@@ -1,0 +1,65 @@
+=== "Brutally Honest" Monorepo .gitignore (FINAL) ===
+# Covers both /frontend and /backend directories
+
+# --------------------------------------------------
+# 1. CRITICAL: Dependencies
+# --------------------------------------------------
+# Using a leading slash (/) to anchor paths to the root
+/frontend/node_modules/
+/backend/node_modules/
+
+# --------------------------------------------------
+# 2. CRITICAL: Security & Environment Files
+# --------------------------------------------------
+# Anchored to root to prevent accidental ignores
+/frontend/.env
+/frontend/.env.*
+!/frontend/.env.example
+
+/backend/.env
+/backend/.env.*
+!/backend/.env.example
+
+# --------------------------------------------------
+# 3. Build & Production Artifacts
+# --------------------------------------------------
+# Anchored to root
+/frontend/dist/
+/frontend/build/
+/frontend/.vite/
+
+/backend/dist/
+/backend/build/
+
+# --------------------------------------------------
+# 4. Logs
+# --------------------------------------------------
+# Wildcards — no leading slash
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# --------------------------------------------------
+# 5. OS & Editor Junk Files
+# --------------------------------------------------
+# Ignore globally
+.DS_Store
+._*
+Thumbs.db
+.Spotlight-V100
+.Trashes
+desktop.ini
+.vscode/
+.idea/
+
+# --------------------------------------------------
+# 6. Optional / Temporary
+# --------------------------------------------------
+.cache/
+*.tmp
+*.temp
