@@ -19,9 +19,9 @@ const adminSchema = new mongoose.Schema(
             type: String,
             required: true,
         },
-        isActive: {
+        isVerified: {
             type: Boolean,
-            default: true,
+            default: false,
         },
         role: {
             type: String,

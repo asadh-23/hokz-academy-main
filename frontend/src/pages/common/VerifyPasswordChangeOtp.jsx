@@ -1,11 +1,11 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { useDispatch } from "react-redux";
 import { userAxios } from "../../api/userAxios";
 import { tutorAxios } from "../../api/tutorAxios";
+import { adminAxios } from "../../api/adminAxios";
 
-const RESEND_INTERVAL = 300; // 5 mins
+const RESEND_INTERVAL = 60;
 
 export default function VerifyPasswordChangeOtp() {
     const location = useLocation();
@@ -84,9 +84,18 @@ export default function VerifyPasswordChangeOtp() {
             return toast.error("Please enter the 6-digit OTP sent to your new email.");
         }
 
-        const axiosInstance = role === "tutor" ? tutorAxios : userAxios;
+        let axiosInstance;
+        if (role === "user") {
+            axiosInstance = userAxios;
+        } else if (role === "tutor") {
+            axiosInstance = tutorAxios;
+        } else if (role === "admin") {
+            axiosInstance = adminAxios;
+        } else {
+            throw new Error("Invalid role specified.");
+        }
 
-        setButtonLoader(true)
+        setButtonLoader(true);
 
         try {
             const response = await axiosInstance.post(`/verify-password-change`, {
@@ -98,23 +107,46 @@ export default function VerifyPasswordChangeOtp() {
                 toast.success(response.data.message || "new password updated successfully!");
                 localStorage.removeItem("otpTimestamp");
 
-              
                 navigate(`/${role}/profile`, { replace: true });
             }
-
         } catch (error) {
             console.error("password change verification failed:", error);
             toast.error(error.response?.data?.message || "Incorrect OTP or it may have expired. Please try again.");
         } finally {
-            setButtonLoader(false)
+            setButtonLoader(false);
         }
     };
 
     const handleResend = async () => {
+        if (resendDisabled) return;
+        setTimer(RESEND_INTERVAL);
+        setResendDisabled(true);
+        setOtp(Array(6).fill(""));
+        localStorage.setItem("otpTimestamp", Date.now().toString());
+
         try {
+            let axiosInstance;
+            if (role === "user") {
+                axiosInstance = userAxios;
+            } else if (role === "tutor") {
+                axiosInstance = tutorAxios;
+            } else if (role === "admin") {
+                axiosInstance = adminAxios;
+            } else {
+                throw new Error("Invalid role specified.");
+            }
+
+            const response = await axiosInstance.post("/resend-password-change-otp");
+
+            if (response.data?.success) {
+                toast.success(response.data.message || "OTP resent successfully.");
+            }
         } catch (error) {
-            toast.error(error.response?.data?.message || "An error occurred.");
-            console.error("Error resending OTP");
+            toast.error(error.response?.data?.message || "An error occurred while resending OTP.");
+            console.error("Error resending password change OTP:", error);
+            setResendDisabled(false);
+            setTimer(0);
+            localStorage.removeItem("otpTimestamp");
         }
     };
 

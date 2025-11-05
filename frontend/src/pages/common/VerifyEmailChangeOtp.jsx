@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { userAxios } from "../../api/userAxios";
 import { tutorAxios } from "../../api/tutorAxios";
 
-const RESEND_INTERVAL = 300; // 5 mins
+const RESEND_INTERVAL = 60;
 
 export default function VerifyEmailChangeOtp() {
     const location = useLocation();
@@ -86,10 +86,10 @@ export default function VerifyEmailChangeOtp() {
 
         const axiosInstance = role === "tutor" ? tutorAxios : userAxios;
 
-        setButtonLoader(true)
+        setButtonLoader(true);
 
         try {
-            const response = await axiosInstance.post(`/verify-email-change`, {
+            const response = await axiosInstance.post("/verify-email-change", {
                 otpCode,
                 email,
             });
@@ -98,23 +98,37 @@ export default function VerifyEmailChangeOtp() {
                 toast.success(response.data.message || "Email address updated successfully!");
                 localStorage.removeItem("otpTimestamp");
 
-              
                 navigate(`/${role}/profile`, { replace: true });
             }
-
         } catch (error) {
             console.error("Email change verification failed:", error);
             toast.error(error.response?.data?.message || "Incorrect OTP or it may have expired. Please try again.");
         } finally {
-            setButtonLoader(false)
+            setButtonLoader(false);
         }
     };
 
     const handleResend = async () => {
+        if (resendDisabled) return;
+        setTimer(RESEND_INTERVAL);
+        setResendDisabled(true);
+        setOtp(Array(6).fill(""));
+        localStorage.setItem("otpTimestamp", Date.now().toString());
+
         try {
+            const axiosInstance = role === "tutor" ? tutorAxios : userAxios;
+
+            const response = await axiosInstance.post("/resend-email-change-otp", { email });
+
+            if (response.data?.success) {
+                toast.success(response.data.message || "OTP resent successfully.");
+            }
         } catch (error) {
-            toast.error(error.response?.data?.message || "An error occurred.");
-            console.error("Error resending OTP");
+            toast.error(error.response?.data?.message || "An error occurred while resending OTP.");
+            console.error("Error resending email change OTP:", error);
+            setResendDisabled(false);
+            setTimer(0);
+            localStorage.removeItem("otpTimestamp");
         }
     };
 

@@ -38,32 +38,57 @@ export const registerTutor = async (req, res) => {
             return res.status(400).json({ message: passwordValidation.message || "Enter a valid password" });
         }
 
-        const tutor = await Tutor.findOne({ email });
-        if (tutor && tutor.isVerified) {
-            return res.status(400).json({ message: "Tutor already registered" });
+        const trimmedEmail = emailValidation.email;
+
+        const existingUser = await User.findOne({ email: trimmedEmail }).lean();
+        const existingTutor = await Tutor.findOne({ email: trimmedEmail }).lean();
+        const existingAdmin = await Admin.findOne({ email: trimmedEmail }).lean();
+
+        if ((existingTutor && existingTutor.isVerified) || existingUser || existingAdmin) {
+            return res
+                .status(400)
+                .json({ success: false, message: "This email address is already in use by another account." });
         }
 
-        await OTP.deleteMany({ email, purpose: "registration", role: "tutor" });
+        const RESEND_INTERVAL_MS = 60 * 1000;
+        const lastOtp = await OTP.findOne({
+            email: trimmedEmail,
+            purpose: "registration",
+            role: "tutor"
+        }).sort({ createdAt: -1 }); // Get the most recent one
+
+        if (lastOtp) {
+            const timeElapsed = Date.now() - lastOtp.createdAt.getTime();
+            if (timeElapsed < RESEND_INTERVAL_MS) {
+                const timeLeft = Math.ceil((RESEND_INTERVAL_MS - timeElapsed) / 1000);
+                return res.status(429).json({
+                    success: false,
+                    message: `Please wait ${timeLeft} more seconds before resending.`,
+                });
+            }
+        }
+
+        await OTP.deleteMany({ email: trimmedEmail, purpose: "registration", role: "tutor" });
 
         const otpCode = crypto.randomInt(100000, 999999).toString();
 
         await OTP.create({
-            email: email,
+            email: trimmedEmail,
             otpHash: otpCode,
             role: "tutor",
             purpose: "registration",
         });
 
-        if (!tutor) {
+        if (!existingTutor) {
             await Tutor.create({
                 fullName,
+                email: trimmedEmail,
                 phone,
-                email,
                 password,
             });
         }
 
-        await sendOtpEmail(email, otpCode, fullName);
+        await sendOtpEmail(trimmedEmail, otpCode, fullName);
 
         return res.status(200).json({
             success: true,
@@ -104,7 +129,7 @@ export const verifyOtp = async (req, res) => {
             user: {
                 role: "tutor",
                 _id: savedTutor._id,
-                name: savedTutor.fullName,
+                fullName: savedTutor.fullName,
                 email: savedTutor.email,
                 profileImage: savedTutor.profileImage,
                 phone: savedTutor.phone,
@@ -122,6 +147,24 @@ export const resendOtp = async (req, res) => {
         const { email } = req.body;
         const tutor = await Tutor.findOne({ email });
         if (!tutor) return res.status(400).json({ message: "Cannot resend otp to this email" });
+
+        const RESEND_INTERVAL_MS = 60 * 1000;
+        const lastOtp = await OTP.findOne({
+            email,
+            purpose: "registration",
+            role: "tutor",
+        }).sort({ createdAt: -1 }); // Get the most recent one
+
+        if (lastOtp) {
+            const timeElapsed = Date.now() - lastOtp.createdAt.getTime();
+            if (timeElapsed < RESEND_INTERVAL_MS) {
+                const timeLeft = Math.ceil((RESEND_INTERVAL_MS - timeElapsed) / 1000);
+                return res.status(429).json({
+                    success: false,
+                    message: `Please wait ${timeLeft} more seconds before resending.`,
+                });
+            }
+        }
 
         await OTP.deleteMany({ email, purpose: "registration", role: "tutor" });
 
@@ -176,7 +219,7 @@ export const loginTutor = async (req, res) => {
             user: {
                 role: "tutor",
                 _id: savedTutor._id,
-                name: savedTutor.fullName,
+                fullName: savedTutor.fullName,
                 email: savedTutor.email,
                 profileImage: savedTutor.profileImage,
                 phone: savedTutor.phone,
@@ -323,27 +366,21 @@ export const getTutorProfile = async (req, res) => {
             tutor: {
                 _id: tutor._id,
                 fullName: tutor.fullName,
-                email: tutor.email, // Keep email (frontend might use it for modals, NOT display)
-                phone: tutor.phone || "", // Keep phone (frontend might use it, NOT display)
-
-                // --- Profile Fields ---
-                profileImage: tutor.profileImage || null, // Send null if empty, let frontend handle placeholder
+                email: tutor.email,
+                phone: tutor.phone || "",
+                profileImage: tutor.profileImage || null,
                 headline: tutor.headline || "",
-                expertiseArea: tutor.expertiseArea || "", // Use expertiseArea instead of stack
+                expertiseArea: tutor.expertiseArea || "",
                 bio: tutor.bio || "",
                 yearsOfExperience: tutor.yearsOfExperience || "",
-                skills: tutor.skills || [], // Default to empty array
-                languages: tutor.languages || [], // Default to empty array
-                qualifications: tutor.qualifications || [], // Default to empty array
-
-                // --- Meta Fields ---
-                isVerified: tutor.isVerified, // Good to send verification status
-                role: tutor.role,
+                skills: tutor.skills || [],
+                languages: tutor.languages || [],
+                qualifications: tutor.qualifications || [],
             },
         });
     } catch (error) {
         console.error("Error fetching tutor profile:", error);
-        res.status(500).json({ success: false, message: "Server error fetching profile." });
+        res.status(500).json({ success: false, message: "Server error fetching tutor profile." });
     }
 };
 
@@ -352,89 +389,103 @@ export const updateTutorProfile = async (req, res) => {
         const tutorId = req.user?._id;
 
         if (!tutorId || !mongoose.Types.ObjectId.isValid(tutorId)) {
-            console.log("hei");
-
             return res.status(401).json({ success: false, message: "Unauthorized: Valid Tutor ID not found in request." });
         }
-        console.log(2);
 
         const { fullName, phone, headline, expertiseArea, bio, yearsOfExperience, skills, languages, qualifications } =
             req.body;
 
         const updateData = {};
+        const errors = {};
 
         if (fullName !== undefined) {
-            if (typeof fullName !== "string")
-                return res.status(400).json({ success: false, message: "Invalid input: fullName must be a string." });
-            updateData.fullName = fullName.trim();
-        }
-        if (phone !== undefined) {
-            if (typeof phone !== "string")
-                return res.status(400).json({ success: false, message: "Invalid input: phone must be a string." });
-            updateData.phone = phone.trim();
-        }
-        if (headline !== undefined) {
-            if (typeof headline !== "string")
-                return res.status(400).json({ success: false, message: "Invalid input: headline must be a string." });
-            updateData.headline = headline.trim();
-        }
-        if (expertiseArea !== undefined) {
-            if (typeof expertiseArea !== "string")
-                return res.status(400).json({ success: false, message: "Invalid input: expertiseArea must be a string." });
-            updateData.expertiseArea = expertiseArea.trim();
-        }
-        if (bio !== undefined) {
-            if (typeof bio !== "string")
-                return res.status(400).json({ success: false, message: "Invalid input: bio must be a string." });
-            updateData.bio = bio.trim();
-        }
-        if (yearsOfExperience !== undefined) {
-            if (typeof yearsOfExperience !== "string" && typeof yearsOfExperience !== "number") {
-                return res
-                    .status(400)
-                    .json({ success: false, message: "Invalid input: yearsOfExperience must be a string or number." });
+            if (isNullOrWhitespace(fullName)) {
+                errors.fullName = "Invalid full name format.";
+            } else {
+                updateData.fullName = fullName.trim();
             }
-            updateData.yearsOfExperience = String(yearsOfExperience).trim();
         }
+
+        if (phone !== undefined) {
+            const phoneValidation = validatePhone(phone);
+            if (!phoneValidation.isValid) {
+                errors.phone = "Invalid phone number format.";
+            } else {
+                updateData.phone = phone.trim();
+            }
+        }
+
+        if (headline !== undefined) {
+            if (typeof headline !== "string") {
+                errors.headline = "Invalid headline format.";
+            } else {
+                updateData.headline = headline.trim();
+            }
+        }
+
+        if (expertiseArea !== undefined) {
+            if (typeof expertiseArea !== "string") {
+                errors.expertiseArea = "Invalid headline format.";
+            } else {
+                updateData.expertiseArea = expertiseArea.trim();
+            }
+        }
+
+        if (bio !== undefined) {
+            if (typeof bio !== "string") {
+                errors.bio = "Invalid bio format.";
+            } else {
+                updateData.bio = bio.trim();
+            }
+        }
+
+        if (yearsOfExperience !== undefined) {
+            if (typeof yearsOfExperience !== "string") {
+                errors.yearsOfExperience = "Invalid yearsOfExperience format.";
+            } else {
+                updateData.yearsOfExperience = yearsOfExperience.trim();
+            }
+        }
+
         if (skills !== undefined) {
             if (!Array.isArray(skills) || !skills.every((s) => typeof s === "string")) {
-                return res
-                    .status(400)
-                    .json({ success: false, message: "Invalid input: skills must be an array of strings." });
+                errors.skills = "Invalid input: skills must be an array of strings.";
+            } else {
+                updateData.skills = skills.map((s) => s.trim()).filter(Boolean);
             }
-            updateData.skills = skills.map((s) => s.trim()).filter(Boolean);
         }
+
         if (languages !== undefined) {
             if (!Array.isArray(languages) || !languages.every((l) => typeof l === "string")) {
-                return res
-                    .status(400)
-                    .json({ success: false, message: "Invalid input: languages must be an array of strings." });
+                errors.languages = "Invalid input: languages must be an array of strings.";
+            } else {
+                updateData.languages = languages.map((l) => l.trim()).filter(Boolean);
             }
-            updateData.languages = languages.map((l) => l.trim()).filter(Boolean);
         }
+
         if (qualifications !== undefined) {
             if (!Array.isArray(qualifications) || !qualifications.every((q) => typeof q === "string")) {
-                return res
-                    .status(400)
-                    .json({ success: false, message: "Invalid input: qualifications must be an array of strings." });
+                errors.qualifications = "Invalid input: qualifications must be an array of strings.";
+            } else {
+                updateData.qualifications = qualifications.map((q) => q.trim()).filter(Boolean);
             }
-            updateData.qualifications = qualifications.map((q) => q.trim()).filter(Boolean);
+        }
+
+        if (Object.keys(errors).length > 0) {
+            return res.status(400).json({ success: false, message: "Validation failed.", errors: errors });
         }
 
         if (Object.keys(updateData).length === 0) {
-            const currentTutor = await Tutor.findById(tutorId).select("-password -refreshToken");
+            const currentTutor = await Tutor.findById(tutorId).select("-password");
             if (!currentTutor) {
                 return res.status(404).json({ success: false, message: "Tutor not found." });
             }
             return res.status(200).json({
                 success: true,
-                message: "No changes provided.",
+                message: "No valid fields provided to update.",
                 tutor: {
-                    _id: currentTutor._id,
                     fullName: currentTutor.fullName,
-                    email: currentTutor.email,
                     phone: currentTutor.phone || "",
-                    profileImage: currentTutor.profileImage,
                     headline: currentTutor.headline || "",
                     expertiseArea: currentTutor.expertiseArea || "",
                     bio: currentTutor.bio || "",
@@ -442,8 +493,6 @@ export const updateTutorProfile = async (req, res) => {
                     skills: currentTutor.skills || [],
                     languages: currentTutor.languages || [],
                     qualifications: currentTutor.qualifications || [],
-                    isVerified: currentTutor.isVerified,
-                    role: currentTutor.role,
                 },
             });
         }
@@ -451,8 +500,8 @@ export const updateTutorProfile = async (req, res) => {
         const updatedTutor = await Tutor.findByIdAndUpdate(
             tutorId,
             { $set: updateData },
-            { new: true, runValidators: true, context: "query" }
-        ).select("-password -refreshToken");
+            { new: true, runValidators: true }
+        ).select("-password");
 
         if (!updatedTutor) {
             return res.status(404).json({ success: false, message: "Tutor not found for update." });
@@ -460,11 +509,9 @@ export const updateTutorProfile = async (req, res) => {
 
         res.status(200).json({
             success: true,
-            message: "Profile updated successfully!",
+            message: "Profile updated successfully",
             tutor: {
-                _id: updatedTutor._id,
                 fullName: updatedTutor.fullName,
-                email: updatedTutor.email,
                 phone: updatedTutor.phone || "",
                 profileImage: updatedTutor.profileImage,
                 headline: updatedTutor.headline || "",
@@ -474,19 +521,10 @@ export const updateTutorProfile = async (req, res) => {
                 skills: updatedTutor.skills || [],
                 languages: updatedTutor.languages || [],
                 qualifications: updatedTutor.qualifications || [],
-                isVerified: updatedTutor.isVerified,
-                role: updatedTutor.role,
             },
         });
     } catch (error) {
         console.error("Error updating tutor profile:", error);
-        if (error.name === "ValidationError") {
-            const messages = Object.values(error.errors).map((val) => val.message);
-            return res.status(400).json({ success: false, message: messages.join(", ") || "Validation failed." });
-        }
-        if (error.name === "CastError") {
-            return res.status(400).json({ success: false, message: `Invalid data format for field: ${error.path}` });
-        }
         res.status(500).json({ success: false, message: "Server error updating profile." });
     }
 };
@@ -503,12 +541,12 @@ export const updateTutorProfileImage = async (req, res) => {
             return res.status(401).json({ success: false, message: "Unauthorized: Valid Tutor ID not found." });
         }
 
-        const currentTutor = await Tutor.findById(tutorId).select("profileImage");
+        const currentTutor = await Tutor.findById(tutorId).select("profileImage -_id");
+
         if (currentTutor?.profileImage) {
             try {
-                const publicIdMatch = currentTutor.profileImage.match(/\/v\d+\/(?:tutor_profiles\/)?([^\.]+)/); // Adjusted regex to optionally include folder
+                const publicIdMatch = currentTutor.profileImage.match(/\/v\d+\/(?:tutor_profiles\/)?([^\.]+)/);
                 if (publicIdMatch && publicIdMatch[1]) {
-                    // Include folder in public_id if it exists
                     const publicId = currentTutor.profileImage.includes("/tutor_profiles/")
                         ? `tutor_profiles/${publicIdMatch[1]}`
                         : publicIdMatch[1];
@@ -516,7 +554,7 @@ export const updateTutorProfileImage = async (req, res) => {
                     console.log(`Previous image deleted: ${publicId}`);
                 }
             } catch (deleteError) {
-                console.error("Failed to delete previous image from Cloudinary:", deleteError.message);
+                console.error("Failed to delete tutor previous image from Cloudinary:", deleteError.message);
             }
         }
 
@@ -540,9 +578,7 @@ export const updateTutorProfileImage = async (req, res) => {
 
         const newImageUrl = uploadResult.secure_url;
 
-        const updatedTutor = await Tutor.findByIdAndUpdate(tutorId, { profileImage: newImageUrl }, { new: true }).select(
-            "profileImage"
-        );
+        const updatedTutor = await Tutor.findByIdAndUpdate(tutorId, { profileImage: newImageUrl }, { new: true });
 
         if (!updatedTutor) {
             return res.status(404).json({ success: false, message: "Tutor not found after image upload." });
@@ -575,10 +611,6 @@ export const requestEmailChange = async (req, res) => {
             return res.status(401).json({ success: false, message: "Unauthorized: Valid Tutor ID not found." });
         }
 
-        if (!newEmail) {
-            return res.status(400).json({ success: false, message: "New email address is required." });
-        }
-
         const emailValidation = validateEmail(newEmail);
         if (!emailValidation.isValid) {
             return res.status(400).json({ message: emailValidation.message || "Enter a valid email address" });
@@ -597,6 +629,25 @@ export const requestEmailChange = async (req, res) => {
             return res
                 .status(400)
                 .json({ success: false, message: "This email address is already in use by another account." });
+        }
+
+        const RESEND_INTERVAL_MS = 60 * 1000;
+        const lastOtp = await OTP.findOne({
+            email: trimmedNewEmail,
+            purpose: "email_change",
+            role: "tutor",
+        }).sort({ createdAt: -1 }); // Get the most recent one
+
+        if (lastOtp) {
+            const timeElapsed = Date.now() - lastOtp.createdAt.getTime();
+            if (timeElapsed < RESEND_INTERVAL_MS) {
+                const timeLeft = Math.ceil((RESEND_INTERVAL_MS - timeElapsed) / 1000);
+                // 429 = Too Many Requests. This stops spamming.
+                return res.status(429).json({
+                    success: false,
+                    message: `Please wait ${timeLeft} more seconds before resending.`,
+                });
+            }
         }
 
         await OTP.deleteMany({ email: trimmedNewEmail, purpose: "email_change", role: "tutor" });
@@ -694,6 +745,80 @@ export const verifyEmailChangeOtp = async (req, res) => {
     }
 };
 
+export const resendEmailChangeOtp = async (req, res) => {
+    try {
+        const tutorId = req.user?._id;
+        const { email } = req.body;
+
+        if (!tutorId || !mongoose.Types.ObjectId.isValid(tutorId)) {
+            return res.status(401).json({ success: false, message: "Unauthorized: Valid Tutor ID not found." });
+        }
+
+        const emailValidation = validateEmail(email);
+        if (!emailValidation.isValid) {
+            return res.status(400).json({ message: "Email not found Please verify your email address" });
+        }
+
+        const trimmedNewEmail = emailValidation.email;
+
+        const existingUser = await User.findOne({ email: trimmedNewEmail }).lean();
+        const existingTutor = await Tutor.findOne({ email: trimmedNewEmail }).lean();
+        const existingAdmin = await Admin.findOne({ email: trimmedNewEmail }).lean();
+
+        if (existingUser || (existingTutor && existingTutor._id.toString() !== tutorId.toString()) || existingAdmin) {
+            return res
+                .status(400)
+                .json({ success: false, message: "This email address is already in use by another account." });
+        }
+
+        const RESEND_INTERVAL_MS = 60 * 1000;
+        const lastOtp = await OTP.findOne({
+            email,
+            purpose: "email_change",
+            role: "tutor",
+        }).sort({ createdAt: -1 }); // Get the most recent one
+
+        if (lastOtp) {
+            const timeElapsed = Date.now() - lastOtp.createdAt.getTime();
+            if (timeElapsed < RESEND_INTERVAL_MS) {
+                const timeLeft = Math.ceil((RESEND_INTERVAL_MS - timeElapsed) / 1000);
+                // 429 = Too Many Requests. This stops spamming.
+                return res.status(429).json({
+                    success: false,
+                    message: `Please wait ${timeLeft} more seconds before resending.`,
+                });
+            }
+        }
+
+        await OTP.deleteMany({ email: trimmedNewEmail, purpose: "email_change", role: "tutor" });
+
+        const otpCode = crypto.randomInt(100000, 999999).toString();
+
+        await OTP.create({
+            email: trimmedNewEmail,
+            otpHash: otpCode,
+            role: "tutor",
+            purpose: "email_change",
+        });
+
+        try {
+            await sendOtpEmail(trimmedNewEmail, otpCode, req.user.fullName);
+
+            res.status(200).json({
+                success: true,
+                message: `OTP resent successfully to your new email address. It will expire in 5 minutes.`,
+            });
+        } catch (emailError) {
+            console.error("Failed to resend OTP email:", emailError);
+            await OTP.deleteOne({ email: trimmedNewEmail, purpose: "email_change", role: "tutor" });
+            return res.status(500).json({ success: false, message: "Failed to send OTP email. Please try again later." });
+        }
+    } catch (error) {
+        console.error("Error resending email change OTP:", error);
+        res.status(500).json({ success: false, message: "Server error resending OTP." });
+    }
+};
+
 export const requestPasswordChange = async (req, res) => {
     try {
         const tutor = req.user;
@@ -710,17 +835,32 @@ export const requestPasswordChange = async (req, res) => {
             return res.status(400).json({ message: passwordValidation.message || "Enter a valid new password" });
         }
         const trimmedNewPassword = passwordValidation.password;
-console.log(1);
 
         const isCurrentPasswordValid = await tutor.matchTutorPassword(currentPassword);
         if (!isCurrentPasswordValid) {
             return res.status(400).json({ message: "Invalid current password. Please try again" });
         }
-        console.log(2);
-        
 
         if (currentPassword === trimmedNewPassword) {
             return res.status(400).json({ message: "New password must be different from the current password" });
+        }
+
+        const RESEND_INTERVAL_MS = 60 * 1000;
+        const lastOtp = await OTP.findOne({
+            email: currentEmail,
+            purpose: "password_change",
+            role: "tutor",
+        }).sort({ createdAt: -1 }); // Get the most recent one
+
+        if (lastOtp) {
+            const timeElapsed = Date.now() - lastOtp.createdAt.getTime();
+            if (timeElapsed < RESEND_INTERVAL_MS) {
+                const timeLeft = Math.ceil((RESEND_INTERVAL_MS - timeElapsed) / 1000);
+                return res.status(429).json({
+                    success: false,
+                    message: `Please wait ${timeLeft} more seconds before resending.`,
+                });
+            }
         }
 
         await OTP.deleteMany({ email: currentEmail, purpose: "password_change", role: "tutor" });
@@ -761,8 +901,6 @@ console.log(1);
 
 export const verifyPasswordChange = async (req, res) => {
     try {
-        console.log("1111111111111111111");
-
         const tutor = req.user;
         const tutorId = req.user?._id;
         const tutorEmail = req.user?.email;
@@ -812,5 +950,61 @@ export const verifyPasswordChange = async (req, res) => {
     } catch (error) {
         console.error("Error verifying password change OTP:", error);
         res.status(500).json({ success: false, message: "Server error during OTP verification." });
+    }
+};
+
+export const resendPasswordChangeOtp = async (req, res) => {
+    try {
+        const tutorId = req.user._id;
+        const email = req.user.email;
+
+        if (!tutorId || !mongoose.Types.ObjectId.isValid(tutorId)) {
+            return res.status(401).json({ success: false, message: "Unauthorized: Valid Tutor ID not found." });
+        }
+
+        const RESEND_INTERVAL_MS = 60 * 1000;
+        const lastOtp = await OTP.findOne({
+            email,
+            purpose: "password_change",
+            role: "tutor",
+        }).sort({ createdAt: -1 }); // Get the most recent one
+
+        if (lastOtp) {
+            const timeElapsed = Date.now() - lastOtp.createdAt.getTime();
+            if (timeElapsed < RESEND_INTERVAL_MS) {
+                const timeLeft = Math.ceil((RESEND_INTERVAL_MS - timeElapsed) / 1000);
+                return res.status(429).json({
+                    success: false,
+                    message: `Please wait ${timeLeft} more seconds before resending.`,
+                });
+            }
+        }
+
+        await OTP.deleteMany({ email, purpose: "password_change", role: "tutor" });
+
+        const otpCode = crypto.randomInt(100000, 999999).toString();
+
+        await OTP.create({
+            email,
+            otpHash: otpCode,
+            role: "tutor",
+            purpose: "password_change",
+        });
+
+        try {
+            await sendOtpEmail(email, otpCode, req.user.fullName);
+
+            res.status(200).json({
+                success: true,
+                message: `OTP resent successfully to your email address. It will expire in 5 minutes.`,
+            });
+        } catch (passwordError) {
+            console.error("Failed to resend OTP email:", passwordError);
+            await OTP.deleteOne({ email, purpose: "password_change", role: "tutor" });
+            return res.status(500).json({ success: false, message: "Failed to send OTP email. Please try again later." });
+        }
+    } catch (error) {
+        console.error("Error resending password change OTP:", error);
+        res.status(500).json({ success: false, message: "Server error resending OTP." });
     }
 };

@@ -27,7 +27,7 @@ const TutorSidebar = () => {
     }
   };
 
-  const tutorName = user.name || "Tutor";
+  const tutorName = user.fullName || "Tutor";
   const tutorProfileImage = user.profileImage || defaultProfileImage;
 
   const menuItems = [

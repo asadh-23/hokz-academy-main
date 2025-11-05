@@ -17,8 +17,8 @@ export default function ResetPassword() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (formData.password.trim().length < 5) {
-            return toast.error("Password must be at least 5 characters.");
+        if (formData.password.trim().length < 8) {
+            return toast.error("Password must be at least 8 characters.");
         }
         if (formData.password.trim() !== formData.confirmPassword.trim()) {
             return toast.error("Passwords do not match.");
@@ -56,7 +56,7 @@ export default function ResetPassword() {
                 {/* Title */}
                 <h2 className="text-3xl font-bold mb-4 text-gray-900 drop-shadow-md">Reset Your Password</h2>
                 <p className="text-gray-500 text-sm mb-8 text-center px-8">
-                    Enter your new password below. It must be at least 5 characters long.
+                    Enter your new password below. It must be at least 8 characters long.
                 </p>
                 {/* Form */}
                 <form className="w-full space-y-6" onSubmit={handleSubmit}>

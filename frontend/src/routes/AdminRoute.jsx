@@ -5,6 +5,8 @@ import AdminPublicRoute from "./guards/AdminPublicRoute";
 import NotFound from "../pages/error/NotFound";
 import AdminPrivateRoute from "./guards/AdminPrivateRoute";
 import AdminDashboard from "../pages/admin/AdminDashboard";
+import AdminProfile from "../pages/admin/AdminProfile";
+import VerifyPasswordChangeOtp from "../pages/common/VerifyPasswordChangeOtp";
 
 export default function AdminRoutes() {
     return (
@@ -15,6 +17,8 @@ export default function AdminRoutes() {
 
             <Route element={<AdminPrivateRoute />}>
                 <Route path="/dashboard" element={<AdminDashboard />} />
+                <Route path="/profile" element={<AdminProfile /> } />
+                <Route path="/verify-password-change" element={<VerifyPasswordChangeOtp/> } />
             </Route>
 
             

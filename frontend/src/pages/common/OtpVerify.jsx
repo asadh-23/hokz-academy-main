@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { useDispatch } from "react-redux";
 import { loginSuccess } from "../../store/features/auth/authSlice";
 
-const RESEND_INTERVAL = 300; // 5 mins
+const RESEND_INTERVAL = 60;
 
 export default function OtpVerify() {
     const location = useLocation();
@@ -103,7 +103,7 @@ export default function OtpVerify() {
             }
         } catch (error) {
             toast.error(error.response?.data?.message || "OTP verification failed");
-            console.logj("OTP verification error", error);
+            console.log("OTP verification error", error);
         }
     };
 
@@ -119,11 +119,14 @@ export default function OtpVerify() {
             });
 
             if (response.data?.success) {
-                toast.success(response.data?.message);
+                toast.success(response.data?.message || "OTP resent successfully.");
             }
         } catch (error) {
-            toast.error(error.response?.data?.message || "An error occurred.");
-            console.error("Error resending OTP");
+            toast.error(error.response?.data?.message || "An error occurred while resending OTP.");
+            console.error("Error resending email change OTP:", error);
+            setResendDisabled(false);
+            setTimer(0);
+            localStorage.removeItem("otpTimestamp");
         }
     };
 

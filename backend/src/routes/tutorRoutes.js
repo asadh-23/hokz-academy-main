@@ -14,8 +14,10 @@ import {
     updateTutorProfileImage,
     requestEmailChange,
     verifyEmailChangeOtp,
+    resendEmailChangeOtp,
     requestPasswordChange,
     verifyPasswordChange,
+    resendPasswordChangeOtp,
 } from "../controllers/tutorController.js"; 
 
 import { verifyToken } from "../middlewares/authMiddleware.js";
@@ -40,7 +42,9 @@ tutorRouter.put("/profile", updateTutorProfile);
 tutorRouter.post("/profile/image", uploadSingleImage, updateTutorProfileImage);
 tutorRouter.post("/request-email-change", requestEmailChange);
 tutorRouter.post("/verify-email-change", verifyEmailChangeOtp);
+tutorRouter.post("/resend-email-change-otp",resendEmailChangeOtp);
 tutorRouter.post("/request-password-change", requestPasswordChange);
 tutorRouter.post("/verify-password-change", verifyPasswordChange);
+tutorRouter.post("/resend-password-change-otp",resendPasswordChangeOtp);
 
 export default tutorRouter;

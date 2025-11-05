@@ -21,7 +21,7 @@ const createSuperAdmin = async () => {
     const adminExists = await Admin.findOne({ email: SUPER_ADMIN_EMAIL });
 
     if (adminExists) {
-      console.warn('⚠️  Warning: Ee email-il oru admin account und.');
+      console.warn('⚠️  Warning: email address already in user');
       process.exit();
     }
 
@@ -29,10 +29,10 @@ const createSuperAdmin = async () => {
       fullName: 'Super Admin',
       email: SUPER_ADMIN_EMAIL,
       password: SUPER_ADMIN_PASSWORD,
-      isActive: true,
+      isVerified: true,
     });
 
-    console.log('✅ Success! Puthiya Super Admin-e create cheythu.');
+    console.log('✅ Success! New super admin created.');
     process.exit();
   } catch (error) {
     console.error(`Error creating super admin: ${error.message}`);

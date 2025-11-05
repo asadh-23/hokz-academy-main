@@ -5,8 +5,9 @@ import { tutorAxios } from "../../api/tutorAxios";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { validatePassword } from "../../utils/validation";
+import { adminAxios } from "../../api/adminAxios";
 
-const ChangePasswordModal = ({ isOpen, onClose, email, role }) => {
+const ChangePasswordModal = ({ isOpen, onClose, role }) => {
     const [formData, setFormData] = useState({
         currentPassword: "",
         newPassword: "",
@@ -66,8 +67,14 @@ const ChangePasswordModal = ({ isOpen, onClose, email, role }) => {
         setIsLoading(true);
 
         try {
-            const axiosInstance = role === "user" ? userAxios : tutorAxios;
-            if (!axiosInstance) {
+            let axiosInstance;
+            if(role === "user"){
+                axiosInstance = userAxios;
+            }else if(role === "tutor"){
+                axiosInstance = tutorAxios;
+            }else if(role === "admin"){
+                axiosInstance = adminAxios;
+            }else{
                 throw new Error("Invalid role specified.");
             }
 
@@ -81,11 +88,11 @@ const ChangePasswordModal = ({ isOpen, onClose, email, role }) => {
 
                 onClose();
 
-                navigate(`/${role}/verify-password-change`, { state: { role, newPassword: trimmedNewPassword }, replace: true});
+                navigate(`/${role}/verify-password-change`, { state: { role, newPassword: trimmedNewPassword }, replace: true });
             }
         } catch (error) {
             console.error("Password change request failed:", error.response.data.message);
-            setErrors({general: error.response?.data?.message || "Failed to send OTP. Please try again."})
+            setErrors({ general: error.response?.data?.message || "Failed to send OTP. Please try again." })
 
         } finally {
             setIsLoading(false);
@@ -103,8 +110,8 @@ const ChangePasswordModal = ({ isOpen, onClose, email, role }) => {
 
     const isFormValid =
         formData.currentPassword.trim().length > 0 &&
-        formData.newPassword.length >= 5 &&
-        formData.confirmPassword.length >= 5 &&
+        formData.newPassword.length >= 8 &&
+        formData.confirmPassword.length >= 8 &&
         formData.newPassword === formData.confirmPassword;
 
     return (
@@ -152,11 +159,10 @@ const ChangePasswordModal = ({ isOpen, onClose, email, role }) => {
                             value={formData.currentPassword}
                             onChange={(e) => handleInputChange("currentPassword", e.target.value)}
                             placeholder="Enter your current password"
-                            className={`w-full py-3 px-4 border-2 rounded-xl outline-none transition-colors ${
-                                errors.currentPassword
-                                    ? "border-red-300 focus:border-red-500"
-                                    : "border-gray-300 focus:border-cyan-500"
-                            } bg-white text-gray-800 placeholder-gray-400`}
+                            className={`w-full py-3 px-4 border-2 rounded-xl outline-none transition-colors ${errors.currentPassword
+                                ? "border-red-300 focus:border-red-500"
+                                : "border-gray-300 focus:border-cyan-500"
+                                } bg-white text-gray-800 placeholder-gray-400`}
                             disabled={isLoading}
                         />
                         {errors.currentPassword && (
@@ -178,11 +184,10 @@ const ChangePasswordModal = ({ isOpen, onClose, email, role }) => {
                             value={formData.newPassword}
                             onChange={(e) => handleInputChange("newPassword", e.target.value)}
                             placeholder="Enter your new password"
-                            className={`w-full py-3 px-4 border-2 rounded-xl outline-none transition-colors ${
-                                errors.newPassword
-                                    ? "border-red-300 focus:border-red-500"
-                                    : "border-gray-300 focus:border-cyan-500"
-                            } bg-white text-gray-800 placeholder-gray-400`}
+                            className={`w-full py-3 px-4 border-2 rounded-xl outline-none transition-colors ${errors.newPassword
+                                ? "border-red-300 focus:border-red-500"
+                                : "border-gray-300 focus:border-cyan-500"
+                                } bg-white text-gray-800 placeholder-gray-400`}
                             disabled={isLoading}
                         />
                         {errors.newPassword && (
@@ -204,20 +209,18 @@ const ChangePasswordModal = ({ isOpen, onClose, email, role }) => {
                             value={formData.confirmPassword}
                             onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
                             placeholder="Confirm your new password"
-                            className={`w-full py-3 px-4 border-2 rounded-xl outline-none transition-colors ${
-                                errors.confirmPassword
-                                    ? "border-red-300 focus:border-red-500"
-                                    : formData.confirmPassword && formData.newPassword === formData.confirmPassword
+                            className={`w-full py-3 px-4 border-2 rounded-xl outline-none transition-colors ${errors.confirmPassword
+                                ? "border-red-300 focus:border-red-500"
+                                : formData.confirmPassword && formData.newPassword === formData.confirmPassword
                                     ? "border-green-300 focus:border-green-500"
                                     : "border-gray-300 focus:border-cyan-500"
-                            } bg-white text-gray-800 placeholder-gray-400`}
+                                } bg-white text-gray-800 placeholder-gray-400`}
                             disabled={isLoading}
                         />
                         {formData.confirmPassword && (
                             <p
-                                className={`text-sm mt-2 flex items-center gap-1 ${
-                                    formData.newPassword === formData.confirmPassword ? "text-green-500" : "text-red-500"
-                                }`}
+                                className={`text-sm mt-2 flex items-center gap-1 ${formData.newPassword === formData.confirmPassword ? "text-green-500" : "text-red-500"
+                                    }`}
                             >
                                 {formData.newPassword === formData.confirmPassword
                                     ? "✅ Passwords match"
@@ -254,11 +257,10 @@ const ChangePasswordModal = ({ isOpen, onClose, email, role }) => {
                         <button
                             onClick={handleSendOTP}
                             disabled={!isFormValid || isLoading}
-                            className={`flex-1 py-3 px-6 rounded-xl font-semibold transition-all transform ${
-                                !isFormValid || isLoading
-                                    ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                                    : "bg-gradient-to-r from-cyan-500 to-emerald-500 text-white hover:from-cyan-600 hover:to-emerald-600 hover:-translate-y-0.5 hover:shadow-lg"
-                            }`}
+                            className={`flex-1 py-3 px-6 rounded-xl font-semibold transition-all transform ${!isFormValid || isLoading
+                                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                                : "bg-gradient-to-r from-cyan-500 to-emerald-500 text-white hover:from-cyan-600 hover:to-emerald-600 hover:-translate-y-0.5 hover:shadow-lg"
+                                }`}
                         >
                             {isLoading ? (
                                 <div className="flex items-center justify-center gap-2">

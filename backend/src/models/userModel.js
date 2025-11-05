@@ -36,7 +36,6 @@ const userSchema = mongoose.Schema(
         },
         phone: {
             type: String,
-            unique: true,
             trim: true,
             required: function () {
                 return !this.googleId;

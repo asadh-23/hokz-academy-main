@@ -11,6 +11,10 @@ import NotFound from "../pages/error/NotFound";
 import UserPrivateRoute from "./guards/UserPrivateRoute";
 import UserPublicRoute from "./guards/UserPublicRoute";
 
+import UserProfile from "../pages/user/UserProfile";
+import VerifyEmailChangeOtp from "../pages/common/VerifyEmailChangeOtp";
+import VerifyPasswordChangeOtp from "../pages/common/VerifyPasswordChangeOtp";
+
 export default function UserRoutes() {
     return (
         <Routes>
@@ -26,6 +30,9 @@ export default function UserRoutes() {
 
             <Route element={<UserPrivateRoute />}>
                 <Route path="/dashboard" element={<UserDashboard />} />
+                <Route path="/profile" element={<UserProfile /> } />
+                <Route path="/verify-email-change" element={<VerifyEmailChangeOtp/> } />
+                <Route path="/verify-password-change" element={<VerifyPasswordChangeOtp/> } />
             </Route>
         </Routes>
     );

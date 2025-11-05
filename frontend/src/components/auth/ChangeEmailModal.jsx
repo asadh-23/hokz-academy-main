@@ -4,6 +4,7 @@ import { tutorAxios } from "../../api/tutorAxios";
 import { userAxios } from "../../api/userAxios";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { validateEmail } from "../../utils/validation";
 
 const ChangeEmailModal = ({ isOpen, onClose, currentEmail, role }) => {
     const [newEmail, setNewEmail] = useState("");
@@ -12,16 +13,12 @@ const ChangeEmailModal = ({ isOpen, onClose, currentEmail, role }) => {
 
     const navigate = useNavigate();
 
-    // Lock/unlock body scroll when modal opens/closes
     useEffect(() => {
         if (isOpen) {
-            // Store original overflow style
             const originalStyle = window.getComputedStyle(document.body).overflow;
 
-            // Disable scrolling
             document.body.style.overflow = "hidden";
 
-            // Handle Escape key to close modal
             const handleEscape = (event) => {
                 if (event.key === "Escape") {
                     handleClose();
@@ -30,7 +27,6 @@ const ChangeEmailModal = ({ isOpen, onClose, currentEmail, role }) => {
 
             document.addEventListener("keydown", handleEscape);
 
-            // Cleanup function to restore scrolling and remove event listener when modal closes
             return () => {
                 document.body.style.overflow = originalStyle;
                 document.removeEventListener("keydown", handleEscape);
@@ -38,27 +34,17 @@ const ChangeEmailModal = ({ isOpen, onClose, currentEmail, role }) => {
         }
     }, [isOpen]);
 
-    const validateEmail = (email) => {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return emailRegex.test(email);
-    };
-
     const handleSendOTP = async () => {
-        // Clear previous errors
         setErrors({});
 
-        // Validation
-        if (!newEmail.trim()) {
-            setErrors({ email: "Please enter a new email address" });
+        const emailValidation = validateEmail(newEmail);
+        if (!emailValidation.isValid) {
+            setErrors({ email: emailValidation.message || "Please enter a valid email address" });
             return;
         }
+        const trimmedNewEmail = emailValidation.email;
 
-        if (!validateEmail(newEmail)) {
-            setErrors({ email: "Please enter a valid email address" });
-            return;
-        }
-
-        if (newEmail.trim().toLowerCase() === currentEmail) {
+        if (trimmedNewEmail === currentEmail) {
             setErrors({ email: "New email must be different from current email" });
             return;
         }
@@ -71,7 +57,7 @@ const ChangeEmailModal = ({ isOpen, onClose, currentEmail, role }) => {
                 throw new Error("Invalid role specified.");
             }
 
-            const response = await axiosInstance.post("/request-email-change", { newEmail: newEmail.trim().toLowerCase() });
+            const response = await axiosInstance.post("/request-email-change", { newEmail: trimmedNewEmail });
 
             if (response.data?.success) {
                 toast.success(response.data?.message || `OTP sent to your new Email. Please check your inbox.`);
@@ -79,7 +65,7 @@ const ChangeEmailModal = ({ isOpen, onClose, currentEmail, role }) => {
                 onClose();
 
                 navigate(`/${role}/verify-email-change`, {
-                    state: { email: newEmail.trim().toLowerCase(), role },
+                    state: { email: trimmedNewEmail, role },
                     replace: true,
                 });
             }

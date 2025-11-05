@@ -3,12 +3,13 @@ import { toast } from "sonner";
 import { publicAxios } from "../../../api/publicAxios";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { validateEmail, validatePassword, validatePhone, isNullOrWhitespace } from "../../../utils/validation";
 
 export default function UserRegister() {
     const navigate = useNavigate();
 
     const [formData, setFormData] = useState({
-        name: "",
+        fullName: "",
         phone: "",
         email: "",
         password: "",
@@ -18,40 +19,44 @@ export default function UserRegister() {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        const cleanData = {
-            name: formData.name.trim(),
-            email: formData.email.trim(),
-            phone: formData.phone.trim(),
-            password: formData.password.trim(),
-            confirmPassword: formData.confirmPassword.trim(),
-        };
-
-        if (!cleanData.name || !cleanData.phone || !cleanData.email || !cleanData.password || !cleanData.confirmPassword) {
-            return toast.error("Please fill all required fields");
+        if (isNullOrWhitespace(formData.fullName)) {
+            return toast.error("Full Name is required");
         }
 
-        if (cleanData.password !== cleanData.confirmPassword) {
+        const phoneValidation = validatePhone(formData.phone);
+        if (!phoneValidation.isValid) {
+            return toast.error(phoneValidation.message || "Enter valid phone number");
+        }
+
+        const emailValidation = validateEmail(formData.email);
+        if (!emailValidation.isValid) {
+            return toast.error(emailValidation.message || "Enter valid email address");
+        }
+
+        const passwordValidation = validatePassword(formData.password);
+        if (!passwordValidation.isValid) {
+            return toast.error(passwordValidation.message || "Enter a valid password");
+        }
+
+        if (formData.password.trim() !== formData.confirmPassword.trim()) {
             return toast.error("Passwords do not match");
         }
 
-        if (cleanData.password.length < 5) {
-            return toast.error("Password must be at least 5 characters");
-        }
-
-        if (!/^(\+91)?\d{10}$/.test(cleanData.phone)) {
-            return toast.error("Enter a valid 10-digit phone number");
-        }
+        const cleanData = {
+            fullName: formData.fullName.trim(),
+            phone: phoneValidation.phone,
+            email: emailValidation.email,
+            password: passwordValidation.password,
+        };
 
         try {
-            console.log('1');
-            
-            const response = await publicAxios.post("/user/register",cleanData );            
+            const response = await publicAxios.post("/user/register", cleanData);
 
-            if (response.data.success) {                
+            if (response.data.success) {
                 toast.success(response.data?.message);
-                navigate("/user/verify-otp", { state: { email: cleanData.email, role: "user"} });
+                navigate("/user/verify-otp", { state: { email: cleanData.email, role: "user" } });
             }
-        } catch (error) {            
+        } catch (error) {
             toast.error(error.response?.data?.message || "Registration failed");
             console.log(error.response?.data?.message);
         }
@@ -70,8 +75,8 @@ export default function UserRegister() {
                         type="text"
                         placeholder="Username"
                         className="w-full rounded-full border border-gray-300 px-6 py-3 focus:outline-none focus:ring-4 focus:ring-teal-300 transition"
-                        name="name"
-                        value={formData.name}
+                        name="fullName"
+                        value={formData.fullName}
                         onChange={handleChange}
                         required
                     />
@@ -143,7 +148,6 @@ export default function UserRegister() {
                     Register
                 </button>
             </form>
-
         </AuthLayout>
     );
 }

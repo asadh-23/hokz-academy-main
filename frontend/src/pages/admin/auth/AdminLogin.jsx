@@ -5,6 +5,7 @@ import { publicAxios } from "../../../api/publicAxios";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { loginSuccess } from "../../../store/features/auth/authSlice";
+import { validateEmail, validatePassword } from "../../../utils/validation";
 
 export default function AdminLogin() {
     const [formData, setFormData] = useState({
@@ -18,30 +19,33 @@ export default function AdminLogin() {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        const cleanData = {
-            ...formData,
-            email: formData.email.trim(),
-        };
-
-        if (!cleanData.email || !cleanData.password) {
-            return toast.error("Please fill all required fields");
+        const emailValidation = validateEmail(formData.email);
+        if(!emailValidation.isValid){
+            return toast.error(emailValidation.message || "Enter a valid email address")
         }
 
+        const passwordValidation = validatePassword(formData.password);
+        if(!passwordValidation.isValid){
+            toast.error(passwordValidation.message || "Enter a valid password");
+        }
+        const trimmedEmail = emailValidation.email;
+        const trimmedPassword = passwordValidation.password;
+
         try {
-            const response = await publicAxios.post("/admin/login", cleanData);
+            const response = await publicAxios.post("/admin/login", {email: trimmedEmail, password: trimmedPassword});
 
             if (response.data?.success) {                
                 toast.success(response.data.message || "Login successful");
                 const payload = {
-                    user: response.data.user,
+                    user: response.data.admin,
                     accessToken: response.data.accessToken,
                 };
             
                 dispatch(loginSuccess(payload));
-                navigate("/admin/dashboard");
+                navigate("/admin/dashboard", { replace: true });
             }
         } catch (error) {
-            console.log(error.response?.data?.message);
+            console.log(error.response?.data?.message || "admin login failed", error);
             toast.error(error.response?.data?.message || "Admin Login failed");
         }
     };
