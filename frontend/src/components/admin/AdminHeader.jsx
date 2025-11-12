@@ -14,14 +14,8 @@ const AdminHeader = () => {
       {/* Left Section - Logo and Categories */}
       <div className="flex items-center gap-8">
         <div className="flex-shrink-0">
-          <h1 className="text-2xl font-bold text-cyan-500 m-0">Scholaro</h1>
+          <h1 className="text-2xl font-bold text-cyan-500 m-0">Hokz Academy</h1>
         </div>
-        
-        <nav className="hidden md:flex">
-          <button className="text-gray-600 hover:text-cyan-500 font-medium transition-colors">
-            Categories
-          </button>
-        </nav>
       </div>
       
       {/* Center Section - Search Bar */}

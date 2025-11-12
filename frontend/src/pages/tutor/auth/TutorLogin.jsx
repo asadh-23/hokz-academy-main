@@ -29,7 +29,7 @@ export default function TutorLogin() {
         }
 
         try {
-            const response = await publicAxios.post("/tutor/login", cleanData);
+            const response = await publicAxios.post("/tutor/auth/login", cleanData);
 
             if (response.data.success) {
                 toast.success(response.data.message || "Login successful");

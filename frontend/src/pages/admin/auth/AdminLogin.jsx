@@ -26,15 +26,15 @@ export default function AdminLogin() {
 
         const passwordValidation = validatePassword(formData.password);
         if(!passwordValidation.isValid){
-            toast.error(passwordValidation.message || "Enter a valid password");
+            return toast.error(passwordValidation.message || "Enter a valid password");
         }
         const trimmedEmail = emailValidation.email;
         const trimmedPassword = passwordValidation.password;
 
         try {
-            const response = await publicAxios.post("/admin/login", {email: trimmedEmail, password: trimmedPassword});
+            const response = await publicAxios.post("/admin/auth/login", {email: trimmedEmail, password: trimmedPassword});
 
-            if (response.data?.success) {                
+            if (response.data?.success) {              
                 toast.success(response.data.message || "Login successful");
                 const payload = {
                     user: response.data.admin,

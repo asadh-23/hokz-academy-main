@@ -1,45 +1,11 @@
-import Admin from "../models/adminModel.js";
-import { setAuthTokens } from "../utils/responseHandler.js";
-import multer from "multer";
-import cloudinary from "../config/cloudinary.js";
-import mongoose from "mongoose";
-import OTP from "../models/otpModel.js";
-import { validatePassword } from "../utils/validation.js";
+import Admin from "../../models/adminModel.js";
+import OTP from "../../models/otpModel.js";
+import { sendOtpEmail } from "../../services/emailService.js";
 import crypto from "crypto";
-import { sendOtpEmail } from "../services/emailService.js";
-
-export const loginAdmin = async (req, res) => {
-    try {
-        const { email, password } = req.body;
-        if (!email || !password) return res.status(400).json({ message: "All fields are required" });
-
-        const admin = await Admin.findOne({ email });
-        if (!admin && !admin.isActive) return res.status(400).json({ message: "Invalid Email or Password" });
-
-        const isPasswordValid = await admin.matchAdminPassword(password);
-        if (!isPasswordValid) return res.status(400).json({ message: "Invalid Email or Password" });
-
-        const accessToken = setAuthTokens(res, admin);
-
-        admin.lastLogin = new Date();
-        const savedAdmin = await admin.save();
-        return res.status(200).json({
-            success: true,
-            message: "Welcome back admin",
-            accessToken,
-            admin: {
-                role: savedAdmin.role,
-                _id: savedAdmin._id,
-                fullName: savedAdmin.fullName,
-                email: savedAdmin.email,
-                profileImage: savedAdmin.profileImage || null,
-            },
-        });
-    } catch (error) {
-        console.log("Admin login error", error);
-        return res.status(500).json({ message: "Admin Login failed" });
-    }
-};
+import mongoose from "mongoose";
+import multer from "multer";
+import cloudinary from "../../config/cloudinary.js";
+import { validatePassword } from "../../../../frontend/src/utils/validation.js";
 
 export const getAdminProfile = async (req, res) => {
     try {
@@ -164,7 +130,7 @@ export const requestPasswordChange = async (req, res) => {
             email: currentEmail,
             purpose: "password_change",
             role: "admin",
-        }).sort({ createdAt: -1 }); // Get the most recent one
+        }).sort({ createdAt: -1 });
 
         if (lastOtp) {
             const timeElapsed = Date.now() - lastOtp.createdAt.getTime();

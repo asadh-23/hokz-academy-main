@@ -47,7 +47,7 @@ export const handle401Interceptor = async (error) => {
         isRefreshing = true;
 
         try {
-            const refreshResponse = await authAxios.post("/auth/refresh");
+            const refreshResponse = await authAxios.post("/refresh");
             const { accessToken } = refreshResponse.data;
 
             store.dispatch(setAccessToken(accessToken));

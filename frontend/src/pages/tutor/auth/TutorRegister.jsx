@@ -51,7 +51,7 @@ export default function TutorRegister() {
         }
         try {
             
-            const response = await publicAxios.post("/tutor/register", cleanData);
+            const response = await publicAxios.post("/tutor/auth/register", cleanData);
 
             if (response.data.success) {
                 

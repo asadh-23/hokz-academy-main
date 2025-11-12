@@ -1,23 +1,24 @@
 import express from "express";
 import {
-    loginAdmin,
     getAdminProfile,
     updateAdminProfileImage,
     requestPasswordChange,
     verifyPasswordChange,
     resendPasswordChangeOtp,
-} from "../controllers/adminController.js";
-import { verifyToken } from "../middlewares/authMiddleware.js";
-import { uploadSingleImage } from "../middlewares/multerMiddleware.js";
+} from "../../controllers/admin/profileController.js";
+import { uploadSingleImage } from "../../middlewares/multerMiddleware.js";
+import { isAdmin, verifyToken } from "../../middlewares/authMiddleware.js";
 
 const adminRouter = express.Router();
 
-adminRouter.post("/login", loginAdmin);
+// Protected routes - require authentication
+adminRouter.use(verifyToken, isAdmin);
 
-adminRouter.use(verifyToken);
-
+// Profile management
 adminRouter.get("/profile", getAdminProfile);
 adminRouter.post("/profile/image", uploadSingleImage, updateAdminProfileImage);
+
+// Password change
 adminRouter.post("/request-password-change", requestPasswordChange);
 adminRouter.post("/verify-password-change", verifyPasswordChange);
 adminRouter.post("/resend-password-change-otp", resendPasswordChangeOtp);

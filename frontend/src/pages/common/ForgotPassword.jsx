@@ -16,7 +16,7 @@ export default function ForgotPassword() {
         }
 
         try {
-            const response = await publicAxios.post(`/${role}/forgot-password`, { email });
+            const response = await publicAxios.post(`/${role}/auth/forgot-password`, { email });
             if (response.data?.success) {
                 toast.success(response.data?.message || "Check your email for reset link");
                 navigate(`/${role}/login`);

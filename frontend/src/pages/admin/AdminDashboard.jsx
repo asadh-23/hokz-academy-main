@@ -1,7 +1,4 @@
 import React from "react";
-import AdminHeader from "../../components/admin/AdminHeader";
-import AdminSidebar from "../../components/admin/AdminSidebar";
-import AdminFooter from "../../components/admin/AdminFooter";
 import AdminAnimatedChart from "../../components/admin/AdminAnimatedChart";
 
 const AdminDashboard = () => {
@@ -34,11 +31,7 @@ const AdminDashboard = () => {
 
     return (
         <div className="flex flex-col min-h-screen bg-gray-50">
-            <AdminHeader />
-
             <div className="flex flex-1">
-                <AdminSidebar />
-
                 <div className="flex-1 p-8 overflow-y-auto">
                     {/* Dashboard Header */}
                     <div className="mb-8">
@@ -183,8 +176,6 @@ const AdminDashboard = () => {
                     </div>
                 </div>
             </div>
-
-            <AdminFooter />
         </div>
     );
 };

@@ -34,6 +34,7 @@ export const handleRefreshToken = async (req, res) => {
         if (!user || user.isBlocked) {
             return res.status(401).json({ message: "Unauthorized: User not found or is blocked" });
         }
+        
 
         const newAccessToken = generateAccessToken(user._id, user.role);
 
@@ -42,7 +43,7 @@ export const handleRefreshToken = async (req, res) => {
             accessToken: newAccessToken,
             user: {
                 _id: user._id,
-                name: user.fullName,
+                fullName: user.fullName,
                 email: user.email,
                 role: user.role,
                 profileImage: user.profileImage,

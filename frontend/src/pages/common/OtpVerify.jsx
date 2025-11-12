@@ -84,7 +84,7 @@ export default function OtpVerify() {
         }
 
         try {
-            const response = await publicAxios.post(`/${role}/verify-otp`, {
+            const response = await publicAxios.post(`/${role}/auth/verify-otp`, {
                 email,
                 otpCode,
             });
@@ -114,7 +114,7 @@ export default function OtpVerify() {
             setOtp(Array(6).fill(""));
             localStorage.setItem("otpTimestamp", Date.now().toString());
 
-            const response = await publicAxios.post(`/${role}/resend-otp`, {
+            const response = await publicAxios.post(`/${role}/auth/resend-otp`, {
                 email,
             });
 

@@ -29,7 +29,7 @@ export default function UserLogin() {
         }
 
         try {
-            const response = await publicAxios.post("/user/login", cleanData);
+            const response = await publicAxios.post("/user/auth/login", cleanData);
 
             if (response.data.success) {
                 toast.success(response.data.message || "Login successful");

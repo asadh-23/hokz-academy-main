@@ -24,7 +24,7 @@ export default function ResetPassword() {
             return toast.error("Passwords do not match.");
         }
         try{
-            const response = await publicAxios.post(`/${role}/reset-password/${token}`, {password : formData.password.trim()});
+            const response = await publicAxios.post(`/${role}/auth/reset-password/${token}`, {password : formData.password.trim()});
             if(response.data?.success){
                 toast.success(response.data?.message);
                 navigate(`/${role}/login`);

@@ -1,7 +1,4 @@
 import React, { useState, useEffect, useRef } from "react";
-import AdminHeader from "../../components/admin/AdminHeader";
-import AdminSidebar from "../../components/admin/AdminSidebar";
-import AdminFooter from "../../components/admin/AdminFooter";
 import ChangePasswordModal from "../../components/auth/ChangePasswordModal";
 import { adminAxios } from "../../api/adminAxios";
 import { toast } from "sonner";
@@ -10,7 +7,6 @@ import defaultProfileImage from "../../assets/images/default-profile-image.webp"
 import { updateUserData } from "../../store/features/auth/authSlice";
 import { useDispatch } from "react-redux";
 import { ButtonLoader } from "../../components/common/LoadingSpinner";
-
 
 const AdminProfile = () => {
     const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
@@ -22,7 +18,7 @@ const AdminProfile = () => {
     });
 
     const [isLoading, setIsLoading] = useState(true);
-    const [isUploading, setIsUploading] = useState(false)
+    const [isUploading, setIsUploading] = useState(false);
 
     const fileInputRef = useRef(null);
     const dispatch = useDispatch();
@@ -98,7 +94,6 @@ const AdminProfile = () => {
             fileInputRef.current.value = "";
         }
     };
-    
 
     // --- Loading State ---
     if (isLoading) {
@@ -108,9 +103,7 @@ const AdminProfile = () => {
     // --- Render Component ---
     return (
         <div className="flex flex-col min-h-screen bg-gray-50">
-            <AdminHeader />
             <div className="flex flex-1">
-                <AdminSidebar />
                 <div className="flex-1 p-6 md:p-8 overflow-y-auto">
                     {/* Header */}
                     <div className="mb-8">
@@ -220,8 +213,6 @@ const AdminProfile = () => {
                     </div>
                 </div>
             </div>
-
-            <AdminFooter />
 
             {/* Modals */}
             {isChangePasswordOpen && (

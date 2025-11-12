@@ -50,7 +50,7 @@ export default function UserRegister() {
         };
 
         try {
-            const response = await publicAxios.post("/user/register", cleanData);
+            const response = await publicAxios.post("/user/auth/register", cleanData);
 
             if (response.data.success) {
                 toast.success(response.data?.message);

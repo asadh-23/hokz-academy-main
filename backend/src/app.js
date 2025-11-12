@@ -1,67 +1,78 @@
 import express from "express";
 import cors from "cors";
 import cookieParser from 'cookie-parser';
-import userRouter from "./routes/userRoutes.js";
-import tutorRouter from "./routes/tutorRoutes.js";
-import adminRouter from "./routes/adminRoutes.js";
-import authRouter from "./routes/authRoutes.js";
+
+import authRoutes from './routes/authRoutes.js';
+
+import adminAuthRoutes from './routes/admin/authRoutes.js';
+import tutorAuthRoutes from './routes/tutor/authRoutes.js';
+import userAuthRoutes from './routes/user/authRoutes.js';
+
+import adminProfileRoutes from './routes/admin/profileRoutes.js';
+import adminUserManagementRoutes from './routes/admin/userManagementRoutes.js';
+// import adminTutorManagementRoutes from './routes/admin/tutorManagementRoutes.js';
+// import adminCategoryManagementRoutes from './routes/admin/categoryManagementRoutes.js';
+// import adminCourseManagementRoutes from './routes/admin/courseManagementRoutes.js';
+// import adminOrderManagementRoutes from './routes/admin/orderManagementRoutes.js';
+// import adminDashboardRoutes from './routes/admin/dashboardRoutes.js';
+
+import tutorProfileRoutes from './routes/tutor/profileRoutes.js';
+// import tutorCourseRoutes from './routes/tutor/courseManagementRoutes.js';
+
+import userProfileRoutes from './routes/user/profileRoutes.js';
+
+import { notFound, errorHandler } from "./middlewares/errorHandler.js";
 
 const app = express();
 
 app.use(express.json());
-app.use(express.urlencoded({extended:true}));
+app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+
+const allowedOrigins = [
+  process.env.FRONTEND_URL,
+  'http://localhost:5173',
+  'http://localhost:3000'
+];
+
 app.use(cors({
-  origin: process.env.FRONTEND_URL,
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   optionsSuccessStatus: 200
 }));
 
-
-
-
-// Test cookie endpoint
-app.get('/test-cookie', (req, res) => {
-    console.log('🧪 Test cookie endpoint hit');
-    console.log('🍪 Received cookies:', req.cookies);
-    
-    // Set a test cookie exactly like refreshToken
-    res.cookie('testRefreshToken', 'test-jwt-token-value', {
-        httpOnly: true,
-        secure: false, // Same as development
-        sameSite: 'lax',
-        path: '/',
-        maxAge: 7 * 24 * 60 * 60 * 1000
-    });
-    
-    res.json({ 
-        message: 'Test refresh token cookie set', 
-        receivedCookies: req.cookies 
-    });
+app.get('/', (req, res) => {
+  res.send("<h1>Backend server is running</h1>");
 });
 
-// Test refresh endpoint
-app.post('/test-refresh', (req, res) => {
-    console.log('🧪 Test refresh endpoint hit');
-    console.log('🍪 Received cookies:', req.cookies);
-    
-    if (req.cookies.testRefreshToken) {
-        res.json({ success: true, message: 'Test refresh token received!' });
-    } else {
-        res.status(401).json({ success: false, message: 'No test refresh token' });
-    }
-});
+app.use('/api/auth', authRoutes);
 
-app.use("/api/user", userRouter);
-app.use("/api/tutor", tutorRouter);
-app.use("/api/admin", adminRouter);
+app.use('/api/admin/auth', adminAuthRoutes);
+app.use('/api/tutor/auth', tutorAuthRoutes);
+app.use('/api/user/auth', userAuthRoutes);
 
-app.get('/',(req,res)=>{
-    res.send("<h1>Backend server is running</h1>")
-});
+app.use('/api/admin', adminProfileRoutes);
+app.use('/api/admin', adminUserManagementRoutes);
+// app.use('/api/admin', adminTutorManagementRoutes);
+// app.use('/api/admin', adminCategoryManagementRoutes);
+// app.use('/api/admin', adminCourseManagementRoutes);
+// app.use('/api/admin', adminOrderManagementRoutes);
+// app.use('/api/admin', adminDashboardRoutes);
 
-app.use("/api/auth", authRouter)
+app.use('/api/tutor', tutorProfileRoutes);
+// app.use('/api/tutor', tutorCourseRoutes);
+
+app.use('/api/user', userProfileRoutes);
+
+app.use(notFound);
+app.use(errorHandler);
 
 export default app;

@@ -31,7 +31,7 @@ const UserHeader = () => {
     // "Brutally Honest" Standard Logout Function
     const handleLogout = async () => {
         try {
-            await authAxios.post('/auth/logout');
+            await authAxios.post('/logout');
         } catch (error) {
             console.error("Backend logout failed:", error);
         } finally {

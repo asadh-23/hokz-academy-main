@@ -21,7 +21,7 @@ function App() {
     const verifyRefreshToken = async () => {
       try {
         
-        const response = await authAxios.post('/auth/refresh');
+        const response = await authAxios.post('/refresh');
         if(response.data?.success){       
             const { accessToken, user } = response.data;
             dispatch(loginSuccess({ accessToken, user }));

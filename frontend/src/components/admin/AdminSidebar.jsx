@@ -16,7 +16,7 @@ const AdminSidebar = () => {
 
   const handleLogout = async () => {
     try {
-      await authAxios.post("/auth/logout");
+      await authAxios.post("/logout");
     } catch (error) {
       console.error("Logout failed:", error);
     } finally {
@@ -33,7 +33,7 @@ const AdminSidebar = () => {
     { name: "Dashboard", icon: "📊", path: "/admin/dashboard" },
     { name: "Profile", icon: "👤", path: "/admin/profile" },
     { name: "Category", icon: "📂", path: "/admin/category" },
-    { name: "Students", icon: "🎓", path: "/admin/students" },
+    { name: "Students", icon: "🎓", path: "/admin/users" },
     { name: "Tutors", icon: "👨‍🏫", path: "/admin/tutors" },
     { name: "Orders", icon: "📋", path: "/admin/orders" },
     { name: "Coupon", icon: "🎫", path: "/admin/coupon" },
@@ -41,6 +41,8 @@ const AdminSidebar = () => {
     { name: "Legal", icon: "⚖️", path: "/admin/legal" },
     { name: "Logout", icon: "🚪" }, // no path needed
   ];
+
+  console.log("testing")
 
   return (
     <>
