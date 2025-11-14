@@ -32,7 +32,7 @@ const AdminSidebar = () => {
   const menuItems = [
     { name: "Dashboard", icon: "📊", path: "/admin/dashboard" },
     { name: "Profile", icon: "👤", path: "/admin/profile" },
-    { name: "Category", icon: "📂", path: "/admin/category" },
+    { name: "Category", icon: "📂", path: "/admin/categories" },
     { name: "Students", icon: "🎓", path: "/admin/users" },
     { name: "Tutors", icon: "👨‍🏫", path: "/admin/tutors" },
     { name: "Orders", icon: "📋", path: "/admin/orders" },

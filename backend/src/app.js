@@ -11,7 +11,7 @@ import userAuthRoutes from './routes/user/authRoutes.js';
 import adminProfileRoutes from './routes/admin/profileRoutes.js';
 import adminUserManagementRoutes from './routes/admin/userManagementRoutes.js';
 // import adminTutorManagementRoutes from './routes/admin/tutorManagementRoutes.js';
-// import adminCategoryManagementRoutes from './routes/admin/categoryManagementRoutes.js';
+import adminCategoryRoutes from './routes/admin/categoryRoutes.js';
 // import adminCourseManagementRoutes from './routes/admin/courseManagementRoutes.js';
 // import adminOrderManagementRoutes from './routes/admin/orderManagementRoutes.js';
 // import adminDashboardRoutes from './routes/admin/dashboardRoutes.js';
@@ -61,8 +61,8 @@ app.use('/api/user/auth', userAuthRoutes);
 
 app.use('/api/admin', adminProfileRoutes);
 app.use('/api/admin', adminUserManagementRoutes);
+app.use('/api/admin', adminCategoryRoutes);
 // app.use('/api/admin', adminTutorManagementRoutes);
-// app.use('/api/admin', adminCategoryManagementRoutes);
 // app.use('/api/admin', adminCourseManagementRoutes);
 // app.use('/api/admin', adminOrderManagementRoutes);
 // app.use('/api/admin', adminDashboardRoutes);

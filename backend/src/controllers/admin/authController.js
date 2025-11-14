@@ -3,7 +3,6 @@ import { setAuthTokens } from "../../utils/responseHandler.js";
 
 export const loginAdmin = async (req, res) => {
     try {
-        console.log('11111111111111111');
         
         const { email, password } = req.body;
 

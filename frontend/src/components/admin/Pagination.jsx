@@ -3,14 +3,14 @@ import React from "react";
 const Pagination = ({
   currentPage,
   totalPages,
-  totalFilteredStudents,
-  studentsPerPage,
+  totalItems,
+  itemsPerPage,
   onPageChange,
 }) => {
   if (totalPages <= 0) return null;
 
-  const startItem = (currentPage - 1) * studentsPerPage + 1;
-  const endItem = Math.min(currentPage * studentsPerPage, totalFilteredStudents);
+  const startItem = (currentPage - 1) * itemsPerPage + 1;
+  const endItem = Math.min(currentPage * itemsPerPage, totalItems);
 
   const getPageNumbers = () => {
     const pages = [];
@@ -43,12 +43,12 @@ const Pagination = ({
     <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mt-6">
       {/* Results Info */}
       <div className="text-sm text-gray-600">
-        {totalFilteredStudents > 0 ? (
+        {totalItems > 0 ? (
           <>
             Showing{" "}
             <span className="font-medium">{startItem}</span> to{" "}
             <span className="font-medium">{endItem}</span> of{" "}
-            <span className="font-medium">{totalFilteredStudents}</span> students
+            <span className="font-medium">{totalItems}</span> students
           </>
         ) : (
           "No students found"

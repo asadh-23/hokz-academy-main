@@ -9,6 +9,8 @@ import AdminDashboard from "../pages/admin/AdminDashboard";
 import AdminProfile from "../pages/admin/AdminProfile";
 import VerifyPasswordChangeOtp from "../pages/common/VerifyPasswordChangeOtp";
 import ManageUsers from "../pages/admin/ManageUsers";
+import ManageCategory from "../pages/admin/ManageCategory";
+import CategoryView from "../pages/admin/CategoryView";
 
 export default function AdminRoutes() {
     return (
@@ -22,6 +24,8 @@ export default function AdminRoutes() {
                     <Route path="/dashboard" element={<AdminDashboard />} />
                     <Route path="/profile" element={<AdminProfile />} />
                     <Route path="/users" element={<ManageUsers />} />
+                    <Route path="/categories" element={<ManageCategory/> } />
+                    <Route path="/category/:id" element={<CategoryView/> } />
                 </Route>
 
                 <Route path="/verify-password-change" element={<VerifyPasswordChangeOtp />} />
