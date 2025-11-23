@@ -1,6 +1,6 @@
 import dotenv from 'dotenv';
 
-import Admin from '../src/models/adminModel.js';
+import Admin from '../src/models/user/Admin.js';
 import connectDB from "../src/config/db.js";
 
 dotenv.config();

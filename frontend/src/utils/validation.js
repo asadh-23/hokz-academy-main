@@ -51,5 +51,6 @@ export const validatePhone = (phone) => {
 
 
 export const isNullOrWhitespace = (value) => {
-    return value === null || value === undefined || value.trim() === '';
+  if (value === null || value === undefined) return true;
+  return String(value).trim() === "";
 };

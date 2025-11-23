@@ -93,16 +93,6 @@ export default function AdminLogin() {
                     </span>
                 </div>
 
-                {/* Forgot Password Link */}
-                <div className="text-right mb-2">
-                    <Link
-                        to="/admin/forgot-password"
-                        className="text-gray-400 hover:text-gray-700 hover:underline text-sm font-medium"
-                    >
-                        Forgot Password?
-                    </Link>
-                </div>
-
                 {/* Login Button */}
                 <button
                     type="submit"
@@ -111,13 +101,6 @@ export default function AdminLogin() {
                     Login
                 </button>
             </form>
-
-            {/* Google Login Divider */}
-            <div className="flex items-center my-6">
-                <div className="flex-1 border-t border-gray-200" />
-                <span className="mx-2 text-xs text-gray-400">or</span>
-                <div className="flex-1 border-t border-gray-200" />
-            </div>
         </AuthLayout>
     );
 }

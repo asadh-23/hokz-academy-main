@@ -42,7 +42,7 @@ const CategoryItem = ({ category, onEdit, onList, onUnlist }) => {
 
                     {category.isListed ? (
                         <button
-                            onClick={() => onUnlist(category._id)}
+                            onClick={() => onUnlist(category._id, category.name)}
                             className="bg-red-100 text-red-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-200 transition-colors"
                         >
                             Unlist

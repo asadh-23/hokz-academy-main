@@ -39,11 +39,7 @@ const TutorDashboard = () => {
 
     return (
         <div className="flex flex-col min-h-screen bg-gray-50">
-            <TutorHeader />
-
             <div className="flex flex-1">
-                <TutorSidebar />
-
                 <div className="flex-1 p-8 overflow-y-auto">
                     {/* Dashboard Header */}
                     <div className="mb-8">
@@ -170,8 +166,6 @@ const TutorDashboard = () => {
                     </div>
                 </div>
             </div>
-
-            <TutorFooter />
         </div>
     );
 };

@@ -1,4 +1,4 @@
-import Category from "../../models/categoryModel.js";
+import Category from "../../models/category/Category.js";
 import { isNullOrWhitespace } from "../../utils/validation.js";
 
 export const getAllCategories = async (req, res) => {

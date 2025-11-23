@@ -11,17 +11,17 @@ import {
     resendPasswordChangeOtp,
 } from "../../controllers/tutor/profileController.js";
 import { verifyToken, isTutor } from "../../middlewares/authMiddleware.js";
-import { uploadSingleImage } from "../../middlewares/multerMiddleware.js";
+import upload from "../../middlewares/multerMiddleware.js";
 
 const tutorRouter = express.Router();
 
 // Protected routes - require authentication
-tutorRouter.use(verifyToken ,isTutor);
+tutorRouter.use(verifyToken, isTutor);
 
 // Profile management
 tutorRouter.get("/profile", getTutorProfile);
 tutorRouter.put("/profile", updateTutorProfile);
-tutorRouter.post("/profile/image", uploadSingleImage, updateTutorProfileImage);
+tutorRouter.post("/profile/image", upload.single("profileImageFile"), updateTutorProfileImage);
 
 // Email change
 tutorRouter.post("/request-email-change", requestEmailChange);

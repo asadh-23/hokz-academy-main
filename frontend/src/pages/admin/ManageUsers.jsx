@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import StudentStatsCards from "../../components/admin/students/StudentStatsCards";
 import StudentTable from "../../components/admin/students/StudentTable";
-import Pagination from "../../components/admin/Pagination";
+import Pagination from "../../components/common/Pagination";
 import { PageLoader } from "../../components/common/LoadingSpinner";
 import { toast } from "sonner";
 import { adminAxios } from "../../api/adminAxios";

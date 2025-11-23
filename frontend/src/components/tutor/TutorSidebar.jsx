@@ -89,16 +89,6 @@ const TutorSidebar = () => {
             </div>
           </div>
         </div>
-
-        {/* Add Course Button */}
-        <div className="p-6 border-t border-gray-100">
-          <button
-            onClick={() => navigate("/tutor/add-course")}
-            className="w-full bg-gradient-to-br from-cyan-400 to-emerald-500 text-white py-3 px-5 rounded-full text-sm font-semibold cursor-pointer transition-all hover:-translate-y-0.5 hover:shadow-lg hover:shadow-emerald-500/30"
-          >
-            Add New Course
-          </button>
-        </div>
       </aside>
 
       {/* 🔹 Logout Confirmation Modal */}

@@ -9,25 +9,20 @@ const fileFilter = (req, file, cb) => {
     const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
 
     if (mimetype && extname) {
-        return cb(null, true);
+        cb(null, true);
     } else {
-        cb(new Error('Error: Only image files (jpeg, jpg, png, webp) are allowed!'), false);
+        cb(new Error('Only image files (jpeg, jpg, png, webp) are allowed!'), false);
     }
 };
 
-
 const limits = {
-    fileSize: 5 * 1024 * 1024 // 5mb
+    fileSize: 10 * 1024 * 1024,
 };
 
 const upload = multer({
-    storage: storage,
-    fileFilter: fileFilter,
-    limits: limits
+    storage,
+    fileFilter,
+    limits
 });
 
-
-const uploadSingleImage = upload.single('profileImageFile');
-
-export { uploadSingleImage };
-
+export default upload;

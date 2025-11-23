@@ -138,7 +138,7 @@ export default function VerifyEmailChangeOtp() {
                 <button
                     className="absolute right-8 top-7 text-xl text-gray-400 hover:text-gray-700"
                     onClick={() => {
-                        navigate(`/${role}/register`);
+                        navigate(`/${role}/profile`);
                     }}
                 >
                     &times;
@@ -189,7 +189,7 @@ export default function VerifyEmailChangeOtp() {
                 <div className="mb-6 text-sm">
                     Want to Change Your Email Address?
                     <Link
-                        to={`/${role}/register`}
+                        to={`/${role}/profile`}
                         className="underline font-semibold ml-1 text-gray-800 hover:text-orange-500"
                     >
                         Change Here

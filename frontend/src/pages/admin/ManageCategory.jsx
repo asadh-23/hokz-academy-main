@@ -5,8 +5,8 @@ import { adminAxios } from "../../api/adminAxios";
 import AddCategoryModal from "../../components/admin/categories/AddCategoryModal";
 import EditCategoryModal from "../../components/admin/categories/EditCategoryModal";
 import CategoryList from "../../components/admin/Categories/CategoryList";
-import CategoryStatsCards from "../../components/admin/categories/CategoryStatsCards";
-import Pagination from "../../components/admin/Pagination";
+import StatsCards from "../../components/common/StatsCards";
+import Pagination from "../../components/common/Pagination";
 
 const ManageCategory = () => {
     // -------------------- STATE --------------------
@@ -123,10 +123,8 @@ const ManageCategory = () => {
         }
     };
 
-    const handleUnlistCategory = async (categoryId) => {
-        const category = categories.find((c) => c._id === categoryId);
-        const categoryName = category?.name || "this category";
-
+    const handleUnlistCategory = async (categoryId, categoryName) => {
+        
         toast.warning(`Are you sure you want to unlist ${categoryName}?`, {
             action: {
                 label: "Unlist",
@@ -172,7 +170,7 @@ const ManageCategory = () => {
                     </div>
 
                     {/* Stats Cards */}
-                    <CategoryStatsCards stats={stats} />
+                    <StatsCards stats={stats} label={"Categories"} />
 
                     {/* Controls Section */}
                     <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">

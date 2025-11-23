@@ -1,6 +1,6 @@
-import User from '../models/userModel.js';
-import Tutor from '../models/tutorModel.js';
-import Admin from '../models/adminModel.js';
+import User from '../models/user/User.js';
+import Tutor from '../models/user/Tutor.js';
+import Admin from '../models/user/Admin.js';
 import { verifyAccessToken } from '../utils/generateToken.js';
 
 

@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import bcrypt from 'bcryptjs'; // Import bcrypt here
+import bcrypt from 'bcryptjs';
 
 const otpSchema = new mongoose.Schema({
     email: {
@@ -26,14 +26,11 @@ const otpSchema = new mongoose.Schema({
     createdAt: {
         type: Date,
         default: Date.now,
-        expires: 300, // 5 minutes TTL
+        expires: 300,
     },
 });
 
-
-
 otpSchema.pre('save', async function(next) {
-
     if (this.isModified('otpHash') && this.otpHash && this.otpHash.length <= 8) {
         try {
             const salt = await bcrypt.genSalt(10);
@@ -54,7 +51,6 @@ otpSchema.methods.compareOtp = async function(candidateOtp) {
     }
     return await bcrypt.compare(candidateOtp, this.otpHash);
 };
-
 
 const OTP = mongoose.model("OTP", otpSchema);
 

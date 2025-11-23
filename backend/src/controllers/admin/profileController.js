@@ -1,9 +1,9 @@
-import Admin from "../../models/adminModel.js";
-import OTP from "../../models/otpModel.js";
+import Admin from "../../models/user/Admin.js";
+import OTP from "../../models/common/Otp.js";
 import { sendOtpEmail } from "../../services/emailService.js";
 import crypto from "crypto";
 import mongoose from "mongoose";
-import multer from "multer";
+import { uploadToCloudinary } from "../../services/cloudinaryService.js";
 import cloudinary from "../../config/cloudinary.js";
 import { validatePassword } from "../../../../frontend/src/utils/validation.js";
 
@@ -39,63 +39,44 @@ export const updateAdminProfileImage = async (req, res) => {
         }
 
         const admin = await Admin.findById(adminId).select("profileImage -_id");
+
+        // DELETE PREVIOUS
         if (admin?.profileImage) {
             try {
-                const publicIdMatch = admin.profileImage.match(/\/v\d+\/(?:admin_profiles\/)?([^\.]+)/);
-                if (publicIdMatch && publicIdMatch[1]) {
+                const match = admin.profileImage.match(/\/v\d+\/(?:admin_profiles\/)?([^\.]+)/);
+                if (match && match[1]) {
                     const publicId = admin.profileImage.includes("/admin_profiles/")
-                        ? `admin_profiles/${publicIdMatch[1]}`
-                        : publicIdMatch[1];
+                        ? `admin_profiles/${match[1]}`
+                        : match[1];
+
                     await cloudinary.uploader.destroy(publicId, { resource_type: "image" });
-                    console.log(`Previous image deleted: ${publicId}`);
                 }
-            } catch (deleteError) {
-                console.error("Failed to delete admin previous image from Cloudinary:", deleteError.message);
+            } catch (err) {
+                console.error("Failed to delete old admin image:", err.message);
             }
         }
 
-        const uploadResult = await new Promise((resolve, reject) => {
-            const uploadStream = cloudinary.uploader.upload_stream(
-                {
-                    folder: "admin_profiles",
-                    resource_type: "image",
-                },
-                (error, result) => {
-                    if (error) return reject(error);
-                    resolve(result);
-                }
-            );
-            uploadStream.end(req.file.buffer);
-        });
+        // UPLOAD NEW IMAGE USING HELPER
+        const uploadResult = await uploadToCloudinary(req.file.buffer, "admin_profiles");
 
-        if (!uploadResult || !uploadResult.secure_url) {
-            throw new Error("Cloudinary upload failed to return a secure URL.");
-        }
+        if (!uploadResult?.secure_url) throw new Error("Cloudinary upload failed");
 
-        const newImageUrl = uploadResult.secure_url;
+        const updatedAdmin = await Admin.findByIdAndUpdate(
+            adminId,
+            { profileImage: uploadResult.secure_url },
+            { new: true }
+        );
 
-        const updatedAdmin = await Admin.findByIdAndUpdate(adminId, { profileImage: newImageUrl }, { new: true });
-
-        if (!updatedAdmin) {
-            return res.status(404).json({ success: false, message: "Admin not found after image upload." });
-        }
+        if (!updatedAdmin) return res.status(404).json({ message: "Admin not found" });
 
         res.status(200).json({
             success: true,
             message: "Profile image updated successfully",
-            imageUrl: newImageUrl,
+            imageUrl: uploadResult.secure_url,
         });
     } catch (error) {
-        console.log("Error updating profile image : ", error);
-        if (error instanceof multer.MulterError) {
-            return res.status(400).json({ message: `File upload error : ${error.message}` });
-        }
-
-        if (error.message && error.message.includes("Cloudinary")) {
-            return res.status(500).json({ message: `Cloudinary error : ${error.message}` });
-        }
-
-        return res.status(500).json({ message: "Server error updatating profile image" });
+        console.error("Error:", error);
+        return res.status(500).json({ message: "Server error updating profile image" });
     }
 };
 

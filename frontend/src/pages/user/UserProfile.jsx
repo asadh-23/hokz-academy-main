@@ -72,9 +72,19 @@ const UserProfile = () => {
     const handleImageChange = (event) => {
         const file = event.target.files[0];
 
-        if (file) {
-            handleImageUpload(file);
-        }
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            setProfileData((prev) => ({
+                ...prev,
+                profileImage: reader.result,
+            }));
+            dispatch(updateUserData({ profileImage: reader.result }));
+            toast.success("Profile image updated successfully");
+        };
+        reader.readAsDataURL(file);
+        handleImageUpload(file);
 
         if (fileInputRef.current) {
             fileInputRef.current.value = "";
@@ -108,8 +118,6 @@ const UserProfile = () => {
                 dispatch(updateUserData({ profileImage: newImageUrl }));
 
                 setOriginalData((prev) => ({ ...prev, profileImage: newImageUrl }));
-
-                toast.success("Profile image updated successfully");
             }
         } catch (error) {
             console.log("Image upload filed : ", error);
@@ -239,14 +247,9 @@ const UserProfile = () => {
                                     }`}
                                     aria-label="Edit profile picture"
                                 >
-                                    {isUploading ? <ButtonLoader /> : "📷"}
+                                    📷
                                 </button>
                                 {/* Upload indicator */}
-                                {isUploading && (
-                                    <div className="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center">
-                                        <div className="text-white text-xs font-medium">Uploading...</div>
-                                    </div>
-                                )}
                             </div>
                         </div>
 

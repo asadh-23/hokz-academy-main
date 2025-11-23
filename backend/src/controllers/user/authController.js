@@ -1,7 +1,7 @@
-import User from "../../models/userModel.js";
-import OTP from "../../models/otpModel.js";
-import Tutor from "../../models/tutorModel.js";
-import Admin from "../../models/adminModel.js";
+import User from "../../models/user/User.js";
+import OTP from "../../models/common/Otp.js";
+import Tutor from "../../models/user/Tutor.js";
+import Admin from "../../models/user/Admin.js";
 import { sendOtpEmail, sendPasswordResetEmail } from "../../services/emailService.js";
 import { setAuthTokens } from "../../utils/responseHandler.js";
 import crypto from "crypto";

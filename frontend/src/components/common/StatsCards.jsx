@@ -1,4 +1,4 @@
-const CategoryStatsCards = ({ stats }) => {
+const CategoryStatsCards = ({ stats, label }) => {
     return (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             {/* Total Categories */}
@@ -17,7 +17,7 @@ const CategoryStatsCards = ({ stats }) => {
                         <h3 className="text-2xl font-bold text-gray-800">
                             {stats.total || 0}
                         </h3>
-                        <p className="text-gray-600 text-sm">Total Categories</p>
+                        <p className="text-gray-600 text-sm">Total {label}</p>
                     </div>
                 </div>
             </div>
@@ -38,7 +38,7 @@ const CategoryStatsCards = ({ stats }) => {
                         <h3 className="text-2xl font-bold text-gray-800">
                             {stats.listed || 0}
                         </h3>
-                        <p className="text-gray-600 text-sm">Listed Categories</p>
+                        <p className="text-gray-600 text-sm">Listed {label}</p>
                     </div>
                 </div>
             </div>
@@ -59,7 +59,7 @@ const CategoryStatsCards = ({ stats }) => {
                         <h3 className="text-2xl font-bold text-gray-800">
                             {stats.unlisted || 0}
                         </h3>
-                        <p className="text-gray-600 text-sm">Unlisted Categories</p>
+                        <p className="text-gray-600 text-sm">Unlisted {label}</p>
                     </div>
                 </div>
             </div>

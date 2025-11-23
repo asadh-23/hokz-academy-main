@@ -1,4 +1,4 @@
-import Admin from "../../models/adminModel.js";
+import Admin from "../../models/user/Admin.js";
 import { setAuthTokens } from "../../utils/responseHandler.js";
 
 export const loginAdmin = async (req, res) => {

@@ -1,11 +1,11 @@
-import User from "../../models/userModel.js";
-import OTP from "../../models/otpModel.js";
-import Tutor from "../../models/tutorModel.js";
-import Admin from "../../models/adminModel.js";
+import User from "../../models/user/User.js";
+import OTP from "../../models/common/Otp.js";
+import Tutor from "../../models/user/Tutor.js";
+import Admin from "../../models/user/Admin.js";
 import { sendOtpEmail } from "../../services/emailService.js";
 import crypto from "crypto";
 import mongoose from "mongoose";
-import multer from "multer";
+import { uploadToCloudinary } from "../../services/cloudinaryService.js";
 import cloudinary from "../../config/cloudinary.js";
 import {
     isNullOrWhitespace,
@@ -88,49 +88,40 @@ export const updateUserProfileImage = async (req, res) => {
     try {
         const userId = req.user?._id;
 
-        if (!req.file) return res.status(400).json({ message: "No image file provided" });
+        if (!req.file) {
+            return res.status(400).json({ message: "No image file provided" });
+        }
 
         if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
             return res.status(401).json({ message: "Unauthorized : Valid user ID not found" });
         }
 
         const currentUser = await User.findById(userId).select("profileImage -_id");
+
+        // Delete old image from Cloudinary
         if (currentUser?.profileImage) {
             try {
-                const publicIdMatch = currentUser.profileImage.match(/\/v\d+\/(?:user_profiles\/)?([^\.]+)/);
-                if (publicIdMatch && publicIdMatch[1]) {
+                const match = currentUser.profileImage.match(/\/v\d+\/(?:user_profiles\/)?([^\.]+)/);
+                if (match && match[1]) {
                     const publicId = currentUser.profileImage.includes("/user_profiles/")
-                        ? `user_profiles/${publicIdMatch[1]}`
-                        : publicIdMatch[1];
+                        ? `user_profiles/${match[1]}`
+                        : match[1];
+
                     await cloudinary.uploader.destroy(publicId, { resource_type: "image" });
-                    console.log(`Previous image deleted: ${publicId}`);
                 }
-            } catch (deleteError) {
-                console.error("Failed to delete user previous image from Cloudinary:", deleteError.message);
+            } catch (err) {
+                console.error("Failed to delete previous user image:", err.message);
             }
         }
 
-        const uploadResult = await new Promise((resolve, reject) => {
-            const uploadStream = cloudinary.uploader.upload_stream(
-                {
-                    folder: "user_profiles",
-                    resource_type: "image",
-                },
-                (error, result) => {
-                    if (error) return reject(error);
-                    resolve(result);
-                }
-            );
-            uploadStream.end(req.file.buffer);
-        });
+        // Upload new image using helper method
+        const uploadResult = await uploadToCloudinary(req.file.buffer, "user_profiles");
 
-        if (!uploadResult || !uploadResult.secure_url) {
-            throw new Error("Cloudinary upload failed to return a secure URL.");
+        if (!uploadResult?.secure_url) {
+            throw new Error("Cloudinary upload failed");
         }
 
-        const newImageUrl = uploadResult.secure_url;
-
-        const updatedUser = await User.findByIdAndUpdate(userId, { profileImage: newImageUrl }, { new: true });
+        const updatedUser = await User.findByIdAndUpdate(userId, { profileImage: uploadResult.secure_url }, { new: true });
 
         if (!updatedUser) {
             return res.status(404).json({ success: false, message: "User not found after image upload." });
@@ -139,19 +130,16 @@ export const updateUserProfileImage = async (req, res) => {
         res.status(200).json({
             success: true,
             message: "Profile image updated successfully",
-            imageUrl: newImageUrl,
+            imageUrl: uploadResult.secure_url,
         });
     } catch (error) {
-        console.log("Error updating profile image : ", error);
-        if (error instanceof multer.MulterError) {
-            return res.status(400).json({ message: `File upload error : ${error.message}` });
+        console.error("Error updating profile image:", error);
+
+        if (error.message.includes("Cloudinary")) {
+            return res.status(500).json({ message: `Cloudinary error: ${error.message}` });
         }
 
-        if (error.message && error.message.includes("Cloudinary")) {
-            return res.status(500).json({ message: `Cloudinary error : ${error.message}` });
-        }
-
-        return res.status(500).json({ message: "Server error updatating profile image" });
+        return res.status(500).json({ message: "Server error updating profile image" });
     }
 };
 

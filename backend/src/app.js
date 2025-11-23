@@ -17,7 +17,8 @@ import adminCategoryRoutes from './routes/admin/categoryRoutes.js';
 // import adminDashboardRoutes from './routes/admin/dashboardRoutes.js';
 
 import tutorProfileRoutes from './routes/tutor/profileRoutes.js';
-// import tutorCourseRoutes from './routes/tutor/courseManagementRoutes.js';
+import tutorCourseRoutes from './routes/tutor/courseRoutes.js';
+import tutorLessonRoutes from "./routes/tutor/lessonRoutes.js";
 
 import userProfileRoutes from './routes/user/profileRoutes.js';
 
@@ -68,7 +69,8 @@ app.use('/api/admin', adminCategoryRoutes);
 // app.use('/api/admin', adminDashboardRoutes);
 
 app.use('/api/tutor', tutorProfileRoutes);
-// app.use('/api/tutor', tutorCourseRoutes);
+app.use('/api/tutor', tutorCourseRoutes);
+app.use("/api/tutor", tutorLessonRoutes)
 
 app.use('/api/user', userProfileRoutes);
 
