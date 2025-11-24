@@ -201,7 +201,6 @@ const UserProfile = () => {
     // --- Render Component ---
     return (
         <div className="flex flex-col min-h-screen bg-gray-50">
-            <UserHeader />
             <div className="flex-1 p-6 md:p-8 overflow-y-auto">
                 {/* Header */}
                 <div className="mb-8">
@@ -379,8 +378,6 @@ const UserProfile = () => {
                     </div>
                 </div>
             </div>
-
-            <UserFooter />
 
             {/* Modals */}
             {isChangeEmailOpen && (

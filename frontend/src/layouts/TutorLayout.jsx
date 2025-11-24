@@ -6,18 +6,18 @@ import TutorFooter from "../components/tutor/TutorFooter";
 const TutorLayout = () => {
     return (
         <>
-            {/* Main layout wrapper */}
-            <div className="flex min-h-screen">
+            {/* Header at the top */}
+            <TutorHeader />
+
+            {/* Main layout wrapper with sidebar and content */}
+            <div className="flex min-h-[calc(100vh-70px)]">
                 {/* Sidebar (fixed width) */}
                 <TutorSidebar />
 
-                {/* Right side (content + header) */}
-                <div className="flex flex-col flex-1 bg-gray-50">
-                    <TutorHeader />
-                    <main className="flex-1 p-6 md:p-8 overflow-y-auto">
-                        <Outlet />
-                    </main>
-                </div>
+                {/* Main content */}
+                <main className="flex-1 p-6 md:p-8 overflow-y-auto bg-gray-50">
+                    <Outlet />
+                </main>
             </div>
 
             {/* Footer OUTSIDE layout so it spans full width */}

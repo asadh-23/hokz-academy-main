@@ -137,7 +137,9 @@ frontend/
 │   │   ├── common/                     # Shared components
 │   │   │   ├── LoadingSpinner.jsx
 │   │   │   ├── PublicHeader.jsx
-│   │   │   └── PublicFooter.jsx
+│   │   │   ├── PublicFooter.jsx
+│   │   │   ├── Pagination.jsx          # Reusable pagination
+│   │   │   └── StatsCards.jsx          # Statistics cards
 │   │   │
 │   │   ├── auth/                       # Auth-related components
 │   │   │   ├── AuthLayout.jsx
@@ -146,20 +148,21 @@ frontend/
 │   │   │   └── ChangePasswordModal.jsx
 │   │   │
 │   │   ├── user/                       # User components
-│   │   │   ├── UserHeader.jsx
+│   │   │   ├── UserHeader.jsx          # Header with sidebar toggle
+│   │   │   ├── UserSidebar.jsx         # Toggleable sidebar
 │   │   │   └── UserFooter.jsx
 │   │   │
 │   │   ├── tutor/                      # Tutor components
-│   │   │   ├── TutorHeader.jsx
-│   │   │   ├── TutorSidebar.jsx
+│   │   │   ├── TutorHeader.jsx         # Fixed header
+│   │   │   ├── TutorSidebar.jsx        # Fixed sidebar
 │   │   │   ├── TutorFooter.jsx
-│   │   │   └── AnimatedChart.jsx
+│   │   │   ├── AnimatedChart.jsx
+│   │   │   └── LessonsList.jsx         # Lesson management component
 │   │   │
 │   │   ├── admin/                      # Admin components
-│   │   │   ├── AdminHeader.jsx
-│   │   │   ├── AdminSidebar.jsx
+│   │   │   ├── AdminHeader.jsx         # Fixed header
+│   │   │   ├── AdminSidebar.jsx        # Fixed sidebar
 │   │   │   ├── AdminFooter.jsx
-│   │   │   ├── Pagination.jsx
 │   │   │   ├── AdminAnimatedChart.jsx
 │   │   │   │
 │   │   │   ├── students/               # Student management components
@@ -188,12 +191,12 @@ frontend/
 │   │
 │   ├── layouts/                        # Layout components
 │   │   ├── AuthLayout.jsx              # Auth pages layout
-│   │   ├── UserLayout.jsx              # User pages layout
-│   │   ├── TutorLayout.jsx             # Tutor pages layout (NEW)
-│   │   └── AdminLayout.jsx             # Admin pages layout
+│   │   ├── UserLayout.jsx              # User pages layout (toggleable sidebar)
+│   │   ├── TutorLayout.jsx             # Tutor pages layout (fixed sidebar)
+│   │   └── AdminLayout.jsx             # Admin pages layout (fixed sidebar)
 │   │
 │   ├── pages/                          # Page components
-│   │   ├── Home.jsx                    # Landing page
+│   │   ├── Home.jsx                    # Landing page (public)
 │   │   │
 │   │   ├── home/                       # Home page sections
 │   │   │   ├── HeroSection.jsx
@@ -214,33 +217,35 @@ frontend/
 │   │   │   └── Unauthorized.jsx        # 401 page
 │   │   │
 │   │   ├── user/                       # User pages
-│   │   │   ├── UserDashboard.jsx
-│   │   │   ├── UserProfile.jsx
-│   │   │   ├── Courses.jsx
-│   │   │   ├── CourseDetails.jsx
+│   │   │   ├── UserDashboard.jsx       # User dashboard (protected)
+│   │   │   ├── UserProfile.jsx         # User profile management (protected)
+│   │   │   ├── Courses.jsx             # Browse courses (protected)
+│   │   │   ├── CourseDetails.jsx       # Course details page (protected)
+│   │   │   ├── WishList.jsx            # User wishlist (protected)
 │   │   │   └── auth/
-│   │   │       ├── UserLogin.jsx
-│   │   │       └── UserRegister.jsx
+│   │   │       ├── UserLogin.jsx       # User login (public)
+│   │   │       └── UserRegister.jsx    # User registration (public)
 │   │   │
 │   │   ├── tutor/                      # Tutor pages
-│   │   │   ├── TutorDashboard.jsx
-│   │   │   ├── TutorProfile.jsx
-│   │   │   ├── AddCourse.jsx           # Add new course form
-│   │   │   ├── AddLesson.jsx           # Add lessons to course (NEW)
-│   │   │   ├── ManageCourses.jsx
+│   │   │   ├── TutorDashboard.jsx      # Tutor dashboard (protected)
+│   │   │   ├── TutorProfile.jsx        # Tutor profile management (protected)
+│   │   │   ├── AddCourse.jsx           # Add new course form (protected)
+│   │   │   ├── EditCourse.jsx          # Edit course form (protected)
+│   │   │   ├── AddLesson.jsx           # Add lessons to course (protected)
+│   │   │   ├── ManageCourses.jsx       # Course management dashboard (protected)
 │   │   │   └── auth/
-│   │   │       ├── TutorLogin.jsx
-│   │   │       └── TutorRegister.jsx
+│   │   │       ├── TutorLogin.jsx      # Tutor login (public)
+│   │   │       └── TutorRegister.jsx   # Tutor registration (public)
 │   │   │
 │   │   └── admin/                      # Admin pages
-│   │       ├── AdminDashboard.jsx
-│   │       ├── AdminProfile.jsx
-│   │       ├── ManageUsers.jsx         # User management with pagination
-│   │       ├── ManageTutors.jsx
-│   │       ├── ManageCategory.jsx      # Category management (NEW)
-│   │       ├── CategoryView.jsx        # Category details & courses (NEW)
+│   │       ├── AdminDashboard.jsx      # Admin dashboard (protected)
+│   │       ├── AdminProfile.jsx        # Admin profile management (protected)
+│   │       ├── ManageUsers.jsx         # User management with pagination (protected)
+│   │       ├── ManageTutors.jsx        # Tutor management (protected)
+│   │       ├── ManageCategory.jsx      # Category management (protected)
+│   │       ├── CategoryView.jsx        # Category details & courses (protected)
 │   │       └── auth/
-│   │           └── AdminLogin.jsx
+│   │           └── AdminLogin.jsx      # Admin login (public)
 │   │
 │   ├── routes/                         # Routing configuration
 │   │   ├── AppRoutes.jsx               # Main routes
@@ -501,3 +506,44 @@ Created a modern course management dashboard for tutors:
 - Modern color scheme with teal/cyan accents
 
 **Route:** `/tutor/manage-courses` (Protected with TutorLayout)
+
+---
+
+### 7. Toggleable Sidebar Implementation (User Layout)
+Implemented a modern toggleable sidebar system for the user dashboard:
+
+**Components Updated:**
+1. **UserLayout.jsx** - Added sidebar toggle state management
+2. **UserSidebar.jsx** - Converted to toggleable with slide animations
+3. **UserHeader.jsx** - Added menu button to toggle sidebar
+
+**Features:**
+- ✅ **Toggle Button**: Hamburger menu icon in header to open/close sidebar
+- ✅ **Slide Animation**: Smooth 300ms slide-in/slide-out transition
+- ✅ **Overlay**: Dark semi-transparent overlay when sidebar is open
+- ✅ **Auto-close**: Sidebar closes when clicking outside or navigating
+- ✅ **Default Open**: Sidebar opens by default on page load
+- ✅ **Proper Layering**: 
+  - Header: z-50 (top layer)
+  - Sidebar: z-40 (below header)
+  - Overlay: z-30 (below sidebar)
+- ✅ **Positioned Below Header**: Sidebar starts at `top-16` (below 64px header)
+- ✅ **Responsive Height**: Sidebar height is `calc(100vh - 4rem)` to fit below header
+
+**Layout Structure:**
+```
+UserLayout
+├── UserHeader (z-50, sticky top-0)
+│   └── Menu Button (toggles sidebar)
+├── Content Area
+│   ├── Overlay (z-30, appears when sidebar open)
+│   ├── UserSidebar (z-40, slides from left)
+│   └── Main Content (flex-1)
+└── UserFooter
+```
+
+**Design Notes:**
+- Only UserLayout has toggleable sidebar
+- TutorLayout and AdminLayout retain fixed sidebars
+- Sidebar positioned below header, not overlapping it
+- Smooth transitions with Tailwind CSS classes

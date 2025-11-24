@@ -11,9 +11,14 @@ import NotFound from "../pages/error/NotFound";
 import UserPrivateRoute from "./guards/UserPrivateRoute";
 import UserPublicRoute from "./guards/UserPublicRoute";
 
+import {UserLayout } from "../layouts/UserLayout"
+
 import UserProfile from "../pages/user/UserProfile";
 import VerifyEmailChangeOtp from "../pages/common/VerifyEmailChangeOtp";
 import VerifyPasswordChangeOtp from "../pages/common/VerifyPasswordChangeOtp";
+import Courses from "../pages/user/Courses";
+import CourseDetails from "../pages/user/CourseDetails";
+import Wishlist from "../pages/user/WishList";
 
 export default function UserRoutes() {
     return (
@@ -29,10 +34,16 @@ export default function UserRoutes() {
             </Route>
 
             <Route element={<UserPrivateRoute />}>
-                <Route path="/dashboard" element={<UserDashboard />} />
-                <Route path="/profile" element={<UserProfile /> } />
-                <Route path="/verify-email-change" element={<VerifyEmailChangeOtp/> } />
-                <Route path="/verify-password-change" element={<VerifyPasswordChangeOtp/> } />
+               <Route element={<UserLayout/> } >
+                    <Route path="/dashboard" element={<UserDashboard />} />
+                    <Route path="/profile" element={<UserProfile />} />
+                    <Route path="/verify-email-change" element={<VerifyEmailChangeOtp />} />
+                    <Route path="/verify-password-change" element={<VerifyPasswordChangeOtp />} />
+
+                    <Route path="/courses" element={<Courses />} />
+                    <Route path="/courses/:courseId" element={<CourseDetails />} />
+                    <Route path="/wishlist" element={<Wishlist />} />
+                </Route>
             </Route>
         </Routes>
     );

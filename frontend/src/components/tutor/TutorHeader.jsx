@@ -6,7 +6,7 @@ const TutorHeader = () => {
   
   const { user } = useSelector((state) => state.auth)
 
-  const tutorName = user?.fullName || "Tutor"; // headeril add chayyanam
+  const tutorName = user?.fullName || "Tutor";
   const tutorProfileImage = user?.profileImage || defaultProfileImage;
 
   return (

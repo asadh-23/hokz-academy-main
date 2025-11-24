@@ -1,7 +1,5 @@
 import Category from "../../models/category/Category.js";
 import Course from "../../models/course/Course.js";
-import { isNullOrWhitespace } from "../../utils/validation.js";
-import mongoose from "mongoose";
 import { uploadToS3 } from "../../services/s3UploadService.js";
 
 export const getTutorCategories = async (req, res) => {
