@@ -1,6 +1,3 @@
-import TutorHeader from "../../components/tutor/TutorHeader";
-import TutorSidebar from "../../components/tutor/TutorSidebar";
-import TutorFooter from "../../components/tutor/TutorFooter";
 import AnimatedChart from "../../components/tutor/AnimatedChart";
 
 const TutorDashboard = () => {

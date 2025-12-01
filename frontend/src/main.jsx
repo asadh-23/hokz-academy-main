@@ -6,6 +6,10 @@ import App from "./App.jsx";
 import { Toaster } from "sonner";
 import { Provider } from "react-redux";
 import { store } from "./store/store.js";
+import { setStoreRef } from "./api/setupInterceptors";
+
+// Set store reference for interceptors to avoid circular dependency
+setStoreRef(store);
 
 createRoot(document.getElementById("root")).render(
     <StrictMode>

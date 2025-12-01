@@ -2,7 +2,6 @@ import Course from "../../models/course/Course.js";
 import mongoose from "mongoose";
 import Lesson from "../../models/course/Lesson.js";
 import { uploadToS3, deleteFromS3 } from "../../services/s3UploadService.js";
-import { getVideoDuration } from "../../utils/videoUtils.js";
 
 export const uploadLessonFile = async (req, res) => {
     try {
@@ -63,6 +62,8 @@ export const createLesson = async (req, res) => {
         const course = await Course.findOne({
             _id: courseId,
             tutor: req.user._id,
+            isDeleted: false,
+            isBanned: false,
         });
 
         if (!course) {
@@ -81,12 +82,19 @@ export const createLesson = async (req, res) => {
             description,
             videoUrl,
             videoKey,
-            duration,
+            duration: duration || 0,
             thumbnailUrl,
             thumbnailKey,
             pdfUrl,
             pdfKey,
             order: existingCount,
+        });
+
+        await Course.findByIdAndUpdate(courseId, {
+            $inc: {
+                lessonsCount: 1,
+                totalDurationSeconds: duration || 0,
+            },
         });
 
         return res.status(201).json({
@@ -170,6 +178,8 @@ export const updateLesson = async (req, res) => {
 
         const filesToDelete = [];
 
+        const oldDuration = lesson.duration;
+
         if (title) lesson.title = title.trim();
         if (description) lesson.description = description.trim();
 
@@ -199,6 +209,14 @@ export const updateLesson = async (req, res) => {
         }
 
         await lesson.save();
+
+        if (duration !== undefined && duration !== oldDuration) {
+            const diff = duration - oldDuration;
+
+            await Course.findByIdAndUpdate(lesson.course, {
+                $inc: { totalDurationSeconds: diff },
+            });
+        }
 
         if (filesToDelete.length > 0) {
             Promise.allSettled(filesToDelete.map((key) => deleteFromS3(key))).then((results) => {
@@ -241,7 +259,7 @@ export const deleteLesson = async (req, res) => {
     try {
         const { lessonId } = req.params;
 
-        // 1️⃣ Find lesson
+      
         const lesson = await Lesson.findById(lessonId);
         if (!lesson) {
             return res.status(404).json({
@@ -250,6 +268,7 @@ export const deleteLesson = async (req, res) => {
             });
         }
 
+       
         const course = await Course.findById(lesson.course).select("tutor");
         if (!course || course.tutor.toString() !== req.user._id.toString()) {
             return res.status(403).json({
@@ -258,13 +277,31 @@ export const deleteLesson = async (req, res) => {
             });
         }
 
+       
+        const lessonDuration = lesson.duration;
+        const lessonOrder = lesson.order;
+
+       
         const filesToDelete = [];
         if (lesson.videoKey) filesToDelete.push(lesson.videoKey);
         if (lesson.thumbnailKey) filesToDelete.push(lesson.thumbnailKey);
         if (lesson.pdfKey) filesToDelete.push(lesson.pdfKey);
 
+       
         await lesson.deleteOne();
 
+        
+        await Course.findByIdAndUpdate(lesson.course, {
+            $inc: {
+                lessonsCount: -1,
+                totalDurationSeconds: -lessonDuration,
+            },
+        });
+
+        
+        await Lesson.updateMany({ course: lesson.course, order: { $gt: lessonOrder } }, { $inc: { order: -1 } });
+
+        // 8️⃣ Delete S3 files asynchronously
         if (filesToDelete.length > 0) {
             Promise.allSettled(filesToDelete.map((key) => deleteFromS3(key))).then((results) => {
                 results.forEach((r) => {
@@ -275,6 +312,7 @@ export const deleteLesson = async (req, res) => {
             });
         }
 
+        // 9️⃣ Success Response
         return res.status(200).json({
             success: true,
             message: "Lesson deleted successfully",

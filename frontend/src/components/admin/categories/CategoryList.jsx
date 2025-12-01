@@ -1,6 +1,6 @@
 import CategoryItem from "./CategoryItem";
 
-const CategoryList = ({ categories, onEdit, onList, onUnlist }) => {
+const CategoryList = ({ categories, onEdit, onToggleList }) => {
     if (categories.length === 0) {
         return (
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-12 text-center">
@@ -18,8 +18,7 @@ const CategoryList = ({ categories, onEdit, onList, onUnlist }) => {
                     key={category._id}
                     category={category}
                     onEdit={onEdit}
-                    onList={onList}
-                    onUnlist={onUnlist}
+                    onToggleList={onToggleList}
                 />
             ))}
         </div>

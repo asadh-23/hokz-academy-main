@@ -1,12 +1,18 @@
 import AuthLayout from "../../../components/auth/AuthLayout";
 import { toast } from "sonner";
-import { publicAxios } from "../../../api/publicAxios";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+
+import { userRegister, selectUserAuthLoading } from "../../../store/features/auth/userAuthSlice";
+
 import { validateEmail, validatePassword, validatePhone, isNullOrWhitespace } from "../../../utils/validation";
 
 export default function UserRegister() {
+    const dispatch = useDispatch();
     const navigate = useNavigate();
+
+    const loading = useSelector(selectUserAuthLoading);
 
     const [formData, setFormData] = useState({
         fullName: "",
@@ -19,48 +25,50 @@ export default function UserRegister() {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
+        // ----------------------------
+        // VALIDATIONS
+        // ----------------------------
         if (isNullOrWhitespace(formData.fullName)) {
             return toast.error("Full Name is required");
         }
 
         const phoneValidation = validatePhone(formData.phone);
         if (!phoneValidation.isValid) {
-            return toast.error(phoneValidation.message || "Enter valid phone number");
+            return toast.error(phoneValidation.message);
         }
 
         const emailValidation = validateEmail(formData.email);
         if (!emailValidation.isValid) {
-            return toast.error(emailValidation.message || "Enter valid email address");
+            return toast.error(emailValidation.message);
         }
 
         const passwordValidation = validatePassword(formData.password);
         if (!passwordValidation.isValid) {
-            return toast.error(passwordValidation.message || "Enter a valid password");
+            return toast.error(passwordValidation.message);
         }
 
         if (formData.password.trim() !== formData.confirmPassword.trim()) {
             return toast.error("Passwords do not match");
         }
 
+        // Clean data
         const cleanData = {
             fullName: formData.fullName.trim(),
             phone: phoneValidation.phone,
             email: emailValidation.email,
             password: passwordValidation.password,
         };
-
         try {
-            const response = await publicAxios.post("/user/auth/register", cleanData);
+            const result = await dispatch(userRegister(cleanData)).unwrap();
 
-            if (response.data.success) {
-                toast.success(response.data?.message);
-                navigate("/user/verify-otp", { state: { email: cleanData.email, role: "user" } });
-            }
+            toast.success(result.message || "Registration successful! Verify your email.");
+            navigate("/user/verify-otp", { state: { email: cleanData.email, role: "user" }, replace: true });
         } catch (error) {
-            toast.error(error.response?.data?.message || "Registration failed");
-            console.log(error.response?.data?.message);
+            toast.error(error || "Registration failed");
+            console.log(error || "User registration failed");
         }
     };
+
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
@@ -68,12 +76,13 @@ export default function UserRegister() {
     return (
         <AuthLayout subtitle="Sign Up" role="user">
             <h2 className="text-3xl font-bold mb-4 text-gray-900 drop-shadow-md">Create your account</h2>
+
             <form className="w-full space-y-6" onSubmit={handleSubmit}>
-                {/* Username */}
+                {/* Full Name */}
                 <div className="relative">
                     <input
                         type="text"
-                        placeholder="Username"
+                        placeholder="Full Name"
                         className="w-full rounded-full border border-gray-300 px-6 py-3 focus:outline-none focus:ring-4 focus:ring-teal-300 transition"
                         name="fullName"
                         value={formData.fullName}
@@ -119,9 +128,6 @@ export default function UserRegister() {
                         onChange={handleChange}
                         required
                     />
-                    <span className="absolute right-4 top-3.5 text-gray-400 cursor-pointer">
-                        <i className="fas fa-eye-slash"></i>
-                    </span>
                 </div>
 
                 {/* Confirm Password */}
@@ -135,17 +141,15 @@ export default function UserRegister() {
                         onChange={handleChange}
                         required
                     />
-                    <span className="absolute right-4 top-3.5 text-gray-400 cursor-pointer">
-                        <i className="fas fa-eye-slash"></i>
-                    </span>
                 </div>
 
                 {/* Register Button */}
                 <button
                     type="submit"
-                    className="w-full bg-teal-400 text-white font-bold text-lg py-3 rounded-full shadow-lg hover:bg-teal-500 transition-all"
+                    disabled={loading}
+                    className="w-full bg-teal-400 text-white font-bold text-lg py-3 rounded-full shadow-lg hover:bg-teal-500 transition-all disabled:opacity-50"
                 >
-                    Register
+                    {loading ? "Registering..." : "Register"}
                 </button>
             </form>
         </AuthLayout>

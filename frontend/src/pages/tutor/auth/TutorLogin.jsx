@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import AuthLayout from "../../../components/auth/AuthLayout";
 import { toast } from "sonner";
-import { publicAxios } from "../../../api/publicAxios";
 import { Link, useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
-import { loginSuccess } from "../../../store/features/auth/authSlice";
+import { useDispatch, useSelector } from "react-redux";
+
+import { tutorLogin } from "../../../store/features/auth/tutorAuthSlice";
+import { selectTutorAuthLoading } from "../../../store/features/auth/tutorAuthSlice";
 
 export default function TutorLogin() {
     const [formData, setFormData] = useState({
@@ -14,35 +15,28 @@ export default function TutorLogin() {
 
     const navigate = useNavigate();
     const dispatch = useDispatch();
-
+    const loading = useSelector(selectTutorAuthLoading);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
         const cleanData = {
-            ...formData,
             email: formData.email.trim(),
+            password: formData.password.trim(),
         };
 
         if (!cleanData.email || !cleanData.password) {
             return toast.error("Please fill all required fields");
         }
-
         try {
-            const response = await publicAxios.post("/tutor/auth/login", cleanData);
+            const result = await dispatch(tutorLogin(cleanData));
 
-            if (response.data.success) {
-                toast.success(response.data.message || "Login successful");
-                const payload = {
-                    user: response.data.user,
-                    accessToken: response.data.accessToken,
-                };
-                dispatch(loginSuccess(payload));
-                navigate("/tutor/dashboard");
-            }
+            toast.success(result.message || "Login successful");
+
+            navigate("/tutor/dashboard", { replace: true });
         } catch (error) {
-            console.log(error.response?.data?.message + "Tutor login failed");
-            toast.error(error.response?.data?.message || "Login failed");
+            console.log(error || "Admin login failed");
+            toast.error(error || "Login failed");
         }
     };
 
@@ -53,6 +47,7 @@ export default function TutorLogin() {
     return (
         <AuthLayout subtitle="Log In" role="tutor">
             <h2 className="text-3xl font-bold mb-4 text-gray-900 drop-shadow-md">Welcome back, Tutor</h2>
+
             <form className="w-full space-y-6" onSubmit={handleSubmit}>
                 {/* Email */}
                 <div className="relative">
@@ -61,7 +56,8 @@ export default function TutorLogin() {
                         required
                         name="email"
                         placeholder="Email"
-                        className="w-full rounded-full border border-gray-300 px-6 py-3 focus:outline-none focus:ring-4 focus:ring-teal-300 transition"
+                        className="w-full rounded-full border border-gray-300 px-6 py-3 focus:outline-none 
+                        focus:ring-4 focus:ring-teal-300 transition"
                         value={formData.email}
                         onChange={handleChange}
                     />
@@ -77,19 +73,22 @@ export default function TutorLogin() {
                         required
                         name="password"
                         placeholder="Password"
-                        className="w-full rounded-full border border-gray-300 px-6 py-3 pr-12 focus:outline-none focus:ring-4 focus:ring-teal-300 transition"
+                        className="w-full rounded-full border border-gray-300 px-6 py-3 pr-12 
+                        focus:outline-none focus:ring-4 focus:ring-teal-300 transition"
                         value={formData.password}
                         onChange={handleChange}
                     />
+
                     <span className="absolute right-4 top-3.5 text-gray-400 cursor-pointer">
                         <i className="fas fa-eye-slash" />
                     </span>
+
                     <span className="absolute left-6 top-3.5 text-gray-400">
                         <i className="fas fa-lock" />
                     </span>
                 </div>
 
-                {/* Forgot Password Link */}
+                {/* Forgot Password */}
                 <div className="text-right mb-2">
                     <Link
                         to="/tutor/forgot-password"
@@ -102,13 +101,15 @@ export default function TutorLogin() {
                 {/* Login Button */}
                 <button
                     type="submit"
-                    className="w-full bg-teal-400 text-white font-bold text-lg py-3 rounded-full shadow-lg hover:bg-teal-500 transition-all"
+                    disabled={loading}
+                    className={`w-full bg-teal-400 text-white font-bold text-lg py-3 rounded-full shadow-lg 
+                    transition-all ${loading ? "opacity-50 cursor-not-allowed" : "hover:bg-teal-500"}`}
                 >
-                    Login
+                    {loading ? "Logging in..." : "Login"}
                 </button>
             </form>
 
-            {/* Google Login Divider */}
+            {/* Divider */}
             <div className="flex items-center my-6">
                 <div className="flex-1 border-t border-gray-200" />
                 <span className="mx-2 text-xs text-gray-400">or</span>

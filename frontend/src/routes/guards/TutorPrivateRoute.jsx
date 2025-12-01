@@ -1,15 +1,20 @@
-import React from 'react';
 import { useSelector } from 'react-redux';
 import { Navigate, Outlet } from 'react-router-dom';
 
 const TutorPrivateRoute = () => {
-  const { isAuthenticated, role } = useSelector((state) => state.auth);
+  const { isAuthenticated, token, loading } = useSelector((state) => state.tutorAuth);
   
-  if (isAuthenticated && role === 'tutor') {
-    return <Outlet />; 
-  } else {
-    return <Navigate to= "/tutor/login" replace />;
+  // Wait for auth state to be determined
+  if (loading) {
+    return null;
   }
+  
+  // Check both authentication flag and token existence
+  if (isAuthenticated && token) {
+    return <Outlet />; 
+  }
+  
+  return <Navigate to="/tutor/login" replace />;
 };
 
 export default TutorPrivateRoute;

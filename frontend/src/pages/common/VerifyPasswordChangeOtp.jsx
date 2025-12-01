@@ -1,6 +1,14 @@
-import React, { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { useDispatch, useSelector } from "react-redux";
+// Redux thunks and selectors
+import {
+    verifyPasswordChangeOtp,
+    resendPasswordChangeOtp,
+    selectVerifyPasswordChangeLoading,
+    selectResendPasswordChangeLoading,
+} from "../../store/features/auth/passwordSlice";
 import { userAxios } from "../../api/userAxios";
 import { tutorAxios } from "../../api/tutorAxios";
 import { adminAxios } from "../../api/adminAxios";
@@ -12,6 +20,7 @@ export default function VerifyPasswordChangeOtp() {
     const { role, newPassword } = location.state;
 
     const navigate = useNavigate();
+    const dispatch = useDispatch();
 
     const [otp, setOtp] = useState(Array(6).fill(""));
     const inputRefs = useRef([]);
@@ -19,7 +28,9 @@ export default function VerifyPasswordChangeOtp() {
     const [timer, setTimer] = useState(RESEND_INTERVAL);
     const [resendDisabled, setResendDisabled] = useState(true);
 
-    const [ButtonLoader, setButtonLoader] = useState(false);
+    // Redux selectors
+    const isVerifying = useSelector(selectVerifyPasswordChangeLoading);
+    const isResending = useSelector(selectResendPasswordChangeLoading);
 
     useEffect(() => {
         const savedTimestamp = localStorage.getItem("otpTimestamp");
@@ -81,39 +92,24 @@ export default function VerifyPasswordChangeOtp() {
         const otpCode = otp.join("");
 
         if (otpCode.length !== 6) {
-            return toast.error("Please enter the 6-digit OTP sent to your new email.");
+            return toast.error("Please enter the 6-digit OTP sent to your email.");
         }
-
-        let axiosInstance;
-        if (role === "user") {
-            axiosInstance = userAxios;
-        } else if (role === "tutor") {
-            axiosInstance = tutorAxios;
-        } else if (role === "admin") {
-            axiosInstance = adminAxios;
-        } else {
-            throw new Error("Invalid role specified.");
-        }
-
-        setButtonLoader(true);
 
         try {
-            const response = await axiosInstance.post(`/verify-password-change`, {
-                otpCode,
-                newPassword,
-            });
+            const result = await dispatch(
+                verifyPasswordChangeOtp({
+                    otpCode,
+                    newPassword,
+                    role,
+                })
+            ).unwrap();
 
-            if (response.data?.success) {
-                toast.success(response.data.message || "new password updated successfully!");
-                localStorage.removeItem("otpTimestamp");
-
-                navigate(`/${role}/profile`, { replace: true });
-            }
+            toast.success(result.message || "Password updated successfully!");
+            localStorage.removeItem("otpTimestamp");
+            navigate(`/${role}/profile`, { replace: true });
         } catch (error) {
-            console.error("password change verification failed:", error);
-            toast.error(error.response?.data?.message || "Incorrect OTP or it may have expired. Please try again.");
-        } finally {
-            setButtonLoader(false);
+            console.error("Password change verification failed:", error);
+            toast.error(error || "Incorrect OTP or it may have expired. Please try again.");
         }
     };
 
@@ -125,24 +121,12 @@ export default function VerifyPasswordChangeOtp() {
         localStorage.setItem("otpTimestamp", Date.now().toString());
 
         try {
-            let axiosInstance;
-            if (role === "user") {
-                axiosInstance = userAxios;
-            } else if (role === "tutor") {
-                axiosInstance = tutorAxios;
-            } else if (role === "admin") {
-                axiosInstance = adminAxios;
-            } else {
-                throw new Error("Invalid role specified.");
-            }
+            // Dispatch Redux thunk - loading state managed by Redux
+            const result = await dispatch(resendPasswordChangeOtp({ role })).unwrap();
 
-            const response = await axiosInstance.post("/resend-password-change-otp");
-
-            if (response.data?.success) {
-                toast.success(response.data.message || "OTP resent successfully.");
-            }
+            toast.success(result.message || "OTP resent successfully.");
         } catch (error) {
-            toast.error(error.response?.data?.message || "An error occurred while resending OTP.");
+            toast.error(error || "An error occurred while resending OTP.");
             console.error("Error resending password change OTP:", error);
             setResendDisabled(false);
             setTimer(0);
@@ -215,21 +199,24 @@ export default function VerifyPasswordChangeOtp() {
                 </div>
                 <button
                     onClick={handleVerify}
-                    className="bg-orange-400 hover:bg-orange-500 transition font-bold text-white px-14 py-3 rounded-full mb-3 shadow"
+                    disabled={isVerifying}
+                    className="bg-orange-400 hover:bg-orange-500 transition font-bold text-white px-14 py-3 rounded-full mb-3 shadow disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                    Verify Email
+                    {isVerifying ? "Verifying..." : "Verify Email"}
                 </button>
                 <button
                     onClick={handleResend}
-                    disabled={resendDisabled}
+                    disabled={resendDisabled || isResending}
                     className={`px-4 py-2 rounded-md font-semibold transition ${
-                        resendDisabled
+                        resendDisabled || isResending
                             ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                             : "bg-orange-400 text-white hover:bg-orange-100 cursor-pointer"
                     }`}
-                    aria-disabled={resendDisabled}
+                    aria-disabled={resendDisabled || isResending}
                 >
-                    {resendDisabled
+                    {isResending
+                        ? "Sending..."
+                        : resendDisabled
                         ? `Resend OTP in ${Math.floor(timer / 60)} : ${(timer % 60).toString().padStart(2, "0")}`
                         : "Resend OTP"}
                 </button>

@@ -1,10 +1,10 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import AuthLayout from "../../../components/auth/AuthLayout";
 import { toast } from "sonner";
-import { publicAxios } from "../../../api/publicAxios";
 import { Link, useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
-import { loginSuccess } from "../../../store/features/auth/authSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { userLogin, selectUserAuthLoading } from "../../../store/features/auth/userAuthSlice";
+import { validateEmail, validatePassword } from "../../../utils/validation";
 
 export default function UserLogin() {
     const [formData, setFormData] = useState({
@@ -14,35 +14,31 @@ export default function UserLogin() {
 
     const navigate = useNavigate();
     const dispatch = useDispatch();
-
+    const isLoading = useSelector(selectUserAuthLoading);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-
-        const cleanData = {
-            ...formData,
-            email: formData.email.trim(),
-        };
-
-        if (!cleanData.email || !cleanData.password) {
-            return toast.error("Please fill all required fields");
+        const emailValidation = validateEmail(formData.email);
+        if (!emailValidation.isValid) {
+            return toast.error(emailValidation.message || "Enter a valid email address");
         }
 
+        const passwordValidation = validatePassword(formData.password);
+        if (!passwordValidation.isValid) {
+            return toast.error(passwordValidation.message || "Enter a valid Password");
+        }
+        const payload = {
+            email: emailValidation.email,
+            password: passwordValidation.password,
+        };
         try {
-            const response = await publicAxios.post("/user/auth/login", cleanData);
+            const result = await dispatch(userLogin(payload)).unwrap();
 
-            if (response.data.success) {
-                toast.success(response.data.message || "Login successful");
-                const payload = {
-                    user: response.data.user,
-                    accessToken: response.data.accessToken,
-                };
-                dispatch(loginSuccess(payload))
-                navigate("/user/dashboard");
-            }
+            toast.success(result.message || "Login successful");
+            navigate("/user/dashboard", { replace: true });
         } catch (error) {
-            console.log(error.response?.data?.message);
-            toast.error(error.response?.data?.message || "Login failed");
+            toast.error(error || "Login failed");
+            console.log(error);
         }
     };
 
@@ -102,9 +98,10 @@ export default function UserLogin() {
                 {/* Login Button */}
                 <button
                     type="submit"
-                    className="w-full bg-teal-400 text-white font-bold text-lg py-3 rounded-full shadow-lg hover:bg-teal-500 transition-all"
+                    disabled={isLoading}
+                    className="w-full bg-teal-400 text-white font-bold text-lg py-3 rounded-full shadow-lg hover:bg-teal-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                    Login
+                    {isLoading ? "Logging in..." : "Login"}
                 </button>
             </form>
 

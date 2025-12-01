@@ -1,6 +1,6 @@
 import React from 'react';
 
-const StudentRow = ({ student, onBlockStudent, onUnblockStudent }) => {
+const StudentRow = ({ student, onToggleBlock }) => {
   // 🧠 Function to get initials if no profile image
   const getInitials = (name = '') =>
     name
@@ -80,14 +80,14 @@ const StudentRow = ({ student, onBlockStudent, onUnblockStudent }) => {
       <td className="p-4 border-b border-gray-100">
         {student.status === 'Blocked' ? (
           <button
-            onClick={() => onUnblockStudent(student._id)}
+            onClick={() => onToggleBlock(student._id, student.fullName, student.status)}
             className="bg-green-500 text-white px-4 py-1 rounded-md text-xs font-medium hover:bg-green-600 transition-colors"
           >
             Unblock
           </button>
         ) : (
           <button
-            onClick={() => onBlockStudent(student._id)}
+            onClick={() => onToggleBlock(student._id, student.fullName, student.status)}
             className="bg-red-500 text-white px-4 py-1 rounded-md text-xs font-medium hover:bg-red-600 transition-colors"
           >
             Block

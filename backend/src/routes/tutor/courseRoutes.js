@@ -18,10 +18,10 @@ tutorRouter.use(verifyToken, isTutor);
 tutorRouter.get("/categories", getTutorCategories);
 tutorRouter.post("/courses/upload-thumbnail", courseThumbnailMiddleware, uploadCourseThumbnail);
 tutorRouter.post("/courses", createCourse);
-tutorRouter.get("/courses/my-courses", getTutorCourses);
+tutorRouter.get("/courses/", getTutorCourses);
 tutorRouter.get("/courses/:courseId", getCourseById);
 tutorRouter.put("/courses/:courseId", updateCourse);
-tutorRouter.put("/courses/:courseId/toggle-list", toggleListCourse);
+tutorRouter.patch("/courses/:courseId/toggle-list", toggleListCourse);
 
 
 

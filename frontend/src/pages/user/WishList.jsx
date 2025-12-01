@@ -1,209 +1,236 @@
-import React, { useState } from 'react';
-import { 
-  ShoppingCart, 
-  Trash2, 
-  Star, 
-  BookOpen, 
-  Clock, 
-  MoreVertical, 
-  Heart, 
-  Search,
-  Bell,
-  User
-} from 'lucide-react';
+// import { useState, useEffect } from "react";
+// import { toast } from "sonner";
+// import { useDispatch, useSelector } from "react-redux";
+// import { useNavigate } from "react-router-dom";
+// import {
+//     fetchUserWishlist,
+//     removeFromUserWishlist,
+//     selectUserWishlist,
+//     selectUserWishlistLoading,
+// } from "../../store/features/user/userWishlistSlice";
+// import WishlistHeader from "../../components/user/wishlist/WishlistHeader";
+// import WishlistSearchBar from "../../components/user/wishlist/WishlistSearchBar";
+// import WishlistCard from "../../components/user/wishlist/WishlistCard";
+// import WishlistEmptyState from "../../components/user/wishlist/WishlistEmptyState";
 
-// --- Mock Data ---
-const INITIAL_COURSES = [
-  {
-    id: 1,
-    title: "Complete Web Development Bootcamp 2024",
-    instructor: "Dr. Angela Yu",
-    rating: 4.8,
-    students: "1.2k",
-    price: 19.99,
-    originalPrice: 89.99,
-    image: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=800&q=80",
-    tag: "Bestseller",
-    duration: "62h 40m",
-    lectures: 420
-  },
-  {
-    id: 2,
-    title: "UI/UX Design Masterclass: From Beginner to Pro",
-    instructor: "Gary Simon",
-    rating: 4.9,
-    students: "850",
-    price: 24.99,
-    originalPrice: 99.99,
-    image: "https://images.unsplash.com/photo-1586717791821-3f44a5638d48?auto=format&fit=crop&w=800&q=80",
-    tag: "New",
-    duration: "28h 15m",
-    lectures: 145
-  },
-  {
-    id: 3,
-    title: "Python for Data Science and Machine Learning",
-    instructor: "Jose Portilla",
-    rating: 4.7,
-    students: "2.5k",
-    price: 14.99,
-    originalPrice: 74.99,
-    image: "https://images.unsplash.com/photo-1555949963-aa79dcee981c?auto=format&fit=crop&w=800&q=80",
-    tag: null,
-    duration: "34h 10m",
-    lectures: 210
-  },
-  {
-    id: 4,
-    title: "Advanced React & Next.js Patterns",
-    instructor: "Kent C. Dodds",
-    rating: 4.9,
-    students: "500",
-    price: 39.99,
-    originalPrice: 129.99,
-    image: "https://images.unsplash.com/photo-1633356122544-f134324a6cee?auto=format&fit=crop&w=800&q=80",
-    tag: "Highest Rated",
-    duration: "18h 30m",
-    lectures: 88
-  }
-];
+// const WishList = () => {
+//     const dispatch = useDispatch();
+//     const navigate = useNavigate();
 
-const Wishlist = () => {
-  const [wishlist, setWishlist] = useState(INITIAL_COURSES);
+//     // Redux selectors
+//     const wishlist = useSelector(selectUserWishlist);
+//     const loading = useSelector(selectUserWishlistLoading);
 
-  const removeFromWishlist = (id) => {
-    setWishlist(wishlist.filter(course => course.id !== id));
-  };
+//     // Local state
+//     const [searchQuery, setSearchQuery] = useState("");
+//     const [filteredWishlist, setFilteredWishlist] = useState([]);
+//     const [isFilterOpen, setIsFilterOpen] = useState(false);
+//     const [filters, setFilters] = useState({
+//         sort: "",
+//         minPrice: "",
+//         maxPrice: "",
+//     });
+//     const [tempFilters, setTempFilters] = useState({
+//         sort: "",
+//         minPrice: "",
+//         maxPrice: "",
+//     });
 
-  const moveToCart = (course) => {
-    alert(`Added ${course.title} to cart!`);
-    // Add cart logic here
-  };
+//     const sortOptions = [
+//         { value: "", label: "Default" },
+//         { value: "newest", label: "Newest First" },
+//         { value: "oldest", label: "Oldest First" },
+//         { value: "low-high", label: "Price: Low to High" },
+//         { value: "high-low", label: "Price: High to Low" },
+//     ];
 
-  return (
-    <div className="min-h-screen bg-gray-50 font-sans text-gray-900">
+//     // Fetch wishlist on mount
+//     useEffect(() => {
+//         loadWishlist();
+//     }, []);
 
-      {/* --- Main Content --- */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        
-        {/* Header Section */}
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 border-b border-gray-200 pb-4">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">My Wishlist</h1>
-            <p className="mt-2 text-gray-500">
-              {wishlist.length} {wishlist.length === 1 ? 'course' : 'courses'} saved for later
-            </p>
-          </div>
-          {wishlist.length > 0 && (
-             <button 
-               onClick={() => setWishlist([])}
-               className="mt-4 sm:mt-0 text-sm text-red-500 hover:text-red-700 font-medium transition-colors"
-             >
-               Remove all
-             </button>
-          )}
-        </div>
+//     // Filter and sort wishlist
+//     useEffect(() => {
+//         let filtered = [...wishlist];
 
-        {/* --- Wishlist Grid --- */}
-        {wishlist.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {wishlist.map((course) => (
-              <div 
-                key={course.id} 
-                className="group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col"
-              >
-                {/* Image Container */}
-                <div className="relative aspect-video overflow-hidden bg-gray-100">
-                  <img 
-                    src={course.image} 
-                    alt={course.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                  {course.tag && (
-                    <span className="absolute top-3 left-3 px-2.5 py-1 bg-white/90 backdrop-blur-sm text-xs font-bold text-indigo-600 rounded-md shadow-sm">
-                      {course.tag}
-                    </span>
-                  )}
-                  <button 
-                    onClick={() => removeFromWishlist(course.id)}
-                    className="absolute top-3 right-3 p-1.5 bg-white/90 backdrop-blur-sm rounded-full text-gray-400 hover:text-red-500 transition-colors shadow-sm opacity-0 group-hover:opacity-100"
-                    title="Remove from wishlist"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
+//         // Search filter
+//         if (searchQuery.trim() !== "") {
+//             filtered = filtered.filter(
+//                 (item) =>
+//                     item.course?.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+//                     item.course?.tutor?.fullName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+//                     item.course?.category?.name?.toLowerCase().includes(searchQuery.toLowerCase())
+//             );
+//         }
 
-                {/* Content */}
-                <div className="p-5 flex flex-col flex-grow">
-                  <div className="flex-grow">
-                    <h3 className="font-bold text-gray-900 line-clamp-2 mb-1 group-hover:text-indigo-600 transition-colors cursor-pointer">
-                      {course.title}
-                    </h3>
-                    <p className="text-sm text-gray-500 mb-3">{course.instructor}</p>
-                    
-                    {/* Meta Info */}
-                    <div className="flex items-center gap-3 text-xs text-gray-500 mb-4">
-                      <div className="flex items-center gap-1 text-amber-500 font-bold">
-                        <span className="text-sm">{course.rating}</span>
-                        <Star className="w-3 h-3 fill-current" />
-                      </div>
-                      <span className="text-gray-300">|</span>
-                      <div className="flex items-center gap-1">
-                        <Clock className="w-3 h-3" />
-                        {course.duration}
-                      </div>
-                      <span className="text-gray-300">|</span>
-                      <div className="flex items-center gap-1">
-                        <User className="w-3 h-3" />
-                        {course.students}
-                      </div>
-                    </div>
-                  </div>
+//         // Price filter
+//         if (filters.minPrice !== "" || filters.maxPrice !== "") {
+//             filtered = filtered.filter((item) => {
+//                 const course = item.course;
+//                 if (!course) return false;
+//                 const price = course.price - (course.price * course.offerPercentage) / 100;
+//                 const min = filters.minPrice === "" ? 0 : Number(filters.minPrice);
+//                 const max = filters.maxPrice === "" ? Infinity : Number(filters.maxPrice);
+//                 return price >= min && price <= max;
+//             });
+//         }
 
-                  {/* Pricing & Action */}
-                  <div className="pt-4 border-t border-gray-50 mt-auto">
-                    <div className="flex items-end gap-2 mb-4">
-                      <span className="text-2xl font-bold text-gray-900">${course.price}</span>
-                      <span className="text-sm text-gray-400 line-through mb-1">${course.originalPrice}</span>
-                    </div>
-                    
-                    <button 
-                      onClick={() => moveToCart(course)}
-                      className="w-full py-2.5 px-4 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-xl shadow-sm hover:shadow-md transition-all active:scale-[0.98] flex items-center justify-center gap-2"
-                    >
-                      <ShoppingCart className="w-4 h-4" />
-                      Move to Cart
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          /* --- Empty State --- */
-          <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-gray-300">
-            <div className="w-20 h-20 bg-indigo-50 rounded-full flex items-center justify-center mx-auto mb-6">
-              <Heart className="w-10 h-10 text-indigo-300" />
-            </div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Your wishlist is empty</h2>
-            <p className="text-gray-500 max-w-sm mx-auto mb-8">
-              Explore our catalog and save courses you want to take in the future.
-            </p>
-            <button className="px-6 py-3 bg-indigo-600 text-white font-medium rounded-full shadow-lg hover:bg-indigo-700 hover:shadow-indigo-200 transition-all transform hover:-translate-y-1">
-              Browse Courses
-            </button>
-          </div>
-        )}
-      </main>
+//         // Sort
+//         if (filters.sort) {
+//             filtered.sort((a, b) => {
+//                 const courseA = a.course;
+//                 const courseB = b.course;
+//                 if (!courseA || !courseB) return 0;
 
-      {/* --- Footer --- */}
-      <footer className="bg-white border-t border-gray-200 mt-12 py-8">
-        <div className="max-w-7xl mx-auto px-4 text-center text-gray-400 text-sm">
-          <p>&copy; 2024 LearnFlow Inc. All rights reserved.</p>
-        </div>
-      </footer>
-    </div>
-  );
-};
+//                 const priceA = courseA.price - (courseA.price * courseA.offerPercentage) / 100;
+//                 const priceB = courseB.price - (courseB.price * courseB.offerPercentage) / 100;
 
-export default Wishlist;
+//                 switch (filters.sort) {
+//                     case "low-high":
+//                         return priceA - priceB;
+//                     case "high-low":
+//                         return priceB - priceA;
+//                     case "newest":
+//                         return new Date(b.createdAt) - new Date(a.createdAt);
+//                     case "oldest":
+//                         return new Date(a.createdAt) - new Date(b.createdAt);
+//                     default:
+//                         return 0;
+//                 }
+//             });
+//         }
+
+//         setFilteredWishlist(filtered);
+//     }, [searchQuery, wishlist, filters]);
+
+//     const loadWishlist = async () => {
+//         try {
+//             await dispatch(fetchUserWishlist()).unwrap();
+//         } catch (error) {
+//             toast.error(error || "Failed to load wishlist");
+//         }
+//     };
+
+//     const handleRemoveFromWishlist = async (wishlistId, courseTitle) => {
+//         try {
+//             await dispatch(removeFromUserWishlist(wishlistId)).unwrap();
+//             toast.success(`${courseTitle} removed from wishlist`);
+//         } catch (error) {
+//             toast.error(error || "Failed to remove from wishlist");
+//         }
+//     };
+
+//     const handleClearAll = async () => {
+//         if (wishlist.length === 0) {
+//             toast.info("Your wishlist is already empty");
+//             return;
+//         }
+
+//         if (window.confirm("Are you sure you want to clear your entire wishlist?")) {
+//             try {
+//                 const removePromises = wishlist.map((item) =>
+//                     dispatch(removeFromUserWishlist(item._id)).unwrap()
+//                 );
+//                 await Promise.all(removePromises);
+//                 toast.success("Wishlist cleared successfully");
+//             } catch (error) {
+//                 toast.error("Failed to clear wishlist");
+//             }
+//         }
+//     };
+
+//     const handleAddToCart = (courseId, courseTitle) => {
+//         // TODO: Implement add to cart functionality
+//         toast.info(`Add to cart feature coming soon for: ${courseTitle}`);
+//     };
+
+//     const calculateTotalValue = () => {
+//         return wishlist.reduce((total, item) => {
+//             const course = item.course;
+//             if (!course) return total;
+//             const discountedPrice = course.price - (course.price * course.offerPercentage) / 100;
+//             return total + discountedPrice;
+//         }, 0);
+//     };
+
+//     const handleTempFilterChange = (field, value) => {
+//         setTempFilters((prev) => ({ ...prev, [field]: value }));
+//     };
+
+//     const handleApplyFilters = () => {
+//         setFilters(tempFilters);
+//         setIsFilterOpen(false);
+//     };
+
+//     const handleClearFilters = () => {
+//         setFilters({ sort: "", minPrice: "", maxPrice: "" });
+//         setTempFilters({ sort: "", minPrice: "", maxPrice: "" });
+//         setIsFilterOpen(false);
+//     };
+
+//     const hasActiveFilters = filters.minPrice || filters.maxPrice || filters.sort;
+
+//     return (
+//         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+//             {/* Header Section */}
+//             <div className="bg-white shadow-sm border-b border-gray-200">
+//                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+//                     <WishlistHeader
+//                         itemCount={wishlist.length}
+//                         totalValue={calculateTotalValue()}
+//                         onRefresh={loadWishlist}
+//                         onClearAll={handleClearAll}
+//                         onViewCart={() => navigate("/user/cart")}
+//                         loading={loading}
+//                     />
+
+//                     <WishlistSearchBar
+//                         searchQuery={searchQuery}
+//                         onSearchChange={(e) => setSearchQuery(e.target.value)}
+//                         onClearSearch={() => setSearchQuery("")}
+//                         isFilterOpen={isFilterOpen}
+//                         onToggleFilter={() => setIsFilterOpen(!isFilterOpen)}
+//                         hasActiveFilters={hasActiveFilters}
+//                         tempFilters={tempFilters}
+//                         onTempFilterChange={handleTempFilterChange}
+//                         onApplyFilters={handleApplyFilters}
+//                         onClearFilters={handleClearFilters}
+//                         sortOptions={sortOptions}
+//                     />
+//                 </div>
+//             </div>
+
+//             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+//                 {/* Wishlist Grid */}
+//                 {loading ? (
+//                     <div className="flex justify-center items-center py-20">
+//                         <div className="relative">
+//                             <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-cyan-600"></div>
+//                             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+//                                 <div className="h-8 w-8 bg-gradient-to-r from-cyan-500 to-emerald-500 rounded-full"></div>
+//                             </div>
+//                         </div>
+//                     </div>
+//                 ) : filteredWishlist.length > 0 ? (
+//                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+//                         {filteredWishlist.map((item) => (
+//                             <WishlistCard
+//                                 key={item._id}
+//                                 item={item}
+//                                 onRemove={handleRemoveFromWishlist}
+//                                 onAddToCart={handleAddToCart}
+//                             />
+//                         ))}
+//                     </div>
+//                 ) : (
+//                     <WishlistEmptyState
+//                         searchQuery={searchQuery}
+//                         onClearSearch={() => setSearchQuery("")}
+//                     />
+//                 )}
+//             </div>
+//         </div>
+//     );
+// };
+
+// export default WishList;

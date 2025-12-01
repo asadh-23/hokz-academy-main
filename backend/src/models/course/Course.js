@@ -73,7 +73,7 @@ const CourseSchema = new Schema(
 
         // small helpers
         lessonsCount: { type: Number, default: 0, min: 0 },
-        durationSeconds: { type: Number, default: 0, min: 0 },
+        totalDurationSeconds: { type: Number, default: 0, min: 0 },
 
         notificationSent: { type: Boolean, default: false },
         isDeleted: { type: Boolean, default: false, index: true }, // soft delete

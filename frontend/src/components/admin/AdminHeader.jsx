@@ -4,10 +4,10 @@ import defaultProfileImage from "../../assets/images/default-profile-image.webp"
 
 const AdminHeader = () => {
   
-  const { user } = useSelector((state) => state.auth)
+  const { admin } = useSelector((state) => state.adminAuth)
 
-  const adminName = user?.fullName || "Admin";
-  const adminProfileImage = user?.profileImage || defaultProfileImage;
+  const adminName = admin?.fullName || "Admin";
+  const adminProfileImage = admin?.profileImage || defaultProfileImage;
 
   return (
     <header className="flex justify-between items-center px-6 py-3 bg-white border-b border-gray-200 h-[70px]">

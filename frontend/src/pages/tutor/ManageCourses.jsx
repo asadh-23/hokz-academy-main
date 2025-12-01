@@ -3,67 +3,75 @@ import { useNavigate } from "react-router-dom";
 import { FiSearch, FiPlus, FiEdit2, FiSettings } from "react-icons/fi";
 import { MdOutlineSchool } from "react-icons/md";
 import sampleImage from "../../assets/images/CourseImage1.jpg";
-import { tutorAxios } from "../../api/tutorAxios";
 import { toast } from "sonner";
+import { useDispatch, useSelector } from "react-redux";
+// Redux thunks and selectors
+import {
+    fetchTutorCourses,
+    toggleTutorCourseStatus,
+    selectTutorCourses,
+    selectTutorCourseStats,
+    selectTutorCourseFilters,
+    setTutorCourseFilters,
+    selectTutorCoursePagination,
+} from "../../store/features/tutor/tutorCoursesSlice";
 import Pagination from "../../components/common/Pagination";
 import StatsCards from "../../components/common/StatsCards";
+import { PageLoader } from "../../components/common/LoadingSpinner";
 
 const ManageCourses = () => {
     const navigate = useNavigate();
-    const [searchQuery, setSearchQuery] = useState("");
-    const [filterStatus, setFilterStatus] = useState("all");
-    const [courses, setCourses] = useState([]);
-    const [stats, setStats] = useState({});
-    const [loading, setLoading] = useState(true);
+    const dispatch = useDispatch();
 
-    const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 3;
-    const [totalPages, setTotalPages] = useState(1);
-    const [totalItems, setTotalItems] = useState(0);
+    const filters = useSelector(selectTutorCourseFilters);
+    const pagination = useSelector(selectTutorCoursePagination);
+    const stats = useSelector(selectTutorCourseStats);
 
-    const fetchCourses = async () => {
+    const courses = useSelector(selectTutorCourses);
+
+    const [firstLoad, setFirstLoad] = useState(true);
+
+    const loadCourses = async () => {
         try {
-            const response = await tutorAxios.get("/courses/my-courses", {
-                params: {
-                    page: currentPage,
-                    limit: itemsPerPage,
-                    search: searchQuery,
-                    status: filterStatus,
-                },
-            });
-
-            if (response.data?.success) {
-                setCourses(response.data.courses);
-                setStats(response.data.stats);
-                setTotalItems(response.data.totalItems);
-                setTotalPages(response.data.totalPages);
-            }
+            await dispatch(
+                fetchTutorCourses({
+                    page: filters.page,
+                    limit: filters.limit,
+                    search: filters.search,
+                    status: filters.status,
+                })
+            ).unwrap();
+            setFirstLoad(false);
         } catch (error) {
-            console.error("Fetch course loading error : ", error);
-            toast.error(error.response?.data?.message || "Failed to load courses");
-        } finally {
-            setLoading(false);
+            console.error("Fetch course loading error:", error);
+            toast.error(error || "Failed to load courses");
         }
     };
 
     useEffect(() => {
-        setCurrentPage(1);
-    }, [searchQuery, filterStatus]);
+        loadCourses();
+    }, [filters.page, filters.status]);
 
     useEffect(() => {
-        fetchCourses();
-    }, [currentPage, searchQuery, filterStatus]);
+        dispatch(setTutorCourseFilters({ page: 1 }));
+    }, [filters.search, filters.status]);
 
-    const handleAddCourse = () => {
-        navigate("/tutor/courses/add-course");
+    useEffect(() => {
+        const delay = setTimeout(() => {
+            loadCourses();
+        }, 500);
+        return () => clearTimeout(delay);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [filters.search]);
+
+    const handleSearchChange = (e) => {
+        dispatch(setTutorCourseFilters({ search: e.target.value }));
     };
-
-    const handleEditCourse = (courseId) => {
-        navigate(`/tutor/courses/${courseId}/edit`);
+    const handleStatusChange = (e) => {
+        dispatch(setTutorCourseFilters({ status: e.target.value }));
     };
-
-    const handleManageLessons = (courseId, title) => {
-        navigate(`/tutor/courses/${courseId}/add-lesson`, { state: { courseTitle: title } });
+    const handlePageChange = (page) => {
+        dispatch(setTutorCourseFilters({ page }));
     };
 
     const handleToggleListCourse = (courseId, courseTitle, isListed) => {
@@ -74,15 +82,17 @@ const ManageCourses = () => {
                 label: isListed ? "Unlist" : "List",
                 onClick: async () => {
                     try {
-                        const response = await tutorAxios.put(`/courses/${courseId}/toggle-list`);
+                        await dispatch(
+                            toggleTutorCourseStatus({
+                                courseId,
+                            })
+                        ).unwrap();
 
-                        if (response.data?.success) {
-                            toast.success(response.data.message || `${courseTitle} listed successfully`);
-                            fetchCourses();
-                        }
-                    } catch (error) {
-                        console.log("Failed to update course listing: ", error);
-                        toast.error(error.response?.data?.message || "Failed to update listing");
+                        toast.success(`${courseTitle} ${actionText}ed successfully`);
+                        loadCourses();
+                    } catch (err) {
+                        console.log("Failed to update course listing:", err);
+                        toast.error(err || "Failed to update listing");
                     }
                 },
             },
@@ -98,12 +108,8 @@ const ManageCourses = () => {
         console.log("Course settings:", courseId);
     };
 
-    if (loading) {
-        return (
-            <div className="min-h-screen flex items-center justify-center">
-                <p className="text-lg text-gray-600">Loading courses...</p>
-            </div>
-        );
+    if (firstLoad) {
+        return <PageLoader />;
     }
 
     return (
@@ -122,8 +128,8 @@ const ManageCourses = () => {
                                 <input
                                     type="text"
                                     placeholder="Search courses..."
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    value={filters.search}
+                                    onChange={handleSearchChange}
                                     className="pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl 
                    focus:ring-2 focus:ring-teal-500 focus:border-teal-500
                    outline-none focus:outline-none w-72 bg-white shadow-sm"
@@ -132,8 +138,8 @@ const ManageCourses = () => {
 
                             {/* Filter */}
                             <select
-                                value={filterStatus}
-                                onChange={(e) => setFilterStatus(e.target.value)}
+                                value={filters.status}
+                                onChange={handleStatusChange}
                                 className="px-5 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-teal-500 bg-white font-medium shadow-sm"
                             >
                                 <option value="all">All Courses</option>
@@ -162,7 +168,7 @@ const ManageCourses = () => {
                             key={course._id}
                             className="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-100 hover:border-teal-200 hover:-translate-y-1"
                         >
-                            {/* Course Thumbnail FIXED */}
+                            {/* Course Thumbnail */}
                             <div className="relative h-[240px] w-full overflow-hidden">
                                 <img
                                     src={course.thumbnailUrl || sampleImage}
@@ -170,7 +176,7 @@ const ManageCourses = () => {
                                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                                 />
 
-                                {/* Status Badge FIXED */}
+                                {/* Status Badge */}
                                 <span
                                     className={`absolute top-4 right-4 px-4 py-1.5 rounded-full text-xs font-bold shadow-lg backdrop-blur-sm ${
                                         course.isListed ? "bg-green-500/90 text-white" : "bg-red-500/90 text-white"
@@ -189,7 +195,7 @@ const ManageCourses = () => {
                                     {course.shortSummary || course.description}
                                 </p>
 
-                                {/* Price FIXED */}
+                                {/* Price */}
                                 <div className="flex items-center gap-3 mb-4">
                                     {/* Final Price After Discount */}
                                     <span className="text-2xl font-bold text-teal-600">
@@ -209,7 +215,7 @@ const ManageCourses = () => {
                                     )}
                                 </div>
 
-                                {/* Enrollment FIXED */}
+                                {/* Enrollment */}
                                 <div className="flex items-center gap-2 text-sm text-gray-600 mb-6 pb-6 border-b-2 border-gray-100">
                                     <MdOutlineSchool className="text-lg text-teal-600" />
                                     <span className="font-semibold">{course.enrolledCount} students enrolled</span>
@@ -220,7 +226,7 @@ const ManageCourses = () => {
                                     {/* Edit + List */}
                                     <div className="grid grid-cols-2 gap-3">
                                         <button
-                                            onClick={() => handleEditCourse(course._id)}
+                                            onClick={() => navigate(`/tutor/courses/${course._id}/edit`)}
                                             className="px-4 py-3 bg-gradient-to-r from-pink-50 to-rose-50 text-pink-600 rounded-xl text-sm font-bold hover:from-pink-100 hover:to-rose-100 transition-all flex items-center justify-center gap-2 border-2 border-pink-200 hover:border-pink-300 shadow-sm"
                                         >
                                             <FiEdit2 className="text-base" />
@@ -228,7 +234,9 @@ const ManageCourses = () => {
                                         </button>
 
                                         <button
-                                            onClick={() => handleToggleListCourse(course._id,course.title, course.isListed)}
+                                            onClick={() =>
+                                                handleToggleListCourse(course._id, course.title, course.isListed)
+                                            }
                                             className="px-4 py-3 bg-gradient-to-r from-teal-50 to-cyan-50 text-teal-600 rounded-xl text-sm font-bold hover:from-teal-100 hover:to-cyan-100 transition-all border-2 border-teal-200 hover:border-teal-300 shadow-sm"
                                         >
                                             {course.isListed ? "Unlist" : "List"}
@@ -237,7 +245,11 @@ const ManageCourses = () => {
 
                                     {/* Manage Lessons */}
                                     <button
-                                        onClick={() => handleManageLessons(course._id, course.title)}
+                                        onClick={() =>
+                                            navigate(`/tutor/courses/${course._id}/add-lesson`, {
+                                                state: { courseTitle: course.title },
+                                            })
+                                        }
                                         className="w-full px-4 py-3.5 bg-gradient-to-r from-teal-600 to-cyan-600 text-white rounded-xl text-sm font-bold hover:from-teal-700 hover:to-cyan-700 transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2"
                                     >
                                         <FiPlus className="text-lg" />
@@ -268,11 +280,11 @@ const ManageCourses = () => {
                     ))}
                 </div>
                 <Pagination
-                    currentPage={currentPage}
-                    totalPages={totalPages}
-                    totalItems={totalItems}
-                    itemsPerPage={itemsPerPage}
-                    onPageChange={(page) => setCurrentPage(page)}
+                    currentPage={pagination.currentPage}
+                    totalPages={pagination.totalPages}
+                    totalItems={pagination.totalCourses}
+                    itemsPerPage={filters.limit}
+                    onPageChange={handlePageChange}
                 />
 
                 {/* EMPTY STATE */}
@@ -287,7 +299,9 @@ const ManageCourses = () => {
                                 Start creating your first course to share your knowledge with students around the world.
                             </p>
                             <button
-                                onClick={handleAddCourse}
+                                onClick={() => {
+                                    navigate("/tutor/courses/add-course");
+                                }}
                                 className="px-8 py-4 bg-gradient-to-r from-teal-600 to-cyan-600 text-white rounded-xl font-bold hover:from-teal-700 hover:to-cyan-700 transition-all shadow-lg hover:shadow-xl inline-flex items-center gap-3 text-lg"
                             >
                                 <FiPlus className="text-xl" />

@@ -25,14 +25,11 @@ export const getAllCategories = async (req, res) => {
         }
 
         const [total, listed, unlisted, totalFiltered, categories] = await Promise.all([
-            Category.countDocuments(),                 // total
-            Category.countDocuments({ isListed: true }),  // listed
+            Category.countDocuments(), // total
+            Category.countDocuments({ isListed: true }), // listed
             Category.countDocuments({ isListed: false }), // unlisted
-            Category.countDocuments(filter),              // filtered count
-            Category.find(filter)
-                .sort({ createdAt: -1 })
-                .skip(skip)
-                .limit(limit),
+            Category.countDocuments(filter), // filtered count
+            Category.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit),
         ]);
 
         return res.status(200).json({
@@ -41,13 +38,13 @@ export const getAllCategories = async (req, res) => {
             pagination: {
                 currentPage: page,
                 totalPages: Math.ceil(totalFiltered / limit),
-                totalFilteredItems: totalFiltered,
+                totalFilteredCategories: totalFiltered,
             },
             stats: {
                 total,
                 listed,
                 unlisted,
-            }
+            },
         });
     } catch (error) {
         console.error("Error fetching categories:", error);
@@ -57,7 +54,6 @@ export const getAllCategories = async (req, res) => {
         });
     }
 };
-
 
 export const createCategory = async (req, res) => {
     try {
@@ -166,11 +162,13 @@ export const updateCategory = async (req, res) => {
     }
 };
 
-export const unlistCategory = async (req, res) => {
+export const toggleListCategory = async (req, res) => {
     try {
         const categoryId = req.params.id;
 
+        // Find category
         const category = await Category.findById(categoryId);
+
         if (!category) {
             return res.status(404).json({
                 success: false,
@@ -178,58 +176,18 @@ export const unlistCategory = async (req, res) => {
             });
         }
 
-        if (!category.isListed) {
-            return res.status(400).json({
-                success: false,
-                message: "Category is already unlisted",
-            });
-        }
-
-        await Category.findByIdAndUpdate(categoryId, { isListed: false });
+        // Toggle the value
+        category.isListed = !category.isListed;
+        await category.save();
 
         return res.status(200).json({
             success: true,
-            message: `${category.name} has been unlisted`,
         });
     } catch (error) {
-        console.error("Error unlisting category:", error);
+        console.error("Error toggling category:", error);
         return res.status(500).json({
             success: false,
-            message: "Error unlisting category",
-        });
-    }
-};
-
-export const listCategory = async (req, res) => {
-    try {
-        const categoryId = req.params.id;
-
-        const category = await Category.findById(categoryId);
-        if (!category) {
-            return res.status(404).json({
-                success: false,
-                message: "Category not found",
-            });
-        }
-
-        if (category.isListed) {
-            return res.status(400).json({
-                success: false,
-                message: "Category is already listed",
-            });
-        }
-
-        await Category.findByIdAndUpdate(categoryId, { isListed: true });
-
-        return res.status(200).json({
-            success: true,
-            message: `${category.name} has been listed`,
-        });
-    } catch (error) {
-        console.error("Error listing category:", error);
-        return res.status(500).json({
-            success: false,
-            message: "Error listing category",
+            message: "Error toggling category",
         });
     }
 };

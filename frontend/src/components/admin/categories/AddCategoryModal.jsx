@@ -1,9 +1,13 @@
 import { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { toast } from "sonner";
-import { adminAxios } from "../../../api/adminAxios";
+import { createAdminCategory } from "../../../store/features/admin/adminCategorySlice";
 import { isNullOrWhitespace } from "../../../utils/validation";
 
 const AddCategoryModal = ({ isOpen, onClose, onSuccess }) => {
+    const dispatch = useDispatch();
+    const { loading } = useSelector((state) => state.adminCategories);
+    
     const [formData, setFormData] = useState({
         name: "",
         description: "",
@@ -44,17 +48,13 @@ const AddCategoryModal = ({ isOpen, onClose, onSuccess }) => {
         };
 
         try {
-            const response = await adminAxios.post("/categories", payload);
-
-            if (response.data?.success) {
-                toast.success(response.data?.message || "Category added successfully");
-                setFormData({ name: "", description: "" });
-                onSuccess();
-                onClose();
-            }
+            await dispatch(createAdminCategory(payload)).unwrap();
+            toast.success("Category added successfully");
+            setFormData({ name: "", description: "" });
+            onSuccess();
+            onClose();
         } catch (error) {
-            console.error("Failed to add category:", error);
-            toast.error(error.response?.data?.message || "Failed to add category");
+            toast.error(error?.message || "Failed to add category");
         }
     };
 
@@ -109,9 +109,10 @@ const AddCategoryModal = ({ isOpen, onClose, onSuccess }) => {
                         </button>
                         <button
                             type="submit"
-                            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                            disabled={loading}
+                            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            Add Category
+                            {loading ? "Adding..." : "Add Category"}
                         </button>
                     </div>
                 </form>

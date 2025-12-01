@@ -1,15 +1,20 @@
-import React from 'react';
 import { useSelector } from 'react-redux';
 import { Navigate, Outlet } from 'react-router-dom';
 
 const TutorPublicRoute = () => {
-  const { isAuthenticated, role } = useSelector((state) => state.auth);
+  const { isAuthenticated, token, loading } = useSelector((state) => state.tutorAuth);
 
-  if (isAuthenticated && role === 'tutor') {
-    return <Navigate to= "/tutor/dashboard" replace />;
-  } else {
-    return <Outlet />;
+  // Wait for auth state to be determined
+  if (loading) {
+    return null;
   }
+
+  // If authenticated with valid token, redirect to dashboard
+  if (isAuthenticated && token) {
+    return <Navigate to="/tutor/dashboard" replace />;
+  }
+  
+  return <Outlet />;
 };
 
 export default TutorPublicRoute;

@@ -1,11 +1,16 @@
 import { useNavigate } from "react-router-dom";
 
-const CategoryItem = ({ category, onEdit, onList, onUnlist }) => {
+const CategoryItem = ({ category, onEdit, onToggleList }) => {
     const navigate = useNavigate();
 
     const handleViewCategory = () => {
         navigate(`/admin/category/${category._id}`);
     };
+
+    const handleToggle = () => {
+        onToggleList(category._id, category.name, category.isListed);
+    };
+
     return (
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow">
             <div className="flex justify-between items-start">
@@ -40,21 +45,16 @@ const CategoryItem = ({ category, onEdit, onList, onUnlist }) => {
                         Edit
                     </button>
 
-                    {category.isListed ? (
-                        <button
-                            onClick={() => onUnlist(category._id, category.name)}
-                            className="bg-red-100 text-red-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-200 transition-colors"
-                        >
-                            Unlist
-                        </button>
-                    ) : (
-                        <button
-                            onClick={() => onList(category._id)}
-                            className="bg-green-100 text-green-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-200 transition-colors"
-                        >
-                            List
-                        </button>
-                    )}
+                    <button
+                        onClick={handleToggle}
+                        className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                            category.isListed
+                                ? "bg-red-100 text-red-700 hover:bg-red-200"
+                                : "bg-green-100 text-green-700 hover:bg-green-200"
+                        }`}
+                    >
+                        {category.isListed ? "Unlist" : "List"}
+                    </button>
 
                     <button 
                         onClick={handleViewCategory}

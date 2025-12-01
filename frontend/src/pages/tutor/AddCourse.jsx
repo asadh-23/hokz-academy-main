@@ -1,12 +1,27 @@
 import { useState, useRef, useEffect } from "react";
 import { toast } from "sonner";
-import { tutorAxios } from "../../api/tutorAxios";
 import { ButtonLoader } from "../../components/common/LoadingSpinner";
 import { isNullOrWhitespace } from "../../utils/validation";
 import { useNavigate } from "react-router-dom";
 import { FiImage, FiEdit2 } from "react-icons/fi";
+import { useDispatch, useSelector } from "react-redux";
+// Redux thunks and selectors
+import {
+    createTutorCourse,
+    uploadTutorCourseThumbnail,
+    selectTutorCourseCreating,
+    selectTutorThumbnailUploading,
+} from "../../store/features/tutor/tutorCoursesSlice";
+import {
+    fetchTutorCategories,
+    selectTutorCategories,
+    selectTutorCategoryLoading,
+} from "../../store/features/tutor/tutorCategorySlice";
 
 const AddCourse = () => {
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
+
     const [formData, setFormData] = useState({
         title: "",
         category: "",
@@ -17,26 +32,18 @@ const AddCourse = () => {
         thumbnailKey: null,
     });
 
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const [categories, setCategories] = useState([]);
     const fileInputRef = useRef(null);
 
-    const navigate = useNavigate();
+    // Redux selectors
+    const categories = useSelector(selectTutorCategories);
+    const categoriesLoading = useSelector(selectTutorCategoryLoading);
+    const isSubmitting = useSelector(selectTutorCourseCreating);
+    const isUploadingThumbnail = useSelector(selectTutorThumbnailUploading);
 
-    // Fetch categories on mount
+    // Fetch categories on mount using Redux thunk
     useEffect(() => {
-        const fetchCategories = async () => {
-            try {
-                const response = await tutorAxios.get("/categories");
-                if (response.data?.success) {
-                    setCategories(response.data.categories || []);
-                }
-            } catch (error) {
-                console.error("Failed to fetch categories:", error);
-            }
-        };
-        fetchCategories();
-    }, []);
+        dispatch(fetchTutorCategories());
+    }, [dispatch]);
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -64,26 +71,20 @@ const AddCourse = () => {
             return;
         }
 
-        // Preview using Blob URL (BEST METHOD)
+        // Preview using Blob URL
         setFormData((prev) => ({
             ...prev,
             thumbnailUrl: URL.createObjectURL(file),
         }));
 
-        // Upload to backend
+        // Upload to backend using Redux thunk
         const fd = new FormData();
         fd.append("file", file);
 
         try {
-            const response = await tutorAxios.post("/courses/upload-thumbnail", fd, {
-                headers: { "Content-Type": "multipart/form-data" },
-            });
+            const result = await dispatch(uploadTutorCourseThumbnail(fd)).unwrap();
 
-            if (!response.data?.success) {
-                return toast.error("Thumbnail upload failed");
-            }
-
-            const { fileUrl, fileKey } = response.data;
+            const { fileUrl, fileKey } = result;
 
             setFormData((prev) => ({
                 ...prev,
@@ -94,7 +95,7 @@ const AddCourse = () => {
             toast.success("Thumbnail uploaded successfully");
         } catch (error) {
             console.error("Thumbnail upload error:", error);
-            toast.error("Failed to upload thumbnail");
+            toast.error(error || "Failed to upload thumbnail");
         }
     };
 
@@ -120,10 +121,7 @@ const AddCourse = () => {
             return toast.error("Please enter a valid discount percentage (0–100)");
         }
 
-        setIsSubmitting(true);
-
         try {
-            // We no longer send the file — only metadata now
             const payload = {
                 title: title.trim(),
                 category,
@@ -134,29 +132,26 @@ const AddCourse = () => {
                 thumbnailKey,
             };
 
-            const response = await tutorAxios.post("/courses", payload);
+            // Dispatch Redux thunk instead of direct axios call
+            const courseId = await dispatch(createTutorCourse(payload)).unwrap();
 
-            if (response.data?.success) {
-                toast.success(response.data.message || "Course created successfully");
+            toast.success("Course created successfully");
 
-                setFormData({
-                    title: "",
-                    category: "",
-                    regularPrice: "",
-                    offerPercentage: "0",
-                    description: "",
-                    thumbnailUrl: null,
-                    thumbnailKey: null,
-                });
-                if (fileInputRef.current) fileInputRef.current.value = "";
+            setFormData({
+                title: "",
+                category: "",
+                regularPrice: "",
+                offerPercentage: "0",
+                description: "",
+                thumbnailUrl: null,
+                thumbnailKey: null,
+            });
+            if (fileInputRef.current) fileInputRef.current.value = "";
 
-                navigate(`/tutor/courses/${response.data.courseId}/add-lesson`, { state: { courseTitle: title } });
-            }
+            navigate(`/tutor/courses/${courseId}/add-lesson`, { state: { courseTitle: payload.title } });
         } catch (error) {
             console.error("Failed to create course:", error);
-            toast.error(error.response?.data?.message || "Failed to create course");
-        } finally {
-            setIsSubmitting(false);
+            toast.error(error || "Failed to create course");
         }
     };
 
@@ -198,9 +193,11 @@ const AddCourse = () => {
                                 value={formData.category}
                                 onChange={handleInputChange}
                                 className="w-full px-4 py-3 bg-emerald-50 border border-emerald-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
-                                disabled={isSubmitting}
+                                disabled={isSubmitting || categoriesLoading}
                             >
-                                <option value="">Select a category</option>
+                                <option value="">
+                                    {categoriesLoading ? "Loading categories..." : "Select a category"}
+                                </option>
                                 {categories.map((cat) => (
                                     <option key={cat._id} value={cat._id}>
                                         {cat.name}
@@ -271,14 +268,24 @@ const AddCourse = () => {
                                             }}
                                             className="absolute top-2 right-2 bg-white/90 hover:bg-white p-2 rounded-full shadow-md"
                                             title="Change thumbnail"
+                                            disabled={isUploadingThumbnail}
                                         >
                                             <FiEdit2 className="text-teal-600" />
                                         </button>
+
+                                        {/* Upload indicator */}
+                                        {isUploadingThumbnail && (
+                                            <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                                                <div className="text-white text-sm font-medium">Uploading...</div>
+                                            </div>
+                                        )}
                                     </div>
                                 ) : (
                                     <div className="p-6 flex flex-col items-center justify-center h-full">
                                         <FiImage className="w-12 h-12 text-gray-400 mb-2" />
-                                        <p className="text-gray-600 font-medium">Upload Thumbnail</p>
+                                        <p className="text-gray-600 font-medium">
+                                            {isUploadingThumbnail ? "Uploading..." : "Upload Thumbnail"}
+                                        </p>
                                     </div>
                                 )}
                             </div>
@@ -290,10 +297,11 @@ const AddCourse = () => {
                                 accept="image/*"
                                 className="hidden"
                                 onChange={handleImageChange}
+                                disabled={isUploadingThumbnail}
                             />
 
                             <p className="text-gray-400 text-sm text-center py-2">
-                                {formData.thumbnail ? formData.thumbnail.name : "Click anywhere to upload"}
+                                {isUploadingThumbnail ? "Uploading..." : "Click anywhere to upload"}
                             </p>
                         </div>
 
@@ -319,9 +327,9 @@ const AddCourse = () => {
                 <div className="mt-8 flex justify-center">
                     <button
                         type="submit"
-                        disabled={isSubmitting}
+                        disabled={isSubmitting || isUploadingThumbnail}
                         className={`px-12 py-3 bg-gradient-to-r from-cyan-500 to-teal-600 text-white font-semibold rounded-lg shadow-lg transition-all transform ${
-                            isSubmitting
+                            isSubmitting || isUploadingThumbnail
                                 ? "opacity-50 cursor-not-allowed"
                                 : "hover:from-cyan-600 hover:to-teal-700 hover:scale-105 hover:shadow-xl"
                         }`}

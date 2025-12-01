@@ -1,26 +1,28 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { User, BookOpen, ShoppingBag, Heart, ShoppingCart, Award, LogOut, ChevronRight } from "lucide-react";
-import { logoutSuccess } from "../../store/features/auth/authSlice";
+
+import { logoutUser, selectUser } from "../../store/features/auth/userAuthSlice";
+
 import defaultProfileImage from "../../assets/images/default-profile-image.webp";
 
 const UserSidebar = ({ isOpen, onClose }) => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
-    const { user } = useSelector((state) => state.auth);
+
+    // ✅ New selector
+    const user = useSelector(selectUser);
 
     const userName = user?.fullName || "Student";
     const userEmail = user?.email || "";
     const userProfileImage = user?.profileImage || defaultProfileImage;
 
-    const handleLogout = () => {
-        dispatch(logoutSuccess());
-        navigate("/user/login");
-    };
+    const handleLogout = async () => {
+        const result = await dispatch(logoutUser());
 
-    const handleNavigation = (path) => {
-        navigate(path);
-        onClose();
+        if (logoutUser.fulfilled.match(result)) {
+            navigate("/user/login", { replace: true });
+        }
     };
 
     const menuItems = [
@@ -73,7 +75,7 @@ const UserSidebar = ({ isOpen, onClose }) => {
             className={`fixed top-16 left-0 h-[calc(100vh-4rem)] bg-gradient-to-b from-white to-gray-50 
                  border-r border-gray-200 z-40 shadow-xl
                  w-72 flex flex-col transition-transform duration-300 ease-in-out
-                 ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}
+                 ${isOpen ? "translate-x-0" : "-translate-x-full"}`}
         >
             {/* User Profile Section */}
             <div className="p-6 border-b border-gray-200 bg-gradient-to-r from-teal-500 to-cyan-600">
@@ -86,6 +88,7 @@ const UserSidebar = ({ isOpen, onClose }) => {
                         />
                         <div className="absolute bottom-0 right-0 w-4 h-4 bg-green-500 border-2 border-white rounded-full"></div>
                     </div>
+
                     <div className="flex-1 min-w-0">
                         <h3 className="text-white font-bold text-lg truncate">{userName}</h3>
                         <p className="text-teal-100 text-sm truncate">{userEmail}</p>
@@ -95,9 +98,8 @@ const UserSidebar = ({ isOpen, onClose }) => {
 
             {/* Menu Items */}
             <nav className="flex-1 overflow-y-auto p-4">
-                <div className="mb-2">
-                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider px-3 mb-3">Navigation</p>
-                </div>
+                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider px-3 mb-3">Navigation</p>
+
                 <ul className="space-y-1">
                     {menuItems.map((item) => {
                         const Icon = item.icon;
@@ -105,7 +107,7 @@ const UserSidebar = ({ isOpen, onClose }) => {
                             <li key={item.path}>
                                 <NavLink
                                     to={item.path}
-                                    onClick={() => onClose()}
+                                    onClick={onClose}
                                     className={({ isActive }) =>
                                         `group flex items-center justify-between px-4 py-3.5 rounded-xl transition-all duration-200 ${
                                             isActive
@@ -126,6 +128,7 @@ const UserSidebar = ({ isOpen, onClose }) => {
                                                 </div>
                                                 <span className="font-medium">{item.name}</span>
                                             </div>
+
                                             <ChevronRight
                                                 className={`w-4 h-4 transition-transform ${
                                                     isActive ? "text-white" : "text-gray-400 group-hover:translate-x-1"
@@ -152,6 +155,7 @@ const UserSidebar = ({ isOpen, onClose }) => {
                         </div>
                         <span>Logout</span>
                     </div>
+
                     <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </button>
             </div>

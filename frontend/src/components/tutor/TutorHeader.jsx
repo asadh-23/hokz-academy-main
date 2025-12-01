@@ -1,13 +1,12 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
 import defaultProfileImage from "../../assets/images/default-profile-image.webp"
-
+import { selectTutor } from '../../store/features/auth/tutorAuthSlice';
 const TutorHeader = () => {
   
-  const { user } = useSelector((state) => state.auth)
+  const tutor = useSelector(selectTutor)
 
-  const tutorName = user?.fullName || "Tutor";
-  const tutorProfileImage = user?.profileImage || defaultProfileImage;
+  const tutorProfileImage = tutor?.profileImage || defaultProfileImage;
 
   return (
     <header className="flex justify-between items-center px-8 py-4 bg-white border-b border-gray-200 h-[70px]">

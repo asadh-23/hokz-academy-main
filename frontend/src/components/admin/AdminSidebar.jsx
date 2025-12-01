@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { toast } from "sonner";
 import { authAxios } from "../../api/authAxios";
 import { useDispatch, useSelector } from "react-redux";
-import { logoutSuccess } from "../../store/features/auth/authSlice";
+import { clearAdminAuthState, logoutAdmin } from "../../store/features/auth/adminAuthSlice";
 import defaultProfileImage from "../../assets/images/default-profile-image.webp"
 
 const AdminSidebar = () => {
@@ -12,28 +12,28 @@ const AdminSidebar = () => {
     const dispatch = useDispatch();
 
     const [showConfirm, setShowConfirm] = useState(false);
-    const { user } = useSelector((state) => state.auth);
+    const { admin } = useSelector((state) => state.adminAuth);
 
     const handleLogout = async () => {
         try {
-            await authAxios.post("/auth/logout");
+            await dispatch(logoutAdmin()).unwrap();
+            toast.success("Logout successfully");
+            dispatch(clearAdminAuthState());
+            navigate("/admin/login", { replace: true });
         } catch (error) {
             console.error("Logout failed:", error);
-        } finally {
-            toast.success("Logout successfully");
-            dispatch(logoutSuccess());
-            navigate("/admin/login", { replace: true });
+            toast.error("Logout failed");
         }
     };
 
-    const adminName = user?.fullName || "Admin";
-    const adminProfileImage = user?.profileImage || defaultProfileImage;
+    const adminName = admin?.fullName || "Admin";
+    const adminProfileImage = admin?.profileImage || defaultProfileImage;
 
     const menuItems = [
         { name: "Dashboard", icon: "📊", path: "/admin/dashboard" },
         { name: "Profile", icon: "👤", path: "/admin/profile" },
-        { name: "Category", icon: "📂", path: "/admin/category" },
-        { name: "Students", icon: "🎓", path: "/admin/students" },
+        { name: "Category", icon: "📂", path: "/admin/categories" },
+        { name: "Students", icon: "🎓", path: "/admin/users" },
         { name: "Tutors", icon: "👨‍🏫", path: "/admin/tutors" },
         { name: "Orders", icon: "📋", path: "/admin/orders" },
         { name: "Coupon", icon: "🎫", path: "/admin/coupon" },

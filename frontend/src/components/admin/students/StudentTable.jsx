@@ -1,7 +1,7 @@
 import React from "react";
 import StudentRow from "./StudentRow";
 
-const StudentTable = ({ students, onBlockStudent, onUnblockStudent }) => {
+const StudentTable = ({ students, onToggleBlock }) => {
     return (
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
             <div className="overflow-x-auto">
@@ -32,8 +32,7 @@ const StudentTable = ({ students, onBlockStudent, onUnblockStudent }) => {
                                 <StudentRow
                                     key={student._id}
                                     student={student}
-                                    onBlockStudent={onBlockStudent}
-                                    onUnblockStudent={onUnblockStudent}
+                                    onToggleBlock={onToggleBlock}
                                 />
                             ))
                         ) : (

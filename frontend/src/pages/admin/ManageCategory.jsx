@@ -1,7 +1,17 @@
 import { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { PageLoader } from "../../components/common/LoadingSpinner";
 import { toast } from "sonner";
-import { adminAxios } from "../../api/adminAxios";
+import {
+    fetchAdminCategories,
+    toggleListAdminCategory,
+    selectAdminCategories,
+    selectAdminCategoryStats,
+    selectAdminCategoryPagination,
+    selectAdminCategoryFilters,
+    setAdminCategoryFilters,
+    resetAdminCategoryFilters,
+} from "../../store/features/admin/adminCategorySlice";
 import AddCategoryModal from "../../components/admin/categories/AddCategoryModal";
 import EditCategoryModal from "../../components/admin/categories/EditCategoryModal";
 import CategoryList from "../../components/admin/Categories/CategoryList";
@@ -9,81 +19,70 @@ import StatsCards from "../../components/common/StatsCards";
 import Pagination from "../../components/common/Pagination";
 
 const ManageCategory = () => {
-    // -------------------- STATE --------------------
-    const [categories, setCategories] = useState([]);
-    const [isLoading, setIsLoading] = useState(true);
+    // -------------------- REDUX --------------------
+    const dispatch = useDispatch();
+    const categories = useSelector(selectAdminCategories);
+    const stats = useSelector(selectAdminCategoryStats);
+    const pagination = useSelector(selectAdminCategoryPagination);
+    const filters = useSelector(selectAdminCategoryFilters);
 
-    const [searchTerm, setSearchTerm] = useState("");
-    const [filterStatus, setFilterStatus] = useState("All Categories");
 
-    const [currentPage, setCurrentPage] = useState(1);
-    const categoriesPerPage = 3;
-
-    const [pagination, setPagination] = useState({
-        currentPage: 1,
-        totalPages: 1,
-        totalFilteredItems: 0,
-    });
-
-    const [stats, setStats] = useState({
-        total: 0,
-        listed: 0,
-        unlisted: 0,
-    });
-
+    const [firstLoad, setFirstLoad] = useState(true);
+    // -------------------- LOCAL STATE --------------------
     const [showAddModal, setShowAddModal] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState(null);
 
     // -------------------- FETCH CATEGORIES --------------------
-    const fetchCategories = async (showLoader = false) => {
-        if (showLoader) setIsLoading(true);
-
+    const fetchCategories = async () => {
         try {
-            const response = await adminAxios.get("/categories", {
-                params: {
-                    page: currentPage,
-                    limit: categoriesPerPage,
-                    search: searchTerm,
-                    status: filterStatus === "All Categories" ? "" : filterStatus,
-                },
-            });
-
-            if (response.data?.success) {
-                setCategories(response.data.categories);
-                setPagination(response.data.pagination);
-                setStats(response.data.stats);
-            }
+            await dispatch(
+                fetchAdminCategories({
+                    page: filters.page,
+                    limit: filters.limit,
+                    search: filters.search,
+                    status: filters.status,
+                })
+            ).unwrap();
+            setFirstLoad(false);
         } catch (error) {
-            toast.error(error.response?.data?.message || "Failed to load categories");
-        } finally {
-            if (showLoader) setIsLoading(false);
+            toast.error(error?.message || "Failed to load categories");
         }
     };
 
     // -------------------- EFFECTS --------------------
     useEffect(() => {
-        fetchCategories(true); // initial load
-    }, []);
-
-    useEffect(() => {
         fetchCategories();
-    }, [currentPage, filterStatus, searchTerm]);
+    }, [filters.page, filters.status]);
 
     // Reset page when search or filter changes
     useEffect(() => {
-        setCurrentPage(1);
-    }, [searchTerm, filterStatus]);
+        dispatch(setAdminCategoryFilters({ page: 1 }));
+    }, [filters.search, filters.status]);
+
+    useEffect(() => {
+        const delay = setTimeout(() => {
+            fetchCategories();
+        }, 500);
+        return () => clearTimeout(delay);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [filters.search]);
 
     // -------------------- HANDLERS --------------------
-    const handleSearch = (e) => setSearchTerm(e.target.value);
-    const handleFilterChange = (e) => setFilterStatus(e.target.value);
+    const handleSearch = (e) => {
+        dispatch(setAdminCategoryFilters({ search: e.target.value }));
+    };
+
+    const handleFilterChange = (e) => {
+        dispatch(setAdminCategoryFilters({ status: e.target.value }));
+    };
 
     const handleRefresh = () => {
-        setSearchTerm("");
-        setFilterStatus("All Categories");
-        setCurrentPage(1);
-        fetchCategories(true);
+        dispatch(resetAdminCategoryFilters());
+    };
+
+    const handlePageChange = (page) => {
+        dispatch(setAdminCategoryFilters({ page }));
     };
 
     // -------------------- MODAL HANDLERS --------------------
@@ -102,43 +101,24 @@ const ManageCategory = () => {
     };
 
     const handleModalSuccess = () => {
-        fetchCategories(true);
+        fetchCategories();
     };
 
-    // -------------------- LIST / UNLIST --------------------
-    const handleListCategory = async (categoryId) => {
-        const category = categories.find((c) => c._id === categoryId);
-        const categoryName = category?.name || "this category";
+    // -------------------- TOGGLE LIST / UNLIST --------------------
+    const handleToggleListCategory = async (categoryId, categoryName, isListed) => {
+        const actionText = isListed ? "Unlist" : "List";
 
-        try {
-            const response = await adminAxios.patch(`/categories/${categoryId}/list`);
-
-            if (response.data?.success) {
-                toast.success(response.data?.message || `${categoryName} listed successfully`);
-                fetchCategories();
-            }
-        } catch (error) {
-            console.log("Failed to list category : ", error);
-            toast.error(error.response?.data?.message || "Failed to list category");
-        }
-    };
-
-    const handleUnlistCategory = async (categoryId, categoryName) => {
-        
-        toast.warning(`Are you sure you want to unlist ${categoryName}?`, {
+        toast.warning(`Are you sure you want to ${actionText} ${categoryName}?`, {
             action: {
-                label: "Unlist",
+                label: actionText,
                 onClick: async () => {
                     try {
-                        const response = await adminAxios.patch(`/categories/${categoryId}/unlist`);
-
-                        if (response.data?.success) {
-                            toast.success(response.data?.message || `${categoryName} has been unlisted`);
-                            fetchCategories();
-                        }
+                        const result = await dispatch(toggleListAdminCategory(categoryId)).unwrap();
+                        toast.success(result?.message || `${categoryName} has been ${actionText}ed successfully`);
+                        fetchCategories();
                     } catch (error) {
-                        console.log("Failed to unlist category : ", error);
-                        toast.error(error.response?.data?.message || "Failed to unlist category");
+                        console.error(`Failed to ${actionText} category:`, error);
+                        toast.error(error?.message || `Failed to ${actionText.toLowerCase()} category`);
                     }
                 },
             },
@@ -147,7 +127,7 @@ const ManageCategory = () => {
     };
 
     // -------------------- RENDER --------------------
-    if (isLoading) {
+    if (firstLoad) {
         return (
             <div className="flex flex-col min-h-screen bg-gray-50">
                 <div className="flex flex-1">
@@ -180,7 +160,7 @@ const ManageCategory = () => {
                                 <h2 className="text-lg font-semibold text-gray-800">List of Categories</h2>
 
                                 <select
-                                    value={filterStatus}
+                                    value={filters.status}
                                     onChange={handleFilterChange}
                                     className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500"
                                 >
@@ -196,7 +176,7 @@ const ManageCategory = () => {
                                     <input
                                         type="text"
                                         placeholder="Search categories..."
-                                        value={searchTerm}
+                                        value={filters.search}
                                         onChange={handleSearch}
                                         className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 w-64"
                                     />
@@ -247,17 +227,17 @@ const ManageCategory = () => {
                     <CategoryList
                         categories={categories}
                         onEdit={handleEditClick}
-                        onList={handleListCategory}
-                        onUnlist={handleUnlistCategory}
+                        onToggleList={handleToggleListCategory}
                     />
 
                     {/* Pagination */}
                     <Pagination
                         currentPage={pagination.currentPage}
                         totalPages={pagination.totalPages}
-                        totalItems={pagination.totalFilteredItems}
-                        itemsPerPage={categoriesPerPage}
-                        onPageChange={setCurrentPage}
+                        totalItems={pagination.totalFilteredCategories}
+                        itemsPerPage={filters.limit}
+                        onPageChange={handlePageChange}
+                        label="Categories"
                     />
                 </div>
             </div>

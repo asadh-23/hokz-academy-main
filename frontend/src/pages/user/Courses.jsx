@@ -1,239 +1,302 @@
-import { useState, useEffect } from "react";
-import { Search, Star, Filter, SlidersHorizontal, Heart } from "lucide-react";
-import { userAxios } from "../../api/userAxios";
+import { useState, useEffect, useRef } from "react";
+import { Search, Star, SlidersHorizontal, Heart, X, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
+import { useDispatch, useSelector } from "react-redux";
+import {
+    fetchUserCourses,
+    fetchUserListedCategories,
+    setUserCourseFilters,
+    clearUserCourseFilters,
+    selectUserCourses,
+    selectUserCategories,
+    selectUserCourseFilters,
+    selectUserCoursePagination,
+    selectUserCoursesLoading,
+} from "../../store/features/user/userCoursesSlice";
+// import {
+//     toggleUserWishlist,
+//     fetchUserWishlist,
+//     selectUserWishlist,
+// } from "../../store/features/user/userWishlistSlice";
+import Pagination from "../../components/common/Pagination";
+import { Link } from "react-router-dom";
 
 const Courses = () => {
-    // --- State ---
-    const [courses, setCourses] = useState([]);
-    const [categories, setCategories] = useState([]);
+    const dispatch = useDispatch();
+    const filterDropdownRef = useRef(null);
 
-    const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
+    // Redux selectors
+    const courses = useSelector(selectUserCourses);
+    const categories = useSelector(selectUserCategories);
+    const filters = useSelector(selectUserCourseFilters);
+    const pagination = useSelector(selectUserCoursePagination);
+    const loading = useSelector(selectUserCoursesLoading);
+    // const wishlist = useSelector(selectUserWishlist);
+    const [isFilterOpen, setIsFilterOpen] = useState(false);
+    const [tempFilters, setTempFilters] = useState({
+        minPrice: "",
+        maxPrice: "",
+        sort: "",
+    });
 
-    // Filter States
-    const [searchQuery, setSearchQuery] = useState("");
-    const [selectedCategory, setSelectedCategory] = useState("All");
-    const [sortOption, setSortOption] = useState(""); // 'newest', 'oldest', 'low-high', 'high-low'
-    const [minPrice, setMinPrice] = useState("");
-    const [maxPrice, setMaxPrice] = useState("");
+    // Fetch categories and wishlist on mount
+    useEffect(() => {
+        dispatch(fetchUserListedCategories());
+        // dispatch(fetchUserWishlist());
+    }, [dispatch]);
 
-    const fetchCourses = async () => {
-        try {
-            const response = await userAxios.get("/courses", {
-                params: {
-                    search: searchQuery,
-                    category: selectedCategory === "All" ? "" : selectedCategory,
-                    sort: sortOption,
-                    minPrice,
-                    maxPrice,
-                },
-            });
+    // Fetch courses when filters change
+    useEffect(() => {
+        const fetchCourses = async () => {
+            const params = {
+                search: filters.search,
+                category: filters.category,
+                sort: filters.sort,
+                minPrice: filters.minPrice,
+                maxPrice: filters.maxPrice,
+                page: filters.page,
+                limit: filters.limit,
+            };
 
-            if (response.data.success) {
-                setCourses(response.data.courses);
+            try {
+                await dispatch(fetchUserCourses(params)).unwrap();
+            } catch (error) {
+                toast.error(error || "Failed to load courses");
             }
-        } catch (error) {
-            console.log("Failed to load courses", error);
-            toast.error("Failed to load courses");
-        }
-    };
+        };
 
-    useEffect(() => {
         fetchCourses();
-    }, [searchQuery, selectedCategory]);
+    }, [dispatch, filters]);
 
-    const fetchCategories = async () => {
-        try {
-            const response = await userAxios.get("/categories/listed");
-            if (response.data?.success) setCategories(response.data.categories);
-        } catch (error) {
-            console.log("Failed to load categories", error);
-            toast.error("Failed to load categories");
-        }
-    };
-
+    // Close dropdown when clicking outside
     useEffect(() => {
-        fetchCategories();
+        const handleClickOutside = (event) => {
+            if (filterDropdownRef.current && !filterDropdownRef.current.contains(event.target)) {
+                setIsFilterOpen(false);
+            }
+        };
+
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
-    // --- Logic ---
+    // Sync temp filters with Redux filters
+    useEffect(() => {
+        setTempFilters({
+            minPrice: filters.minPrice,
+            maxPrice: filters.maxPrice,
+            sort: filters.sort,
+        });
+    }, [filters]);
+
+    const handleSearchChange = (e) => {
+        dispatch(setUserCourseFilters({ search: e.target.value }));
+    };
+
+    const handleCategoryClick = (categoryId) => {
+        dispatch(setUserCourseFilters({ category: categoryId }));
+    };
+
+    const handleTempFilterChange = (field, value) => {
+        setTempFilters((prev) => ({ ...prev, [field]: value }));
+    };
+
     const handleApplyFilters = () => {
-        fetchCourses();
-        setIsMobileFilterOpen(false);
+        dispatch(setUserCourseFilters(tempFilters));
+        setIsFilterOpen(false);
     };
 
     const handleClearFilters = () => {
-        setSearchQuery("");
-        setSelectedCategory("All");
-        setSortOption("");
-        setMinPrice("");
-        setMaxPrice("");
-        fetchCourses(); // reset fetch
+        dispatch(clearUserCourseFilters());
+        setTempFilters({ minPrice: "", maxPrice: "", sort: "" });
+        setIsFilterOpen(false);
     };
 
+    const handlePageChange = (page) => {
+        dispatch(setUserCourseFilters({ page }));
+    };
+
+    const handleToggleWishlist = async (courseId) => {
+        // try {
+        //     const result = await dispatch(toggleUserWishlist(courseId)).unwrap();
+        //     if (result.action === "added") {
+        //         toast.success("Added to wishlist");
+        //     } else {
+        //         toast.success("Removed from wishlist");
+        //     }
+        // } catch (error) {
+        //     toast.error(error || "Failed to update wishlist");
+        // }
+    };
+
+    // const isInWishlist = (courseId) => {
+    //     return wishlist.some((item) => item.course?._id === courseId);
+    // };
+
+    const sortOptions = [
+        { value: "", label: "Default" },
+        { value: "newest", label: "Newest First" },
+        { value: "oldest", label: "Oldest First" },
+        { value: "low-high", label: "Price: Low to High" },
+        { value: "high-low", label: "Price: High to Low" },
+    ];
+
+    const hasActiveFilters = filters.minPrice || filters.maxPrice || filters.sort;
+
     return (
-        <div className="min-h-screen bg-gray-50 font-sans text-gray-800">
-            {/* --- Header Section --- */}
-            <div className="bg-white border-b border-gray-200 py-8 px-4 sm:px-6 lg:px-8">
-                <div className="max-w-7xl mx-auto">
+        <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+            {/* Header Section */}
+            <div className="bg-white shadow-sm border-b border-gray-200">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
                     <div className="mb-6">
-                        <h1 className="text-4xl font-bold text-gray-900 mb-2">All Courses</h1>
-                        <p className="text-gray-600">Discover amazing courses from expert tutors</p>
+                        <h1 className="text-4xl font-bold bg-gradient-to-r from-cyan-600 to-emerald-600 bg-clip-text text-transparent mb-2">
+                            Discover Courses
+                        </h1>
+                        <p className="text-gray-600">Learn from expert tutors and advance your skills</p>
                     </div>
 
-                    {/* Search and Filter Bar */}
-                    <div className="flex flex-col sm:flex-row gap-4 items-center">
-                        <div className="relative w-full sm:flex-1 sm:max-w-2xl">
+                    {/* Search Bar with Filter Button */}
+                    <div className="flex gap-3">
+                        <div className="relative flex-1">
                             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                                 <Search className="h-5 w-5 text-gray-400" />
                             </div>
                             <input
                                 type="text"
-                                className="block w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
-                                placeholder="Search courses..."
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="block w-full pl-12 pr-4 py-3.5 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all"
+                                placeholder="Search for courses..."
+                                value={filters.search}
+                                onChange={handleSearchChange}
                             />
                         </div>
 
-                        <div className="flex gap-3 w-full sm:w-auto relative">
-                            {/* Filter Button */}
-                            <div className="relative">
-                                <button
-                                    onClick={() => setIsMobileFilterOpen(!isMobileFilterOpen)}
-                                    className="w-full sm:w-auto px-8 py-3 border border-gray-300 rounded-lg bg-white 
-                       hover:bg-gray-50 transition-colors flex items-center gap-2 min-w-[160px] justify-center"
-                                >
-                                    <SlidersHorizontal className="h-5 w-5 text-gray-600" />
-                                    <span className="text-gray-700 font-medium">Filters</span>
-                                </button>
+                        {/* Filter Dropdown Button */}
+                        <div className="relative" ref={filterDropdownRef}>
+                            <button
+                                onClick={() => setIsFilterOpen(!isFilterOpen)}
+                                className={`flex items-center gap-2 px-6 py-3.5 rounded-xl font-medium transition-all ${
+                                    hasActiveFilters
+                                        ? "bg-gradient-to-r from-cyan-500 to-emerald-500 text-white shadow-lg"
+                                        : "bg-white border-2 border-gray-300 text-gray-700 hover:border-cyan-500"
+                                }`}
+                            >
+                                <SlidersHorizontal className="h-5 w-5" />
+                                <span>Filters</span>
+                                {hasActiveFilters && (
+                                    <span className="bg-white text-cyan-600 text-xs font-bold px-2 py-0.5 rounded-full">
+                                        Active
+                                    </span>
+                                )}
+                            </button>
 
-                                {/* Filter Dropdown */}
-                                {isMobileFilterOpen && (
-                                    <>
-                                        <div
-                                            className="fixed inset-0 z-10"
-                                            onClick={() => setIsMobileFilterOpen(false)}
-                                        ></div>
+                            {/* Filter Dropdown */}
+                            {isFilterOpen && (
+                                <div className="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-2xl border border-gray-200 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                                    <div className="p-5">
+                                        <div className="flex items-center justify-between mb-4">
+                                            <h3 className="text-lg font-bold text-gray-900">Filter Options</h3>
+                                            <button
+                                                onClick={() => setIsFilterOpen(false)}
+                                                className="text-gray-400 hover:text-gray-600 transition-colors"
+                                            >
+                                                <X className="h-5 w-5" />
+                                            </button>
+                                        </div>
 
-                                        <div
-                                            className="absolute right-0 mt-2 w-80 bg-white rounded-xl 
-                                shadow-2xl border border-gray-200 p-6 z-20"
-                                        >
-                                            <h3 className="text-lg font-bold text-gray-900 mb-4">Filters</h3>
-
-                                            {/* Sort By */}
-                                            <div className="mb-4">
-                                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                                    Sort By
-                                                </label>
+                                        {/* Sort By */}
+                                        <div className="mb-4">
+                                            <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                                Sort By
+                                            </label>
+                                            <div className="relative">
                                                 <select
-                                                    value={sortOption}
-                                                    onChange={(e) => setSortOption(e.target.value)}
-                                                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg 
-                                       focus:outline-none focus:ring-2 focus:ring-teal-500 bg-white text-gray-700"
+                                                    value={tempFilters.sort}
+                                                    onChange={(e) => handleTempFilterChange("sort", e.target.value)}
+                                                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 appearance-none bg-white cursor-pointer"
                                                 >
-                                                    <option value="">Newest First</option>
-                                                    <option value="newest">Newest to Oldest</option>
-                                                    <option value="oldest">Oldest to Newest</option>
-                                                    <option value="low-high">Price: Low to High</option>
-                                                    <option value="high-low">Price: High to Low</option>
+                                                    {sortOptions.map((option) => (
+                                                        <option key={option.value} value={option.value}>
+                                                            {option.label}
+                                                        </option>
+                                                    ))}
                                                 </select>
-                                            </div>
-
-                                            {/* Min Price */}
-                                            <div className="mb-4">
-                                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                                    Min Price
-                                                </label>
-                                                <div className="relative">
-                                                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
-                                                        ₹
-                                                    </span>
-                                                    <input
-                                                        type="number"
-                                                        placeholder="0"
-                                                        value={minPrice}
-                                                        onChange={(e) => setMinPrice(e.target.value)}
-                                                        className="w-full pl-8 pr-4 py-2.5 border border-gray-300 rounded-lg 
-                                           text-base focus:outline-none focus:ring-2 focus:ring-teal-500 
-                                           focus:border-transparent"
-                                                    />
-                                                </div>
-                                            </div>
-
-                                            {/* Max Price */}
-                                            <div className="mb-6">
-                                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                                    Max Price
-                                                </label>
-                                                <div className="relative">
-                                                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
-                                                        ₹
-                                                    </span>
-                                                    <input
-                                                        type="number"
-                                                        placeholder="10000"
-                                                        value={maxPrice}
-                                                        onChange={(e) => setMaxPrice(e.target.value)}
-                                                        className="w-full pl-8 pr-4 py-2.5 border border-gray-300 rounded-lg 
-                                           text-base focus:outline-none focus:ring-2 focus:ring-teal-500 
-                                           focus:border-transparent"
-                                                    />
-                                                </div>
-                                            </div>
-
-                                            {/* Action Buttons */}
-                                            <div className="flex gap-3">
-                                                <button
-                                                    onClick={handleApplyFilters}
-                                                    className="flex-1 bg-teal-600 text-white py-2.5 px-4 rounded-lg 
-                                       hover:bg-teal-700 transition-colors font-semibold"
-                                                >
-                                                    Apply Filters
-                                                </button>
-
-                                                <button
-                                                    onClick={handleClearFilters}
-                                                    className="flex-1 bg-white text-gray-700 border border-gray-300 py-2.5 px-4 
-                                       rounded-lg hover:bg-gray-50 transition-colors font-semibold"
-                                                >
-                                                    Clear All
-                                                </button>
+                                                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none" />
                                             </div>
                                         </div>
-                                    </>
-                                )}
-                            </div>
+
+                                        {/* Price Range */}
+                                        <div className="mb-5">
+                                            <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                                Price Range
+                                            </label>
+                                            <div className="grid grid-cols-2 gap-3">
+                                                <div>
+                                                    <input
+                                                        type="number"
+                                                        placeholder="Min ₹"
+                                                        value={tempFilters.minPrice}
+                                                        onChange={(e) => handleTempFilterChange("minPrice", e.target.value)}
+                                                        className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <input
+                                                        type="number"
+                                                        placeholder="Max ₹"
+                                                        value={tempFilters.maxPrice}
+                                                        onChange={(e) => handleTempFilterChange("maxPrice", e.target.value)}
+                                                        className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Action Buttons */}
+                                        <div className="flex gap-2">
+                                            <button
+                                                onClick={handleClearFilters}
+                                                className="flex-1 px-4 py-2.5 border-2 border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors"
+                                            >
+                                                Clear
+                                            </button>
+                                            <button
+                                                onClick={handleApplyFilters}
+                                                className="flex-1 px-4 py-2.5 bg-gradient-to-r from-cyan-500 to-emerald-500 text-white rounded-lg font-medium hover:from-cyan-600 hover:to-emerald-600 transition-all shadow-md"
+                                            >
+                                                Apply
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
             </div>
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                {/* Browse by Category */}
+                {/* Category Pills */}
                 <div className="mb-8">
-                    <h2 className="text-xl font-bold text-gray-900 mb-4">Browse by Category</h2>
+                    <h2 className="text-lg font-bold text-gray-900 mb-4">Browse by Category</h2>
                     <div className="flex flex-wrap gap-3">
                         <button
-                            onClick={() => setSelectedCategory("All")}
+                            onClick={() => handleCategoryClick("")}
                             className={`px-5 py-2.5 rounded-full font-medium transition-all ${
-                                selectedCategory === "All"
-                                    ? "bg-teal-600 text-white shadow-md"
-                                    : "bg-white text-gray-700 border border-gray-300 hover:border-teal-500 hover:text-teal-600"
+                                filters.category === ""
+                                    ? "bg-gradient-to-r from-cyan-500 to-emerald-500 text-white shadow-lg scale-105"
+                                    : "bg-white text-gray-700 border-2 border-gray-300 hover:border-cyan-500"
                             }`}
                         >
                             All Categories
                         </button>
-
                         {categories.map((cat) => (
                             <button
                                 key={cat._id}
-                                onClick={() => setSelectedCategory(cat._id)}
+                                onClick={() => handleCategoryClick(cat._id)}
                                 className={`px-5 py-2.5 rounded-full font-medium transition-all ${
-                                    selectedCategory === cat._id
-                                        ? "bg-teal-600 text-white shadow-md"
-                                        : "bg-white text-gray-700 border border-gray-300 hover:border-teal-500 hover:text-teal-600"
+                                    filters.category === cat._id
+                                        ? "bg-gradient-to-r from-cyan-500 to-emerald-500 text-white shadow-lg scale-105"
+                                        : "bg-white text-gray-700 border-2 border-gray-300 hover:border-cyan-500"
                                 }`}
                             >
                                 {cat.name}
@@ -242,99 +305,129 @@ const Courses = () => {
                     </div>
                 </div>
 
-                {/* Results Count */}
-                <div className="mb-6">
-                    <p className="text-gray-600">
-                        Showing <span className="font-bold text-gray-900">{courses.length}</span> of{" "}
-                        <span className="font-bold text-gray-900">{courses.length}</span> courses
-                    </p>
-                </div>
-
                 {/* Course Grid */}
-                <main>
-                    {courses.length > 0 ? (
+                {loading ? (
+                    <div className="flex justify-center items-center py-20">
+                        <div className="relative">
+                            <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-cyan-600"></div>
+                            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+                                <div className="h-8 w-8 bg-gradient-to-r from-cyan-500 to-emerald-500 rounded-full"></div>
+                            </div>
+                        </div>
+                    </div>
+                ) : courses.length > 0 ? (
+                    <>
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                             {courses.map((course) => (
-                                <div
+                                <Link
+                                    to={`/user/courses/${course._id}`}
                                     key={course._id}
-                                    className="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden flex flex-col cursor-pointer"
+                                    className="group bg-white rounded-2xl shadow-md hover:shadow-2xl transition-all duration-300 overflow-hidden flex flex-col cursor-pointer transform hover:-translate-y-2"
                                 >
-                                    {/* Course Image with Discount Badge and Wishlist */}
-                                    <div className="relative h-44 overflow-hidden">
+                                    {/* Course Image */}
+                                    <div className="relative h-48 overflow-hidden bg-gradient-to-br from-gray-200 to-gray-300">
                                         <img
                                             src={course.thumbnailUrl}
                                             alt={course.title}
-                                            className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
+                                            className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500"
                                         />
 
                                         {course.offerPercentage > 0 && (
-                                            <div className="absolute top-3 left-3 bg-yellow-400 text-gray-900 px-2.5 py-1 rounded-lg text-xs font-bold shadow-md">
+                                            <div className="absolute top-3 left-3 bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold shadow-lg">
                                                 {course.offerPercentage}% OFF
                                             </div>
                                         )}
 
-                                        {/* Wishlist Icon */}
-                                        <button className="absolute top-3 right-3 p-2 bg-white rounded-full shadow-md hover:bg-gray-100 transition-colors">
-                                            <Heart className="w-5 h-5 text-gray-700 hover:text-red-500 hover:fill-red-500 transition-colors" />
+                                        <button
+                                            className="absolute top-3 right-3 p-2.5 bg-white/90 backdrop-blur-sm rounded-full shadow-lg hover:bg-white transition-all group/heart"
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                e.stopPropagation();
+                                                handleToggleWishlist(course._id);
+                                            }}
+                                        >
+                                            <Heart
+                                                className={`w-5 h-5 transition-all ${
+                                                    isInWishlist(course._id)
+                                                        ? "text-red-500 fill-red-500"
+                                                        : "text-gray-700 group-hover/heart:text-red-500 group-hover/heart:fill-red-500"
+                                                }`}
+                                            />
                                         </button>
                                     </div>
 
                                     {/* Course Details */}
                                     <div className="p-5 flex-1 flex flex-col">
-                                        {/* Category Badge */}
                                         <div className="mb-2">
-                                            <span className="inline-block bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-xs font-semibold">
+                                            <span className="inline-block bg-gradient-to-r from-purple-100 to-pink-100 text-purple-700 px-3 py-1 rounded-full text-xs font-semibold">
                                                 {course.category?.name}
                                             </span>
                                         </div>
 
-                                        {/* Course Title */}
-                                        <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-2 leading-tight">
+                                        <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-2 leading-tight group-hover:text-cyan-600 transition-colors">
                                             {course.title}
                                         </h3>
 
-                                        {/* Instructor Name */}
                                         <p className="text-gray-500 text-sm mb-3 line-clamp-1">
-                                            {course.tutor?.name || "Unknown Instructor"}
+                                            {course.tutor?.fullName || "Unknown Instructor"}
                                         </p>
 
-                                        {/* Divider */}
-                                        <div className="border-t border-gray-200 my-3"></div>
-
-                                        {/* Price Section */}
-                                        <div className="flex items-center gap-2">
-                                            <span className="text-2xl font-bold text-gray-900">
-                                                ₹{Math.round(course.price - (course.price * course.offerPercentage) / 100)}
+                                        <div className="flex items-center gap-1 mb-4">
+                                            <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                                            <span className="text-sm font-semibold text-gray-900">
+                                                {course.rating || "4.5"}
                                             </span>
+                                            <span className="text-sm text-gray-500">({course.reviews || "0"})</span>
+                                        </div>
 
-                                            {course.offerPercentage > 0 && (
-                                                <span className="text-base text-gray-400 line-through">
-                                                    ₹{course.price}
+                                        <div className="mt-auto pt-4 border-t border-gray-100">
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-2xl font-bold bg-gradient-to-r from-cyan-600 to-emerald-600 bg-clip-text text-transparent">
+                                                    ₹
+                                                    {Math.round(
+                                                        course.price - (course.price * course.offerPercentage) / 100
+                                                    )}
                                                 </span>
-                                            )}
+
+                                                {course.offerPercentage > 0 && (
+                                                    <span className="text-base text-gray-400 line-through">
+                                                        ₹{course.price}
+                                                    </span>
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
+                                </Link>
                             ))}
                         </div>
-                    ) : (
-                        <div className="text-center py-20 bg-white rounded-2xl border-2 border-dashed border-gray-300">
-                            <div className="mx-auto h-16 w-16 text-gray-400 mb-4">
-                                <Search size={64} strokeWidth={1.5} />
-                            </div>
-                            <h3 className="text-xl font-bold text-gray-900 mb-2">No courses found</h3>
-                            <p className="text-gray-500 mb-6">
-                                Try adjusting your search or filters to find what you're looking for.
-                            </p>
-                            <button
-                                onClick={handleClearFilters}
-                                className="inline-flex items-center px-6 py-3 border border-transparent shadow-md text-base font-semibold rounded-lg text-white bg-teal-600 hover:bg-teal-700 transition-colors"
-                            >
-                                Clear all filters
-                            </button>
+
+                        {/* Pagination */}
+                        <Pagination
+                            currentPage={pagination.currentPage}
+                            totalPages={pagination.totalPages}
+                            totalItems={pagination.totalItems}
+                            itemsPerPage={filters.limit}
+                            onPageChange={handlePageChange}
+                            label="Courses"
+                        />
+                    </>
+                ) : (
+                    <div className="text-center py-20 bg-white rounded-2xl border-2 border-dashed border-gray-300">
+                        <div className="mx-auto h-20 w-20 text-gray-300 mb-4">
+                            <Search size={80} strokeWidth={1.5} />
                         </div>
-                    )}
-                </main>
+                        <h3 className="text-2xl font-bold text-gray-900 mb-2">No courses found</h3>
+                        <p className="text-gray-500 mb-6 max-w-md mx-auto">
+                            Try adjusting your search or filters to find what you're looking for.
+                        </p>
+                        <button
+                            onClick={handleClearFilters}
+                            className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-cyan-500 to-emerald-500 text-white font-semibold rounded-xl hover:from-cyan-600 hover:to-emerald-600 transition-all shadow-lg"
+                        >
+                            Clear all filters
+                        </button>
+                    </div>
+                )}
             </div>
         </div>
     );

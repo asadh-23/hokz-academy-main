@@ -34,8 +34,8 @@ const AddLesson = () => {
         thumbnailKey: "",
 
         // PDF
-        pdfUrl: "",
-        pdfKey: "",
+        pdfUrl: null,
+        pdfKey: null,
     });
 
     const [lessons, setLessons] = useState([]);
@@ -172,8 +172,8 @@ const AddLesson = () => {
                 thumbnailUrl: "",
                 thumbnailKey: "",
 
-                pdfUrl: "",
-                pdfKey: "",
+                pdfUrl: null,
+                pdfKey: null,
             });
 
             if (videoInputRef.current) videoInputRef.current.value = "";
@@ -199,8 +199,8 @@ const AddLesson = () => {
             thumbnailUrl: lesson.thumbnailUrl,
             thumbnailKey: lesson.thumbnailKey,
 
-            pdfUrl: lesson.pdfUrl || "",
-            pdfKey: lesson.pdfKey || "",
+            pdfUrl: lesson.pdfUrl || null,
+            pdfKey: lesson.pdfKey || null,
         });
 
         setEditingLessonId(lesson.id);
@@ -240,8 +240,8 @@ const AddLesson = () => {
                 duration: 0,
                 thumbnailUrl: "",
                 thumbnailKey: "",
-                pdfUrl: "",
-                pdfKey: "",
+                pdfUrl: null,
+                pdfKey: null,
             });
         } catch (error) {
             console.error("Lesson update error:", error);
@@ -260,7 +260,23 @@ const AddLesson = () => {
             }
 
             toast.success(response.data.message || "Lesson deleted successfully");
+            setLessonForm({
+                title: "",
+                description: "",
 
+                // VIDEO
+                videoUrl: "",
+                videoKey: "",
+                duration: 0,
+
+                // THUMBNAIL
+                thumbnailUrl: "",
+                thumbnailKey: "",
+
+                // PDF
+                pdfUrl: null,
+                pdfKey: null,
+            });
             // Remove from UI state
             setLessons((prev) => prev.filter((l) => l.id !== lessonId));
         } catch (error) {

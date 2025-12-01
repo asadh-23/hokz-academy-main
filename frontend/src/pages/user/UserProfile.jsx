@@ -1,15 +1,22 @@
-import React, { useState, useEffect, useRef } from "react";
-import UserHeader from "../../components/user/UserHeader";
-import UserFooter from "../../components/user/UserFooter";
+import { useState, useEffect, useRef } from "react";
 import ChangeEmailModal from "../../components/auth/ChangeEmailModal";
 import ChangePasswordModal from "../../components/auth/ChangePasswordModal";
-import { userAxios } from "../../api/userAxios";
+import SecurityCard from "../../components/common/SecurityCard";
 import { toast } from "sonner";
 import { PageLoader, ButtonLoader } from "../../components/common/LoadingSpinner";
 import defaultProfileImage from "../../assets/images/default-profile-image.webp";
 import { isNullOrWhitespace, validatePhone } from "../../utils/validation";
-import { useDispatch } from "react-redux";
-import { updateUserData } from "../../store/features/auth/authSlice";
+import { useDispatch, useSelector } from "react-redux";
+// Redux thunks and selectors
+import {
+    fetchUserProfile,
+    updateUserProfile,
+    uploadUserProfileImage,
+    selectUserProfileLoading,
+    selectUserUpdateLoading,
+    selectUserImageUploadLoading,
+} from "../../store/features/user/userProfileSlice";
+import { patchUser } from "../../store/features/auth/userAuthSlice";
 
 const UserProfile = () => {
     const [isEditing, setIsEditing] = useState(false);
@@ -24,42 +31,37 @@ const UserProfile = () => {
     });
 
     const [originalData, setOriginalData] = useState(null);
-    const [isLoading, setIsLoading] = useState(false);
-    const [isSaving, setIsSaving] = useState(false);
-    const [isUploading, setIsUploading] = useState(false);
 
     const dispatch = useDispatch();
+
+    // Redux selectors for loading states
+    const isLoading = useSelector(selectUserProfileLoading);
+    const isSaving = useSelector(selectUserUpdateLoading);
+    const isUploading = useSelector(selectUserImageUploadLoading);
 
     // ✅ Ref for the hidden file input
     const fileInputRef = useRef(null);
 
-    // --- Data Fetching ---
+    // --- Data Fetching using Redux thunk ---
     useEffect(() => {
-        const fetchProfile = async () => {
-            setIsLoading(true);
+        const loadUserProfile = async () => {
             try {
-                const response = await userAxios.get("/profile");
-
-                if (response.data?.success) {
-                    const fetchedData = response.data.user;
-                    const data = {
-                        fullName: fetchedData.fullName,
-                        email: fetchedData.email,
-                        phone: fetchedData.phone,
-                        profileImage: fetchedData.profileImage,
-                    };
-                    setProfileData(data);
-                    setOriginalData(data);
-                }
+                const user = await dispatch(fetchUserProfile()).unwrap();
+                const data = {
+                    fullName: user.fullName || "",
+                    email: user.email || "",
+                    phone: user.phone || "",
+                    profileImage: user.profileImage || null,
+                };
+                setProfileData(data);
+                setOriginalData(data);
             } catch (error) {
                 console.error("Failed to fetch profile:", error);
-                toast.error("Could not load tutor profile data.");
-            } finally {
-                setIsLoading(false);
+                toast.error(error || "Could not load profile data.");
             }
         };
-        fetchProfile();
-    }, []);
+        loadUserProfile();
+    }, [dispatch]);
 
     const handleInputChange = (field, value) => {
         setProfileData((prev) => ({
@@ -71,64 +73,39 @@ const UserProfile = () => {
     // ✅ Handle image file selection
     const handleImageChange = (event) => {
         const file = event.target.files[0];
-
         if (!file) return;
 
-        const reader = new FileReader();
-        reader.onloadend = () => {
-            setProfileData((prev) => ({
-                ...prev,
-                profileImage: reader.result,
-            }));
-            dispatch(updateUserData({ profileImage: reader.result }));
-            toast.success("Profile image updated successfully");
-        };
-        reader.readAsDataURL(file);
+
+        setProfileData((prev) => ({ ...prev, profileImage: URL.createObjectURL(file) }));
+
         handleImageUpload(file);
 
-        if (fileInputRef.current) {
-            fileInputRef.current.value = "";
-        }
+       event.target.value = "";
     };
 
+    // ✅ Function to upload the image file using Redux thunk
     const handleImageUpload = async (file) => {
         if (!file) return;
 
-        setIsUploading(true);
-
-        const formData = new FormData();
-        formData.append("profileImageFile", file);
+        const fd = new FormData();
+        fd.append("profileImageFile", file);
 
         try {
-            const response = await userAxios.post("/profile/image", formData, {
-                headers: {
-                    "Content-Type": "multipart/form-data",
-                },
-            });
+            // Dispatch upload thunk - loading state managed by Redux
+            const newImageUrl = await dispatch(uploadUserProfileImage(fd)).unwrap();
+            // Update local state
+            setProfileData((prev) => ({ ...prev, profileImage: newImageUrl }));
+            dispatch(patchUser({ profileImage: newImageUrl }));
+            setOriginalData((prev) => ({ ...prev, profileImage: newImageUrl }));
 
-            if (response.data?.success) {
-                const newImageUrl = response.data?.imageUrl;
-
-                if (!newImageUrl) {
-                    throw new Error("Backend did not return a valid image URL.");
-                }
-
-                setProfileData((prev) => ({ ...prev, profileImage: newImageUrl }));
-
-                dispatch(updateUserData({ profileImage: newImageUrl }));
-
-                setOriginalData((prev) => ({ ...prev, profileImage: newImageUrl }));
-            }
+            toast.success("Profile image updated successfully");
         } catch (error) {
-            console.log("Image upload filed : ", error);
-
-            toast.error(error.response?.data?.message || "Image upload failed. Please try again.");
-
+            console.error("Image upload failed:", error);
+            toast.error(error || "Image upload failed. Please try again.");
             if (originalData) {
+                // Revert to last known good URL
                 setProfileData((prev) => ({ ...prev, profileImage: originalData.profileImage }));
             }
-        } finally {
-            setIsUploading(false);
         }
     };
 
@@ -150,8 +127,9 @@ const UserProfile = () => {
         setIsEditing(false);
     };
 
-    // --- Save Text Changes Handler ---
+    // --- Save Text Changes Handler using Redux thunk ---
     const handleSaveChanges = async () => {
+        // Check Full Name
         if (isNullOrWhitespace(profileData.fullName)) {
             return toast.error("Full name is required");
         }
@@ -161,39 +139,43 @@ const UserProfile = () => {
             return toast.error(phonValidation.message || "Enter a valid phone number");
         }
 
-        setIsSaving(true);
-
         try {
-            const { email, profileImage, ...updatePayload } = profileData;
+            const { email, profileImage, ...editableFields } = profileData;
 
-            const response = await userAxios.put("profile", updatePayload);
-            if (response.data?.success) {
-                const savedData = response.data.user;
-                const dataToSet = {
-                    ...profileData,
-                    fullName: savedData.fullName,
-                    phone: savedData.phone,
-                };
+            const savedData = await dispatch(updateUserProfile(editableFields)).unwrap();
 
-                setProfileData(dataToSet);
-                setOriginalData(dataToSet);
+            const dataToSet = {
+                fullName: savedData.fullName,
+                phone: savedData.phone || "",
+            };
 
-                dispatch(updateUserData({ fullName: dataToSet.fullName, phone: dataToSet.phone }));
-                setIsEditing(false);
-                toast.success(response.data.message || "Profile details updated successfully!");
-            }
+            // --- UPDATE ALL STATES ---
+            setProfileData((prev) => ({
+                ...prev,
+                ...dataToSet,
+            }));
+
+            dispatch(patchUser(dataToSet));
+
+            setOriginalData((prev) => ({
+                ...prev,
+                ...dataToSet,
+            }));
+
+            setIsEditing(false); // Exit edit mode
+            toast.success("Profile details updated successfully!");
         } catch (error) {
             console.error("Profile update failed:", error);
-            toast.error(error.response?.data?.message || "Profile update failed.");
+            toast.error(error || "Profile update failed.");
 
+            // Revert form data on error
             if (originalData) {
                 setProfileData(originalData);
             }
-        } finally {
-            setIsSaving(false);
         }
     };
 
+    // --- Loading State ---
     if (isLoading) {
         return <PageLoader text="Loading Your Profile..." />;
     }
@@ -246,9 +228,8 @@ const UserProfile = () => {
                                     }`}
                                     aria-label="Edit profile picture"
                                 >
-                                    📷
+                                    {isUploading ? <ButtonLoader /> : "📷"}
                                 </button>
-                                {/* Upload indicator */}
                             </div>
                         </div>
 
@@ -344,39 +325,10 @@ const UserProfile = () => {
                 </div>
 
                 {/* Security Card */}
-                <div className="bg-white rounded-xl md:rounded-2xl p-6 md:p-8 max-w-3xl mx-auto mt-8 shadow-lg border border-gray-100">
-                    <h3 className="text-lg md:text-xl font-semibold text-gray-700 mb-5 md:mb-6 border-b pb-3 border-gray-200">
-                        Security Settings
-                    </h3>
-
-                    <div className="space-y-4 md:space-y-5">
-                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
-                            <div>
-                                <p className="font-medium text-gray-800">Change Email</p>
-                                <p className="text-xs text-gray-500 mt-0.5">Update the email linked to your account.</p>
-                            </div>
-                            <button
-                                onClick={() => setIsChangeEmailOpen(true)}
-                                className="mt-2 sm:mt-0 w-full sm:w-auto bg-gray-600 text-white py-2 px-5 rounded-full font-semibold hover:bg-gray-700 transition-all text-sm focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
-                            >
-                                Change Email
-                            </button>
-                        </div>
-
-                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
-                            <div>
-                                <p className="font-medium text-gray-800">Change Password</p>
-                                <p className="text-xs text-gray-500 mt-0.5">Set a new password for your account.</p>
-                            </div>
-                            <button
-                                onClick={() => setIsChangePasswordOpen(true)}
-                                className="mt-2 sm:mt-0 w-full sm:w-auto bg-gray-600 text-white py-2 px-5 rounded-full font-semibold hover:bg-gray-700 transition-all text-sm focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
-                            >
-                                Change Password
-                            </button>
-                        </div>
-                    </div>
-                </div>
+                <SecurityCard
+                    onEmailChange={() => setIsChangeEmailOpen(true)}
+                    onPasswordChange={() => setIsChangePasswordOpen(true)}
+                />
             </div>
 
             {/* Modals */}

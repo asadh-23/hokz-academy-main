@@ -1,11 +1,26 @@
-import React, { useState, useEffect, useRef } from "react";
-import { Save, LayoutDashboard, Image as ImageIcon, DollarSign, UploadCloud, Eye, CheckCircle2 } from "lucide-react";
-import { tutorAxios } from "../../api/tutorAxios";
+import { useState, useEffect, useRef } from "react";
+import { LayoutDashboard, Image as ImageIcon, DollarSign, UploadCloud } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 import { isNullOrWhitespace } from "../../utils/validation";
+import { useDispatch, useSelector } from "react-redux";
+// Redux thunks and selectors
+import {
+    fetchTutorCourseById,
+    updateTutorCourse,
+    uploadTutorCourseThumbnail,
+    selectTutorCourseLoading,
+    selectTutorCourseUpdating,
+    selectTutorThumbnailUploading,
+    selectTutorSelectedCourse,
+} from "../../store/features/tutor/tutorCoursesSlice";
+import { fetchTutorCategories, selectTutorCategories } from "../../store/features/tutor/tutorCategorySlice";
 
 const EditCourse = () => {
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
+    const { courseId } = useParams();
+
     const [formData, setFormData] = useState({
         title: "",
         category: "",
@@ -16,33 +31,49 @@ const EditCourse = () => {
         thumbnailKey: null,
     });
 
-    const [isSaved, setIsSaved] = useState(false);
-
-    const { courseId } = useParams();
-    const [loading, setLoading] = useState(true);
-    const [categories, setCategories] = useState([]);
     const fileInputRef = useRef(null);
-    const navigate = useNavigate();
 
+    // Redux selectors
+    const loading = useSelector(selectTutorCourseLoading);
+    const isUpdating = useSelector(selectTutorCourseUpdating);
+    const isUploadingThumbnail = useSelector(selectTutorThumbnailUploading);
+
+    const selectedCourse = useSelector(selectTutorSelectedCourse);
+    const categories = useSelector(selectTutorCategories);
+
+    // Fetch course and categories on mount using Redux thunks
     useEffect(() => {
-        const fetchCourse = async () => {
+        const loadCourseData = async () => {
             try {
-                const response = await tutorAxios.get(`/courses/${courseId}`);
-
-                if (response.data.success) {
-                    setFormData(response.data.course);
-                    setCategories(response.data.categories);
-                }
+                // Fetch course details
+                await dispatch(fetchTutorCourseById(courseId)).unwrap();
             } catch (error) {
-                console.log("Failed to load course ", error);
-                toast.error("Failed to load course");
-            } finally {
-                setLoading(false);
+                console.log("Failed to load course:", error);
+                toast.error(error || "Failed to load course");
             }
         };
 
-        fetchCourse();
-    }, [courseId]);
+        loadCourseData();
+    }, [dispatch, courseId]);
+
+    useEffect(() => {
+        dispatch(fetchTutorCategories());
+    }, [dispatch]);
+
+    // Update form data when course is loaded
+    useEffect(() => {
+        if (selectedCourse) {
+            setFormData({
+                title: selectedCourse.title || "",
+                category: selectedCourse.category || "",
+                price: selectedCourse.price || 0,
+                offerPercentage: selectedCourse.offerPercentage || 0,
+                description: selectedCourse.description || "",
+                thumbnailUrl: selectedCourse.thumbnailUrl || null,
+                thumbnailKey: selectedCourse.thumbnailKey || null,
+            });
+        }
+    }, [selectedCourse]);
 
     // Calculate final price
     const finalPrice = (formData.price - formData.price * (formData.offerPercentage / 100)).toFixed(2);
@@ -75,26 +106,20 @@ const EditCourse = () => {
             return;
         }
 
-        // Preview using Blob URL (BEST METHOD)
+        // Preview using Blob URL
         setFormData((prev) => ({
             ...prev,
             thumbnailUrl: URL.createObjectURL(file),
         }));
 
-        // Upload to backend
+        // Upload to backend using Redux thunk
         const fd = new FormData();
         fd.append("file", file);
 
         try {
-            const response = await tutorAxios.post("/courses/upload-thumbnail", fd, {
-                headers: { "Content-Type": "multipart/form-data" },
-            });
+            const result = await dispatch(uploadTutorCourseThumbnail(fd)).unwrap();
 
-            if (!response.data?.success) {
-                return toast.error("Thumbnail upload failed");
-            }
-
-            const { fileUrl, fileKey } = response.data;
+            const { fileUrl, fileKey } = result;
 
             setFormData((prev) => ({
                 ...prev,
@@ -105,7 +130,7 @@ const EditCourse = () => {
             toast.success("Thumbnail uploaded successfully");
         } catch (error) {
             console.error("Thumbnail upload error:", error);
-            toast.error("Failed to upload thumbnail");
+            toast.error(error || "Failed to upload thumbnail");
         }
     };
 
@@ -141,17 +166,29 @@ const EditCourse = () => {
         };
 
         try {
-            const response = await tutorAxios.put(`/courses/${courseId}`, payload);
+            // Dispatch Redux thunk instead of direct axios call
+            await dispatch(
+                updateTutorCourse({
+                    courseId,
+                    payload,
+                })
+            ).unwrap();
 
-            if (response.data.success) {
-                toast.success("Course updated");
-                navigate("/tutor/courses", { replace: true });
-            }
+            toast.success("Course updated successfully");
+            navigate("/tutor/courses", { replace: true });
         } catch (error) {
-            console.log("Failed to update course ", error);
-            toast.error(error.response?.data?.message || "Failed to update");
+            console.log("Failed to update course:", error);
+            toast.error(error || "Failed to update course");
         }
     };
+
+    if (loading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center">
+                <p className="text-lg text-gray-600">Loading course...</p>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-gray-50 pb-12 font-sans text-gray-900">
@@ -170,10 +207,14 @@ const EditCourse = () => {
                 <div className="flex gap-3">
                     <button
                         onClick={handleSubmit}
-                        className="flex items-center gap-2 px-6 py-2 text-sm font-medium text-white rounded-lg transition-all shadow-lg shadow-indigo-200 bg-indigo-600 hover:bg-indigo-700"
+                        disabled={isUpdating || isUploadingThumbnail}
+                        className={`flex items-center gap-2 px-6 py-2 text-sm font-medium text-white rounded-lg transition-all shadow-lg shadow-indigo-200 ${
+                            isUpdating || isUploadingThumbnail
+                                ? "bg-indigo-400 cursor-not-allowed"
+                                : "bg-indigo-600 hover:bg-indigo-700"
+                        }`}
                     >
-                        
-                        Save Changes
+                        {isUpdating ? "Saving..." : "Save Changes"}
                     </button>
                 </div>
             </nav>
@@ -198,6 +239,7 @@ const EditCourse = () => {
                                         name="title"
                                         value={formData.title}
                                         onChange={handleInputChange}
+                                        disabled={isUpdating}
                                         className="w-full px-4 py-2.5 rounded-xl border border-gray-300 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all outline-none"
                                     />
                                 </div>
@@ -209,6 +251,7 @@ const EditCourse = () => {
                                         name="category"
                                         value={formData.category}
                                         onChange={handleInputChange}
+                                        disabled={isUpdating}
                                         className="w-full px-4 py-2.5 rounded-xl border border-gray-300 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 bg-white outline-none"
                                     >
                                         {categories.map((c) => (
@@ -227,6 +270,7 @@ const EditCourse = () => {
                                             name="description"
                                             value={formData.description}
                                             onChange={handleInputChange}
+                                            disabled={isUpdating}
                                             rows="6"
                                             className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 resize-none outline-none"
                                         />
@@ -256,6 +300,7 @@ const EditCourse = () => {
                                             name="price"
                                             value={formData.price}
                                             onChange={handleInputChange}
+                                            disabled={isUpdating}
                                             className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-300 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none"
                                         />
                                     </div>
@@ -269,6 +314,7 @@ const EditCourse = () => {
                                         name="offerPercentage"
                                         value={formData.offerPercentage}
                                         onChange={handleInputChange}
+                                        disabled={isUpdating}
                                         className="w-full px-4 py-2.5 rounded-xl border border-gray-300 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none"
                                     />
                                 </div>
@@ -291,7 +337,7 @@ const EditCourse = () => {
                             <div
                                 className="border-2 border-dashed border-gray-300 rounded-2xl p-8 text-center 
                                        hover:border-indigo-400 hover:bg-gray-50 transition-all cursor-pointer"
-                                onClick={() => fileInputRef.current.click()}
+                                onClick={() => !isUploadingThumbnail && fileInputRef.current.click()}
                             >
                                 <input
                                     type="file"
@@ -300,6 +346,7 @@ const EditCourse = () => {
                                     className="hidden"
                                     accept="image/*"
                                     onChange={handleImageChange}
+                                    disabled={isUploadingThumbnail}
                                 />
 
                                 {formData.thumbnailUrl ? (
@@ -309,19 +356,27 @@ const EditCourse = () => {
                                             alt="Preview"
                                             className="w-full h-full object-cover"
                                         />
-                                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
-                                            <span className="text-white font-medium flex items-center gap-2">
-                                                <UploadCloud size={20} /> Change Image
-                                            </span>
-                                        </div>
+                                        {isUploadingThumbnail ? (
+                                            <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                                                <span className="text-white font-medium">Uploading...</span>
+                                            </div>
+                                        ) : (
+                                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
+                                                <span className="text-white font-medium flex items-center gap-2">
+                                                    <UploadCloud size={20} /> Change Image
+                                                </span>
+                                            </div>
+                                        )}
                                     </div>
                                 ) : (
                                     <div className="flex flex-col items-center justify-center py-6">
                                         <div className="w-16 h-16 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center mb-4">
                                             <ImageIcon size={32} />
                                         </div>
-                                        <p className="text-gray-900 font-medium">Click to upload</p>
-                                        <p className="text-gray-500 text-sm mt-1">JPG, PNG, GIF (Max 2MB)</p>
+                                        <p className="text-gray-900 font-medium">
+                                            {isUploadingThumbnail ? "Uploading..." : "Click to upload"}
+                                        </p>
+                                        <p className="text-gray-500 text-sm mt-1">JPG, PNG, GIF (Max 10MB)</p>
                                     </div>
                                 )}
                             </div>
@@ -337,7 +392,11 @@ const EditCourse = () => {
                                 {/* Image */}
                                 <div className="h-48 bg-gray-200 relative">
                                     {formData.thumbnailUrl ? (
-                                        <img src={formData.thumbnailUrl} className="w-full h-full object-cover" />
+                                        <img
+                                            src={formData.thumbnailUrl}
+                                            alt="Preview"
+                                            className="w-full h-full object-cover"
+                                        />
                                     ) : (
                                         <div className="w-full h-full flex items-center justify-center text-gray-400">
                                             <ImageIcon size={40} />

@@ -230,7 +230,6 @@ export const loginUser = async (req, res) => {
                 email: savedUser.email,
                 phone: savedUser.phone,
                 profileImage: savedUser.profileImage,
-                isVerified: true,
             },
         });
     } catch (error) {

@@ -5,7 +5,7 @@ import UserSidebar from "../components/user/UserSidebar";
 import UserFooter from "../components/user/UserFooter";
 
 export const UserLayout = () => {
-    const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
     const toggleSidebar = () => {
         setIsSidebarOpen(!isSidebarOpen);

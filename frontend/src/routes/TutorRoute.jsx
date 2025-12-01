@@ -25,8 +25,8 @@ export default function TutorRoutes() {
                 <Route path="/register" element={<TutorRegister />} />
                 <Route path="/login" element={<TutorLogin />} />
                 <Route path="/verify-otp" element={<OtpVerify />} />
-                <Route path="/forgot-password" element={<ForgotPassword />} />
-                <Route path="/reset-password/:token" element={<ResetPassword />} />
+                <Route path="/forgot-password" element={<ForgotPassword role="tutor" />} />
+                <Route path="/reset-password/:token" element={<ResetPassword role="tutor" />} />
             </Route>
 
             {/* Private Routes with Layout */}

@@ -1,17 +1,26 @@
 import React, { useState, useEffect } from "react";
 import { ButtonLoader } from "../common/LoadingSpinner";
-import { tutorAxios } from "../../api/tutorAxios";
-import { userAxios } from "../../api/userAxios";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { validateEmail } from "../../utils/validation";
+import { useDispatch, useSelector } from "react-redux";
+// Redux thunks and selectors
+import {
+    requestEmailChange,
+    selectEmailChangeRequestLoading,
+} from "../../store/features/auth/emailChangeSlice";
+
 
 const ChangeEmailModal = ({ isOpen, onClose, currentEmail, role }) => {
     const [newEmail, setNewEmail] = useState("");
-    const [isLoading, setIsLoading] = useState(false);
     const [errors, setErrors] = useState({});
 
     const navigate = useNavigate();
+    const dispatch = useDispatch();
+
+    // Redux selectors
+    const isLoading = useSelector(selectEmailChangeRequestLoading);
+   
 
     useEffect(() => {
         if (isOpen) {
@@ -49,38 +58,30 @@ const ChangeEmailModal = ({ isOpen, onClose, currentEmail, role }) => {
             return;
         }
 
-        setIsLoading(true);
-
         try {
-            const axiosInstance = role === "tutor" ? tutorAxios : userAxios;
-            if (!axiosInstance) {
-                throw new Error("Invalid role specified.");
-            }
+         
+            const result = await dispatch(
+                requestEmailChange({
+                    newEmail: trimmedNewEmail,
+                    role,
+                })
+            ).unwrap();
 
-            const response = await axiosInstance.post("/request-email-change", { newEmail: trimmedNewEmail });
-
-            if (response.data?.success) {
-                toast.success(response.data?.message || `OTP sent to your new Email. Please check your inbox.`);
-
-                onClose();
-
-                navigate(`/${role}/verify-email-change`, {
-                    state: { email: trimmedNewEmail, role },
-                    replace: true,
-                });
-            }
+            toast.success(result.message || "OTP sent to your new email. Please check your inbox.");
+            onClose();
+            navigate(`/${role}/verify-email-change`, {
+                state: { email: trimmedNewEmail, role },
+                replace: true,
+            });
         } catch (error) {
             console.error("Failed to send OTP:", error);
-            setErrors({ general: error.response?.data?.message || "Failed to send OTP." });
-        } finally {
-            setIsLoading(false);
+            setErrors({ general: error || "Failed to send OTP." });
         }
     };
 
     const handleClose = () => {
         setNewEmail("");
         setErrors({});
-        setIsLoading(false);
         onClose();
     };
 

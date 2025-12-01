@@ -1,37 +1,45 @@
-import React, { useState } from "react";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
-import { publicAxios } from "../../api/publicAxios";
+import { useDispatch, useSelector } from "react-redux";
+import { validatePassword } from "../../utils/validation";
+import { resetPassword, selectResetPasswordLoading } from "../../store/features/auth/passwordSlice";
 
-export default function ResetPassword() {
+export default function ResetPassword({ role }) {
     const [formData, setFormData] = useState({
         password: "",
         confirmPassword: "",
     });
     const navigate = useNavigate();
-    const {token} = useParams();
-    const location = useLocation();
-    const role = location.pathname.includes("user") ? "user" : "tutor";
+    const dispatch = useDispatch();
+    const { token } = useParams();
+    const isLoading = useSelector(selectResetPasswordLoading);
 
     const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (formData.password.trim().length < 8) {
-            return toast.error("Password must be at least 8 characters.");
+        const passwordValidation = validatePassword(formData.password);
+        if (!passwordValidation.isValid) {
+            return toast.error(passwordValidation.message || "Enter a valid password");
         }
         if (formData.password.trim() !== formData.confirmPassword.trim()) {
             return toast.error("Passwords do not match.");
         }
-        try{
-            const response = await publicAxios.post(`/${role}/auth/reset-password/${token}`, {password : formData.password.trim()});
-            if(response.data?.success){
-                toast.success(response.data?.message);
-                navigate(`/${role}/login`);
-            }
-        }catch(error){
-            console.log("Reset password error", error.response?.data?.message);
-            toast.error(error.response?.data?.message || "Reset password failed");
+
+        const result = await dispatch(
+            resetPassword({
+                token,
+                password: passwordValidation.password,
+                role,
+            })
+        );
+
+        if (resetPassword.fulfilled.match(result)) {
+            toast.success(result.payload?.message || "Password reset successful");
+            navigate(`/${role}/login`);
+        } else {
+            toast.error(result.payload || "Reset password failed");
         }
     };
 
@@ -93,9 +101,10 @@ export default function ResetPassword() {
                     {/* Reset Button */}
                     <button
                         type="submit"
-                        className="w-full bg-teal-400 text-white font-bold text-lg py-3 rounded-full shadow-lg hover:bg-teal-500 transition-all"
+                        disabled={isLoading}
+                        className="w-full bg-teal-400 text-white font-bold text-lg py-3 rounded-full shadow-lg hover:bg-teal-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        Reset Password
+                        {isLoading ? "Resetting..." : "Reset Password"}
                     </button>
                 </form>
                 <div className="text-xs text-gray-400 mt-6">

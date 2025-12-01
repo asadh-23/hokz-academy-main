@@ -6,6 +6,7 @@ const Pagination = ({
   totalItems,
   itemsPerPage,
   onPageChange,
+  label = "Items"
 }) => {
   if (totalPages <= 0) return null;
 
@@ -48,7 +49,7 @@ const Pagination = ({
             Showing{" "}
             <span className="font-medium">{startItem}</span> to{" "}
             <span className="font-medium">{endItem}</span> of{" "}
-            <span className="font-medium">{totalItems}</span> students
+            <span className="font-medium">{totalItems}</span> {label}
           </>
         ) : (
           "No students found"

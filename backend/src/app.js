@@ -22,6 +22,8 @@ import tutorLessonRoutes from "./routes/tutor/lessonRoutes.js";
 
 import userProfileRoutes from './routes/user/profileRoutes.js';
 import userCourseRoutes from "./routes/user/CourseRoutes.js";
+import userWishlistRoutes from "./routes/user/wishlistRoutes.js"
+
 
 import { notFound, errorHandler } from "./middlewares/errorHandler.js";
 
@@ -75,7 +77,7 @@ app.use("/api/tutor", tutorLessonRoutes)
 
 app.use('/api/user', userProfileRoutes);
 app.use("/api/user", userCourseRoutes);
-
+app.use("/api/user", userWishlistRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

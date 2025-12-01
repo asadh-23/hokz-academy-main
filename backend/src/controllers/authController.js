@@ -6,37 +6,65 @@ import Admin from "../models/user/Admin.js";
 
 export const handleRefreshToken = async (req, res) => {
     try {
-
         const cookies = req.cookies;
+        
         if (!cookies?.refreshToken) {
-            console.log('❌ No refresh token in cookies:');
-            return res.status(401).json({ message: "Unauthorized: No token provided" });
+            console.log('❌ No refresh token in cookies');
+            return res.status(401).json({
+                success: false,
+                message: "Unauthorized: No refresh token provided" 
+            });
         }
 
         const refreshToken = cookies.refreshToken;
 
+        // Verify refresh token
         const decoded = verifyRefreshToken(refreshToken);
 
         if (!decoded.id || !decoded.role) {
-            return res.status(401).json({ message: "Unauthorized: Invalid token payload" });
+            console.log('❌ Invalid token payload');
+            return res.status(401).json({ 
+                success: false,
+                message: "Unauthorized: Invalid token payload" 
+            });
         }
 
+        // Find user based on role
         let user;
-
         if (decoded.role === "user") {
             user = await User.findById(decoded.id);
         } else if (decoded.role === "tutor") {
             user = await Tutor.findById(decoded.id);
         } else if (decoded.role === "admin") {
             user = await Admin.findById(decoded.id);
+        } else {
+            console.log('❌ Invalid role in token:', decoded.role);
+            return res.status(401).json({ 
+                success: false,
+                message: "Unauthorized: Invalid role" 
+            });
         }
 
-        if (!user || user.isBlocked) {
-            return res.status(401).json({ message: "Unauthorized: User not found or is blocked" });
+        if (!user) {
+            console.log('❌ User not found for id:', decoded.id);
+            return res.status(401).json({ 
+                success: false,
+                message: "Unauthorized: User not found" 
+            });
         }
-        
 
+        if (user.isBlocked) {
+            console.log('❌ User is blocked:', decoded.id);
+            return res.status(403).json({ 
+                success: false,
+                message: "Forbidden: Account has been blocked" 
+            });
+        }
+
+        // Generate new access token
         const newAccessToken = generateAccessToken(user._id, user.role);
+
+        console.log('✅ Access token refreshed for user:', user._id);
 
         res.status(200).json({
             success: true,
@@ -51,8 +79,26 @@ export const handleRefreshToken = async (req, res) => {
             },
         });
     } catch (error) {
-        console.error("Refresh Token Error:", error.message);
-        return res.status(401).json({ message: "Unauthorized: Invalid or expired token" });
+        console.error("❌ Refresh Token Error:", error.message);
+        
+        if (error.name === 'TokenExpiredError') {
+            return res.status(401).json({ 
+                success: false,
+                message: "Unauthorized: Refresh token has expired" 
+            });
+        }
+        
+        if (error.name === 'JsonWebTokenError') {
+            return res.status(401).json({ 
+                success: false,
+                message: "Unauthorized: Invalid refresh token" 
+            });
+        }
+        
+        return res.status(401).json({ 
+            success: false,
+            message: "Unauthorized: Token verification failed" 
+        });
     }
 };
 

@@ -17,7 +17,6 @@ export const getAllUsers = async (req, res, next) => {
             query.$or = [{ fullName: searchRegex }, { email: searchRegex }];
         }
 
-        // 🧠 Status filter (Active / Blocked / Inactive)
         if (statusFilter) {
             if (statusFilter === "Blocked") query.isBlocked = true;
             else if (statusFilter === "Active") {
@@ -26,10 +25,8 @@ export const getAllUsers = async (req, res, next) => {
             } else if (statusFilter === "Inactive") query.isVerified = false;
         }
 
-        // 🧮 Total count for pagination (filtered)
         const totalFilteredUsers = await User.countDocuments(query);
 
-        // 📄 Paginated user list
         const users = await User.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit).lean();
 
         // 🧩 Format users with computed status
@@ -81,34 +78,32 @@ export const getAllUsers = async (req, res, next) => {
     }
 };
 
-export const blockUser = async (req, res, next) => {
+export const toggleBlockUser = async (req, res, next) => {
     try {
         const { userId } = req.params;
-        const updatedUser = await User.findByIdAndUpdate(userId, { isBlocked: true }, { new: true });
 
-        if (!updatedUser) {
-            return res.status(404).json({ success: false, message: "User not found" });
+        // Fetch user
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found",
+            });
         }
 
-        res.status(200).json({ success: true, message: `${updatedUser.fullName} has been blocked successfully` });
+        // Toggle logic
+        user.isBlocked = !user.isBlocked;
+        await user.save();
+
+        // Response message
+        const statusMessage = user.isBlocked ? "blocked" : "unblocked";
+
+        return res.status(200).json({
+            success: true,
+            message: `${user.fullName} has been ${statusMessage} successfully`,
+        });
     } catch (error) {
-        console.error("Error in user block controller:", error);
-        next(error);
-    }
-};
-
-export const unblockUser = async (req, res, next) => {
-    try {
-        const { userId } = req.params;
-        const updatedUser = await User.findByIdAndUpdate(userId, { isBlocked: false }, { new: true });
-
-        if (!updatedUser) {
-            return res.status(404).json({ success: false, message: "User not found" });
-        }
-
-        res.status(200).json({ success: true, message: `${updatedUser.fullName} Unblocked successfully` });
-    } catch (error) {
-        console.error("Error in user unblock controller:", error);
+        console.error("Error in toggle block controller:", error);
         next(error);
     }
 };

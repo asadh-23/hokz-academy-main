@@ -1,15 +1,20 @@
-import React from "react";
-import { useSelector } from "react-redux"
+import { useSelector } from "react-redux";
 import { Navigate, Outlet } from "react-router-dom";
 
 const AdminPublicRoute = () => {
-    const { isAuthenticated, role } = useSelector((state) => state.auth);
+    const { isAuthenticated, token, loading } = useSelector((state) => state.adminAuth);
 
-    if(isAuthenticated && role === "admin"){
-        return <Navigate to= "/admin/dashboard" replace />
-    }else {
-        return <Outlet/>
+    // Wait for auth state to be determined
+    if (loading) {
+        return null;
     }
+
+    // If authenticated with valid token, redirect to dashboard
+    if (isAuthenticated && token) {
+        return <Navigate to="/admin/dashboard" replace />;
+    }
+    
+    return <Outlet />;
 };
 
 export default AdminPublicRoute;

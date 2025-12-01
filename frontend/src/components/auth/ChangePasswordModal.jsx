@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { ButtonLoader } from "../common/LoadingSpinner";
-import { userAxios } from "../../api/userAxios";
-import { tutorAxios } from "../../api/tutorAxios";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { validatePassword } from "../../utils/validation";
-import { adminAxios } from "../../api/adminAxios";
+import { useDispatch, useSelector } from "react-redux";
+// Redux thunks and selectors
+import {
+    requestPasswordChange,
+    selectRequestPasswordChangeLoading,
+} from "../../store/features/auth/passwordSlice";
+
 
 const ChangePasswordModal = ({ isOpen, onClose, role }) => {
     const [formData, setFormData] = useState({
@@ -13,10 +17,13 @@ const ChangePasswordModal = ({ isOpen, onClose, role }) => {
         newPassword: "",
         confirmPassword: "",
     });
-    const [isLoading, setIsLoading] = useState(false);
     const [errors, setErrors] = useState({});
 
     const navigate = useNavigate();
+    const dispatch = useDispatch();
+
+    // Redux selectors
+    const isLoading = useSelector(selectRequestPasswordChangeLoading);
 
     useEffect(() => {
         if (isOpen) {
@@ -64,45 +71,32 @@ const ChangePasswordModal = ({ isOpen, onClose, role }) => {
             return setErrors({ newPassword: "New password must be different from the current password." });
         }
 
-        setIsLoading(true);
-
         try {
-            let axiosInstance;
-            if(role === "user"){
-                axiosInstance = userAxios;
-            }else if(role === "tutor"){
-                axiosInstance = tutorAxios;
-            }else if(role === "admin"){
-                axiosInstance = adminAxios;
-            }else{
-                throw new Error("Invalid role specified.");
-            }
+         
+          
+            const result = await dispatch(
+                requestPasswordChange({
+                    currentPassword: trimmedCurrentPassword,
+                    newPassword: trimmedNewPassword,
+                    role,
+                })
+            ).unwrap();
 
-            const response = await axiosInstance.post("/request-password-change", {
-                currentPassword: trimmedCurrentPassword,
-                newPassword: trimmedNewPassword
+            toast.success(result.message || "OTP sent to your email. Please check your inbox.");
+            onClose();
+            navigate(`/${role}/verify-password-change`, {
+                state: { role, newPassword: trimmedNewPassword },
+                replace: true,
             });
-
-            if (response.data?.success) {
-                toast.success(response.data?.message || `OTP sent to your email. Please check your inbox.`);
-
-                onClose();
-
-                navigate(`/${role}/verify-password-change`, { state: { role, newPassword: trimmedNewPassword }, replace: true });
-            }
         } catch (error) {
-            console.error("Password change request failed:", error.response.data.message);
-            setErrors({ general: error.response?.data?.message || "Failed to send OTP. Please try again." })
-
-        } finally {
-            setIsLoading(false);
+            console.error("Password change request failed:", error);
+            setErrors({ general: error || "Failed to send OTP. Please try again." });
         }
     };
 
     const handleClose = () => {
         setFormData({ currentPassword: "", newPassword: "", confirmPassword: "" });
         setErrors({});
-        setIsLoading(false);
         onClose();
     };
 

@@ -1,6 +1,5 @@
 import axios from "axios";
-import { attachTokenInterceptor, handle401Interceptor } from "./authInterceptors";
-
+import { setupInterceptors } from "./setupInterceptors";
 
 export const tutorAxios = axios.create({
   baseURL: `${import.meta.env.VITE_BACKEND_URL}/api/tutor`,
@@ -8,8 +7,4 @@ export const tutorAxios = axios.create({
   headers: { "Content-Type": "application/json" },
 });
 
-tutorAxios.interceptors.request.use(attachTokenInterceptor);
-tutorAxios.interceptors.response.use(
-  (response) => response,
-  handle401Interceptor
-);
+setupInterceptors(tutorAxios);

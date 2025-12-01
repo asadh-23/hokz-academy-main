@@ -439,7 +439,7 @@ export const resendEmailChangeOtp = async (req, res) => {
 
             res.status(200).json({
                 success: true,
-                message: `OTP resent successfully to your new email address. It will expire in 5 minutes.`,
+                message: "OTP resent successfully to your new email address. It will expire in 5 minutes.",
             });
         } catch (emailError) {
             console.error("Failed to resend OTP email:", emailError);

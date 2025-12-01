@@ -1,29 +1,31 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
-import { useLocation, useNavigate } from "react-router-dom";
-import { publicAxios } from "../../api/publicAxios";
+import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { forgotPassword, selectForgotPasswordLoading } from "../../store/features/auth/passwordSlice";
+import { validateEmail } from "../../utils/validation";
 
-export default function ForgotPassword() {
+export default function ForgotPassword({ role }) {
     const [email, setEmail] = useState("");
     const navigate = useNavigate();
-    const location = useLocation();
-    const role = location.pathname.includes("user") ? "user" : "tutor";
+    const dispatch = useDispatch();
+    const isLoading = useSelector(selectForgotPasswordLoading);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!email.trim()) {
-            return toast.error("Please enter valid email");
+        const emailValidation = validateEmail(email);
+        if (!emailValidation.isValid) {
+            return toast.error(emailValidation.message || "Enter a valid email");
         }
 
-        try {
-            const response = await publicAxios.post(`/${role}/auth/forgot-password`, { email });
-            if (response.data?.success) {
-                toast.success(response.data?.message || "Check your email for reset link");
-                navigate(`/${role}/login`);
-            }
-        } catch (error) {
-            toast.error(error.response?.data?.message || "Something went wrong");
-            console.log("Error sending password reset link", error.response?.data?.message);
+        const result = await dispatch(forgotPassword({ email: emailValidation.email, role }));
+
+        if (forgotPassword.fulfilled.match(result)) {
+            toast.success(result.payload?.message || "Check your email for reset link");
+            navigate(`/${role}/login`);
+        } else {
+            toast.error(result.payload || "Something went wrong please try again");
+            navigate(`/${role}/login`);
         }
     };
 
@@ -52,9 +54,10 @@ export default function ForgotPassword() {
 
                     <button
                         type="submit"
-                        className="w-full bg-teal-400 text-white font-bold text-lg py-3 rounded-full shadow-lg hover:bg-teal-500 transition-all"
+                        disabled={isLoading}
+                        className="w-full bg-teal-400 text-white font-bold text-lg py-3 rounded-full shadow-lg hover:bg-teal-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        Send Reset Link
+                        {isLoading ? "Sending..." : "Send Reset Link"}
                     </button>
                 </form>
 

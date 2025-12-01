@@ -1,133 +1,112 @@
-import React, { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import StudentStatsCards from "../../components/admin/students/StudentStatsCards";
 import StudentTable from "../../components/admin/students/StudentTable";
 import Pagination from "../../components/common/Pagination";
 import { PageLoader } from "../../components/common/LoadingSpinner";
 import { toast } from "sonner";
-import { adminAxios } from "../../api/adminAxios";
+import {
+    fetchAdminUsers,
+    toggleAdminUserBlock,
+    setAdminUserFilters,
+    selectAdminUsers,
+    selectAdminUserPagination,
+    selectAdminUserStats,
+    selectAdminUserFilters,
+    clearAdminUserFilters,
+} from "../../store/features/admin/adminUserSlice";
 
 const ManageUsers = () => {
-    // -------------------- STATE --------------------
-    const [students, setStudents] = useState([]);
-    const [isLoading, setIsLoading] = useState(true);
-    const [searchTerm, setSearchTerm] = useState("");
-    const [filterStatus, setFilterStatus] = useState("All Students");
-    const [currentPage, setCurrentPage] = useState(1);
-    const [studentsPerPage] = useState(5);
+    const dispatch = useDispatch();
 
-    const [pagination, setPagination] = useState({
-        currentPage: 1,
-        totalPages: 1,
-        totalFilteredUsers: 0,
-    });
+    const [firstLoad, setFirstLoad] = useState(true);
 
-    const [stats, setStats] = useState({
-        total: 0,
-        active: 0,
-        blocked: 0,
-        inactive: 0,
-    });
+    // Redux selectors
+    const students = useSelector(selectAdminUsers);
+    const pagination = useSelector(selectAdminUserPagination);
+    const stats = useSelector(selectAdminUserStats);
+    const filters = useSelector(selectAdminUserFilters);
 
     // -------------------- FETCH USERS --------------------
-    const fetchStudents = async (showLoader = false) => {
-        if (showLoader) setIsLoading(true);
-
+    const fetchStudents = async () => {
         try {
-            const response = await adminAxios.get("/users", {
-                params: {
-                    page: currentPage,
-                    limit: studentsPerPage,
-                    search: searchTerm,
-                    status: filterStatus === "All Students" ? "" : filterStatus,
-                },
-            });
-
-            if (response.data?.success) {
-                setStudents(response.data.users);
-                setPagination(response.data.pagination);
-                setStats(response.data.stats);
-            }
+            await dispatch(
+                fetchAdminUsers({
+                    page: filters.page,
+                    limit: filters.limit,
+                    search: filters.search,
+                    status: filters.status,
+                })
+            ).unwrap();
+            setFirstLoad(false);
         } catch (error) {
             console.error("Error fetching students:", error);
-            toast.error(error.response?.data?.message || "Failed to load students");
-        } finally {
-            if (showLoader) setIsLoading(false);
+            toast.error(error.message || "Failed to load students");
         }
     };
 
     // -------------------- EFFECTS --------------------
 
-    // ✅ Initial load only once
-    useEffect(() => {
-        fetchStudents(true);
-    }, []);
-
-    // ✅ Re-fetch when page, filter, or search changes
+    // ✅ Fetch when filters change
     useEffect(() => {
         fetchStudents();
-    }, [currentPage, filterStatus, searchTerm]);
+    }, [filters.page, filters.status]);
 
-    // ✅ Debounced search (only resets page number)
+    
     useEffect(() => {
-        const delay = setTimeout(() => setCurrentPage(1), 600);
+        dispatch(setAdminUserFilters({ page: 1 }));
+    }, [filters.search, filters.status]);
+
+    useEffect(() => {
+        const delay = setTimeout(() => {
+            fetchStudents();
+        }, 500);
         return () => clearTimeout(delay);
-    }, [searchTerm]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [filters.search]);
 
     // -------------------- HANDLERS --------------------
-    const handleSearch = (e) => setSearchTerm(e.target.value);
-    const handleFilterChange = (e) => setFilterStatus(e.target.value);
-    const handlePageChange = (page) => setCurrentPage(page);
+    const handleSearch = (e) => {
+        dispatch(setAdminUserFilters({ search: e.target.value }));
+    };
+
+    const handleFilterChange = (e) => {
+        dispatch(setAdminUserFilters({ status: e.target.value }));
+    };
+
+    const handlePageChange = (page) => {
+        dispatch(setAdminUserFilters({ page }));
+    };
 
     const handleRefresh = () => {
-        setSearchTerm("");
-        setFilterStatus("All Students");
-        setCurrentPage(1);
-        fetchStudents();
+        dispatch(clearAdminUserFilters());
     };
 
     // -------------------- ACTION HANDLERS --------------------
-    const handleBlockStudent = async (userId) => {
-        const user = students.find((s) => s._id === userId);
-        const userName = user?.fullName || "this student";
+    const handleToggleBlockStudent = async (userId, userName, status) => {
+        const actionText = status === "Blocked" ? "Unblock" : "Block";
 
-        toast.warning(`Are you sure you want to block ${userName}?`, {
+        toast.warning(`Are you sure you want to ${actionText} ${userName}?`, {
             action: {
-                label: "Block",
+                label: actionText,
                 onClick: async () => {
                     try {
-                        const response = await adminAxios.patch(`/users/${userId}/block`);
-                        if (response.data?.success) {
-                            toast.success(response.data?.message || `${userName} has been blocked successfully`);
-                            fetchStudents();
-                        }
+                        await dispatch(toggleAdminUserBlock({ userId })).unwrap();
+                        fetchStudents();
+
+                        toast.success(`${userName} has been ${actionText}ed successfully`);
                     } catch (error) {
-                        console.error("Failed to block user:", error);
-                        toast.error(error.response?.data?.message || "Block request failed");
+                        console.error(`Failed to ${actionText} user:`, error);
+                        toast.error(error.message || `Failed to ${actionText.toLowerCase()} user`);
                     }
                 },
             },
-            cancel: {
-                label: "Cancel",
-                onClick: () => {},
-            },
+            cancel: { label: "Cancel" },
         });
     };
 
-    const handleUnblockStudent = async (userId) => {
-        try {
-            const response = await adminAxios.patch(`/users/${userId}/unblock`);
-            if (response.data?.success) {
-                toast.success(response.data?.message || "User unblocked successfully");
-                fetchStudents();
-            }
-        } catch (error) {
-            console.error("Failed to unblock user:", error);
-            toast.error(error.response?.data?.message || "Unblock request failed");
-        }
-    };
-
     // -------------------- RENDER --------------------
-    if (isLoading) {
+    if (firstLoad) {
         return (
             <div className="flex justify-center items-center flex-1 h-[80vh]">
                 <PageLoader text="Loading Students..." />
@@ -153,11 +132,11 @@ const ManageUsers = () => {
                     <div className="flex items-center gap-4">
                         <h2 className="text-lg font-semibold text-gray-800">Student List</h2>
                         <select
-                            value={filterStatus}
+                            value={filters.status}
                             onChange={handleFilterChange}
                             className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500"
                         >
-                            <option value="All Students">All Students</option>
+                            <option value="All">All Students</option>
                             <option value="Active">Active Students</option>
                             <option value="Blocked">Blocked Students</option>
                             <option value="Inactive">Inactive Students</option>
@@ -170,7 +149,7 @@ const ManageUsers = () => {
                             <input
                                 type="text"
                                 placeholder="Search students..."
-                                value={searchTerm}
+                                value={filters.search}
                                 onChange={handleSearch}
                                 className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 w-64"
                             />
@@ -200,15 +179,16 @@ const ManageUsers = () => {
             </div>
 
             {/* Table */}
-            <StudentTable students={students} onBlockStudent={handleBlockStudent} onUnblockStudent={handleUnblockStudent} />
+            <StudentTable students={students} onToggleBlock={handleToggleBlockStudent} />
 
             {/* Pagination */}
             <Pagination
                 currentPage={pagination.currentPage}
                 totalPages={pagination.totalPages}
-                totalItems={pagination.totalFilteredUsers}
-                itemsPerPage={studentsPerPage}
+                totalItems={pagination.totalFilteredUsers || 0}
+                itemsPerPage={filters.limit}
                 onPageChange={handlePageChange}
+                label="Students"
             />
         </div>
     );

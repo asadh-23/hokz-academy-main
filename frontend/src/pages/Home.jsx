@@ -19,23 +19,20 @@ import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 
 export default function Home() {
-    const { isAuthenticated, role } = useSelector((state) => state.auth);
+    const userAuth = useSelector((state) => state.userAuth);
+    const tutorAuth = useSelector((state) => state.tutorAuth);
+    const adminAuth = useSelector((state) => state.adminAuth);
     const navigate = useNavigate();
-    console.log(role);
-    
 
     useEffect(() => {      
-        if (isAuthenticated) {             
-            if (role === "user") {
-                navigate("/user/dashboard", { replace: true });
-            } else if (role === "tutor") {
-                navigate("/tutor/dashboard", { replace: true });
-            } else if (role === "admin") {
-                navigate("/admin/dashboard", { replace: true });
-            }
+        if (userAuth.isAuthenticated) {
+            navigate("/user/dashboard", { replace: true });
+        } else if (tutorAuth.isAuthenticated) {
+            navigate("/tutor/dashboard", { replace: true });
+        } else if (adminAuth.isAuthenticated) {
+            navigate("/admin/dashboard", { replace: true });
         }
-        
-    }, [isAuthenticated, role, navigate]);
+    }, [userAuth.isAuthenticated, tutorAuth.isAuthenticated, adminAuth.isAuthenticated, navigate]);
     return (
         <>
             <PublicHeader />

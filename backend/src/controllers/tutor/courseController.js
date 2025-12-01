@@ -155,7 +155,7 @@ export const getTutorCourses = async (req, res) => {
             .limit(limit)
             .lean();
 
-        const totalFilteredItems = await Course.countDocuments(filter);
+        const totalFilteredCourses = await Course.countDocuments(filter);
 
         return res.status(200).json({
             success: true,
@@ -166,8 +166,11 @@ export const getTutorCourses = async (req, res) => {
                 listed: listedCount,
                 unlisted: unlistedCount,
             },
-            totalItems: totalFilteredItems,
-            totalPages: Math.ceil(totalFilteredItems / limit),
+            pagination: {
+                totalCourses: totalFilteredCourses,
+                totalPages: Math.ceil(totalFilteredCourses / limit),
+                currentPage: page,
+            }
         });
     } catch (error) {
         console.error("Error fetching tutor courses:", error);
@@ -313,4 +316,3 @@ export const toggleListCourse = async (req, res) => {
         });
     }
 };
-

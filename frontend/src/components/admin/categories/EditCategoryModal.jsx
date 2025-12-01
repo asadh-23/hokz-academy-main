@@ -1,9 +1,13 @@
 import { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { toast } from "sonner";
-import { adminAxios } from "../../../api/adminAxios";
+import { updateAdminCategory } from "../../../store/features/admin/adminCategorySlice";
 import { isNullOrWhitespace } from "../../../utils/validation";
 
 const EditCategoryModal = ({ isOpen, onClose, onSuccess, category }) => {
+    const dispatch = useDispatch();
+    const { loading } = useSelector((state) => state.adminCategories);
+    
     const [formData, setFormData] = useState({
         name: "",
         description: "",
@@ -49,23 +53,21 @@ const EditCategoryModal = ({ isOpen, onClose, onSuccess, category }) => {
             return toast.error("Description is required");
         }
 
-        const trimmedName = formData.name.trim();
-        const trimmedDescription = formData.description.trim();
+        const categoryData = {
+            name: formData.name.trim(),
+            description: formData.description.trim(),
+        };
 
         try {
-            const response = await adminAxios.put(`/categories/${category._id}`, {
-                name: trimmedName,
-                description: trimmedDescription,
-            });
-
-            if (response.data?.success) {
-                toast.success(response.data?.message || "Category updated successfully");
-                onSuccess();
-                onClose();
-            }
+            await dispatch(updateAdminCategory({
+                categoryId: category._id,
+                categoryData
+            })).unwrap();
+            toast.success("Category updated successfully");
+            onSuccess();
+            onClose();
         } catch (error) {
-            console.error("Failed to update category:", error);
-            toast.error(error.response?.data?.message || "Failed to update category");
+            toast.error(error?.message || "Failed to update category");
         }
     };
 
@@ -120,9 +122,10 @@ const EditCategoryModal = ({ isOpen, onClose, onSuccess, category }) => {
                         </button>
                         <button
                             type="submit"
-                            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                            disabled={loading}
+                            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            Update Category
+                            {loading ? "Updating..." : "Update Category"}
                         </button>
                     </div>
                 </form>

@@ -3,7 +3,7 @@ import Category from "../../models/category/Category.js";
 
 export const getAllCourses = async (req, res) => {
     try {
-        const { search, category, minPrice, maxPrice, sort, page, limit } = req.query;
+        const { search = "", category = "", minPrice = "", maxPrice = "", sort = "", page = 1, limit = 10 } = req.query;
 
         const query = {
             isListed: true,
@@ -12,12 +12,12 @@ export const getAllCourses = async (req, res) => {
         };
 
         // SEARCH
-        if (search.trim()) {
+        if (search && search.trim()) {
             query.title = { $regex: search.trim(), $options: "i" };
         }
 
         // CATEGORY
-        if (category && category !== "all") {
+        if (category) {
             query.category = category;
         }
 
@@ -53,22 +53,26 @@ export const getAllCourses = async (req, res) => {
         }
 
         // PAGINATION
-        const skip = (page - 1) * limit;
+        const pageNum = Number(page) || 1;
+        const limitNum = Number(limit) || 10;
+        const skip = (pageNum - 1) * limitNum;
 
         const totalItems = await Course.countDocuments(query);
 
         const courses = await Course.find(query)
             .populate("category", "name")
+            .populate("tutor", "fullName")
             .sort(sortQuery)
             .skip(skip)
-            .limit(Number(limit))
+            .limit(limitNum)
             .lean();
 
         return res.status(200).json({
             success: true,
             courses,
             totalItems,
-            totalPages: Math.ceil(totalItems / limit),
+            totalPages: Math.ceil(totalItems / limitNum),
+            currentPage: pageNum,
         });
     } catch (error) {
         console.error("Get all courses error:", error);
@@ -92,6 +96,51 @@ export const getListedCategories = async (req, res) => {
         return res.status(500).json({
             success: false,
             message: "Failed to fetch categories",
+        });
+    }
+};
+
+export const getCourseDetails = async (req, res) => {
+    try {
+        const { courseId } = req.params;
+
+        if (!courseId) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid course ID",
+            });
+        }
+
+        // Fetch course details
+        const course = await Course.findOne({
+            _id: courseId,
+            isListed: true,
+            isActive: true,
+            isDeleted: false,
+        })
+            .populate("tutor", "fullName email profileImage")
+            .populate("category", "name");
+
+        // Course not found or restricted
+        if (!course) {
+            return res.status(404).json({
+                success: false,
+                message: "Course not found",
+            });
+        }
+
+        // Success
+        return res.status(200).json({
+            success: true,
+            message: "Course details fetched successfully",
+            course,
+        });
+    } catch (err) {
+        console.error("Get course details error:", err.message);
+
+        return res.status(500).json({
+            success: false,
+            message: "Something went wrong while fetching course details",
         });
     }
 };

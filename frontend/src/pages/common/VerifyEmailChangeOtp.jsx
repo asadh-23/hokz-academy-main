@@ -1,8 +1,15 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { userAxios } from "../../api/userAxios";
-import { tutorAxios } from "../../api/tutorAxios";
+import { useDispatch, useSelector } from "react-redux";
+// Redux thunks and selectors
+import {
+    verifyEmailChangeOtp,
+    resendEmailChangeOtp,
+    selectEmailChangeVerifyLoading,
+    selectEmailChangeResendLoading,
+} from "../../store/features/auth/emailChangeSlice";
+
 
 const RESEND_INTERVAL = 60;
 
@@ -12,6 +19,7 @@ export default function VerifyEmailChangeOtp() {
     const role = location.state?.role;
 
     const navigate = useNavigate();
+    const dispatch = useDispatch();
 
     const [otp, setOtp] = useState(Array(6).fill(""));
     const inputRefs = useRef([]);
@@ -19,7 +27,9 @@ export default function VerifyEmailChangeOtp() {
     const [timer, setTimer] = useState(RESEND_INTERVAL);
     const [resendDisabled, setResendDisabled] = useState(true);
 
-    const [ButtonLoader, setButtonLoader] = useState(false);
+    // Redux selectors
+    const isVerifying = useSelector(selectEmailChangeVerifyLoading);
+    const isResending = useSelector(selectEmailChangeResendLoading);
 
     useEffect(() => {
         const savedTimestamp = localStorage.getItem("otpTimestamp");
@@ -84,27 +94,22 @@ export default function VerifyEmailChangeOtp() {
             return toast.error("Please enter the 6-digit OTP sent to your new email.");
         }
 
-        const axiosInstance = role === "tutor" ? tutorAxios : userAxios;
-
-        setButtonLoader(true);
-
         try {
-            const response = await axiosInstance.post("/verify-email-change", {
-                otpCode,
-                email,
-            });
+          
+            const result = await dispatch(
+                verifyEmailChangeOtp({
+                    otpCode,
+                    email,
+                    role,
+                })
+            ).unwrap();
 
-            if (response.data?.success) {
-                toast.success(response.data.message || "Email address updated successfully!");
-                localStorage.removeItem("otpTimestamp");
-
-                navigate(`/${role}/profile`, { replace: true });
-            }
+            toast.success(result.message || "Email address updated successfully!");
+            localStorage.removeItem("otpTimestamp");
+            navigate(`/${role}/profile`, { replace: true });
         } catch (error) {
             console.error("Email change verification failed:", error);
-            toast.error(error.response?.data?.message || "Incorrect OTP or it may have expired. Please try again.");
-        } finally {
-            setButtonLoader(false);
+            toast.error(error || "Incorrect OTP or it may have expired. Please try again.");
         }
     };
 
@@ -116,15 +121,17 @@ export default function VerifyEmailChangeOtp() {
         localStorage.setItem("otpTimestamp", Date.now().toString());
 
         try {
-            const axiosInstance = role === "tutor" ? tutorAxios : userAxios;
+          
+           const result = await dispatch(
+                resendEmailChangeOtp({
+                    email,
+                    role,
+                })
+            ).unwrap();
 
-            const response = await axiosInstance.post("/resend-email-change-otp", { email });
-
-            if (response.data?.success) {
-                toast.success(response.data.message || "OTP resent successfully.");
-            }
+            toast.success(result.message || "OTP resent successfully.");
         } catch (error) {
-            toast.error(error.response?.data?.message || "An error occurred while resending OTP.");
+            toast.error(error || "An error occurred while resending OTP.");
             console.error("Error resending email change OTP:", error);
             setResendDisabled(false);
             setTimer(0);
