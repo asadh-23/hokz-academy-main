@@ -1,114 +1,109 @@
-// import Wishlist from "../../models/interaction/Wishlist.js";
-// import Course from "../../models/course/Course.js";
+import Wishlist from "../../models/interaction/Wishlist.js";
+import Course from "../../models/course/Course.js";
 
-// export const addToWishlist = async (req, res) => {
-//     try {
-//         const userId = req.user._id;
-//         const { courseId } = req.body;
+export const addToWishlist = async (req, res) => {
+    try {
+        const userId = req.user._id;
+        const { courseId } = req.body;
+        if (!courseId) return res.status(400).json({ success: false, message: "courseId required" });
 
-//         if (!courseId) {
-//             return res.status(400).json({
-//                 success: false,
-//                 message: "Course ID is required",
-//             });
-//         }
+        const course = await Course.findById(courseId).select("_id");
+        if (!course) return res.status(404).json({ success: false, message: "Course not found" });
 
-//         const course = await Course.findById(courseId)
-//             .select("title slug thumbnailUrl price offerPercentage")
-//             .populate("tutor", "fullName");
+        const item = await Wishlist.addToWishlist(userId, courseId, { source: "course_page" });
+        const populatedItem = await item.populate({
+            path: "course",
+            select: "title slug thumbnailUrl price offerPercentage tutor category averageRating totalReviews lessonsCount totalDurationSeconds isListed",
+            populate: [
+                {
+                    path: "tutor",
+                    select: "fullName profileImage email",
+                },
+                {
+                    path: "category",
+                    select: "name slug isListed",
+                },
+            ],
+        });
 
-//         if (!course) {
-//             return res.status(404).json({
-//                 success: false,
-//                 message: "Course not found",
-//             });
-//         }
+    
+        return res.status(201).json({ success: true, item: populatedItem });
+    } catch (err) {
+        const status = err.status || 500;
+        return res.status(status).json({ success: false, message: err.message || "Failed to add to wishlist" });
+    }
+};
 
-//         // Prepare snapshot for faster UI
-//         const snapshot = {
-//             title: course.title,
-//             slug: course.slug,
-//             thumbnailUrl: course.thumbnailUrl,
-//             price: course.price,
-//             offerPercentage: course.offerPercentage,
-//             tutorName: course.tutor?.fullName || "Unknown Tutor",
-//         };
+export const getUserWishlist = async (req, res) => {
+    try {
+        const userId = req.user._id;
 
-//         // Use static helper for clean logic
-//         const wishlistItem = await Wishlist.addToWishlist(userId, courseId, snapshot, { upsertSnapshot: true });
+        const wishlistItems = await Wishlist.find({
+            user: userId,
+            isDeleted: false,
+        })
+            .populate({
+                path: "course",
+                select: "title slug thumbnailUrl price offerPercentage tutor category averageRating totalReviews lessonsCount totalDurationSeconds isListed",
+                populate: [
+                    {
+                        path: "tutor",
+                        select: "fullName profileImage",
+                    },
+                    {
+                        path: "category",
+                        select: "name slug isListed",
+                    },
+                ],
+            })
+            .sort({ createdAt: -1 })
+            .lean();
 
-//         return res.status(201).json({
-//             success: true,
-//             message: "Added to wishlist",
-//             item: wishlistItem,
-//         });
-//     } catch (error) {
-//         console.error("Add to wishlist error:", error);
-//         return res.status(500).json({
-//             success: false,
-//             message: "Failed to add to wishlist",
-//         });
-//     }
-// };
+        // Filter out items whose courses are deleted/unlisted
+        const validItems = wishlistItems.filter((item) => item.course);
 
-// export const removeFromWishlist = async (req, res) => {
-//     try {
-//         const userId = req.user._id;
-//         const { wishlistItemId } = req.params;
+        return res.status(200).json({
+            success: true,
+            wishlist: validItems,
+        });
+    } catch (error) {
+        console.error("Get wishlist error:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Failed to fetch wishlist",
+        });
+    }
+};
 
-//         const item = await Wishlist.findOne({
-//             _id: wishlistItemId,
-//             user: userId,
-//         });
+export const removeFromWishlist = async (req, res) => {
+    try {
+        const userId = req.user._id;
+        const { wishlistId } = req.params;
+        const updated = await Wishlist.removeFromWishlist(userId, wishlistId);
+        if (!updated) return res.status(404).json({ success: false, message: "Wishlist item not found" });
 
-//         if (!item) {
-//             return res.status(404).json({
-//                 success: false,
-//                 message: "Wishlist item not found",
-//             });
-//         }
+        return res.status(200).json({ success: true, message: "Removed from wishlist" });
+    } catch (err) {
+        console.error("Remove from wishlist error : ", err);
+        return res.status(500).json({ success: false, message: "Failed to remove wishlist item" });
+    }
+};
 
-//         // Soft delete (recommended)
-//         item.isDeleted = true;
-//         item.deletedAt = new Date();
-//         await item.save();
+export const clearWishlist = async (req, res) => {
+    try {
+        const userId = req.user._id;
 
-//         return res.status(200).json({
-//             success: true,
-//             message: "Removed from wishlist",
-//         });
-//     } catch (error) {
-//         console.error("Remove wishlist error:", error);
-//         return res.status(500).json({
-//             success: false,
-//             message: "Failed to remove wishlist item",
-//         });
-//     }
-// };
+        await Wishlist.updateMany(
+            { user: userId, isDeleted: false },
+            { $set: { isDeleted: true, deletedAt: new Date() } }
+        );
 
-// export const getUserWishlist = async (req, res) => {
-//     try {
-//         const userId = req.user._id;
+        return res.status(200).json({ success: true, message: "Wishlist cleared successfully" });
+    } catch (err) {
+        return res.status(500).json({ success: false, message: "Failed to clear wishlist" });
+    }
+};
 
-//         const items = await Wishlist.find({
-//             user: userId,
-//             isDeleted: false,
-//         })
-//             .populate("course", "title thumbnailUrl price offerPercentage tutor")
-//             .sort({ createdAt: -1 });
-
-//         return res.status(200).json({
-//             success: true,
-//             items,
-//         });
-//     } catch (error) {
-//         console.error("Get wishlist error:", error);
-//         return res.status(500).json({
-//             success: false,
-//             message: "Failed to fetch wishlist",
-//         });
-//     }
-// };
 
 // export const isInWishlist = async (req, res) => {
 //     try {

@@ -14,6 +14,7 @@ import userProfileReducer from "./features/user/userProfileSlice";
 import userDashboardReducer from "./features/user/userDashboardSlice";
 import userCoursesReducer from "./features/user/userCoursesSlice";
 import userWishlistReducer from "./features/user/userWishlistSlice";
+import userCartReducer from "./features/user/userCartSlice";
 
 // ================== TUTOR ==================
 import tutorProfileReducer from "./features/tutor/tutorProfileSlice";
@@ -48,6 +49,7 @@ export const store = configureStore({
     userDashboard: userDashboardReducer,
     userCourses: userCoursesReducer,
     userWishlist: userWishlistReducer,
+    userCart: userCartReducer,
 
     // TUTOR
     tutorProfile: tutorProfileReducer,

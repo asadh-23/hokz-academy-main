@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { Search, Star, SlidersHorizontal, Heart, X, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
 import { useDispatch, useSelector } from "react-redux";
@@ -13,11 +13,12 @@ import {
     selectUserCoursePagination,
     selectUserCoursesLoading,
 } from "../../store/features/user/userCoursesSlice";
-// import {
-//     toggleUserWishlist,
-//     fetchUserWishlist,
-//     selectUserWishlist,
-// } from "../../store/features/user/userWishlistSlice";
+import {
+    toggleUserWishlist,
+    fetchUserWishlist,
+    selectUserWishlist,
+    selectUserWishlistLoadingById,
+} from "../../store/features/user/userWishlistSlice";
 import Pagination from "../../components/common/Pagination";
 import { Link } from "react-router-dom";
 
@@ -31,7 +32,10 @@ const Courses = () => {
     const filters = useSelector(selectUserCourseFilters);
     const pagination = useSelector(selectUserCoursePagination);
     const loading = useSelector(selectUserCoursesLoading);
-    // const wishlist = useSelector(selectUserWishlist);
+
+    const wishlist = useSelector(selectUserWishlist);
+    const loadingById = useSelector(selectUserWishlistLoadingById);
+
     const [isFilterOpen, setIsFilterOpen] = useState(false);
     const [tempFilters, setTempFilters] = useState({
         minPrice: "",
@@ -42,7 +46,7 @@ const Courses = () => {
     // Fetch categories and wishlist on mount
     useEffect(() => {
         dispatch(fetchUserListedCategories());
-        // dispatch(fetchUserWishlist());
+        dispatch(fetchUserWishlist());
     }, [dispatch]);
 
     // Fetch courses when filters change
@@ -116,22 +120,29 @@ const Courses = () => {
         dispatch(setUserCourseFilters({ page }));
     };
 
-    const handleToggleWishlist = async (courseId) => {
-        // try {
-        //     const result = await dispatch(toggleUserWishlist(courseId)).unwrap();
-        //     if (result.action === "added") {
-        //         toast.success("Added to wishlist");
-        //     } else {
-        //         toast.success("Removed from wishlist");
-        //     }
-        // } catch (error) {
-        //     toast.error(error || "Failed to update wishlist");
-        // }
+    const handleToggleWishlist = async (courseId, title) => {
+        try {
+            const result = await dispatch(toggleUserWishlist(courseId)).unwrap();
+            if (result.action === "added") {
+                toast.success(`${title} Added to wishlist`);
+            } else {
+                toast.success(`${title} Removed from wishlist`);
+            }
+        } catch (error) {
+            toast.error(error || "Failed to update wishlist");
+        }
     };
 
-    // const isInWishlist = (courseId) => {
-    //     return wishlist.some((item) => item.course?._id === courseId);
-    // };
+    const wishlistCourseIds = useMemo(() => {
+        if (!Array.isArray(wishlist)) return new Set();
+
+        return new Set(wishlist.map((item) => item.course?._id));
+    }, [wishlist]);
+
+    // Now checking is Instant
+    const isInWishlist = (courseId) => {
+        return wishlistCourseIds.has(courseId);
+    };
 
     const sortOptions = [
         { value: "", label: "Default" },
@@ -339,20 +350,25 @@ const Courses = () => {
                                         )}
 
                                         <button
+                                            disabled={loadingById[course._id]}
                                             className="absolute top-3 right-3 p-2.5 bg-white/90 backdrop-blur-sm rounded-full shadow-lg hover:bg-white transition-all group/heart"
                                             onClick={(e) => {
                                                 e.preventDefault();
                                                 e.stopPropagation();
-                                                handleToggleWishlist(course._id);
+                                                handleToggleWishlist(course._id, course.title);
                                             }}
                                         >
-                                            <Heart
-                                                className={`w-5 h-5 transition-all ${
-                                                    isInWishlist(course._id)
-                                                        ? "text-red-500 fill-red-500"
-                                                        : "text-gray-700 group-hover/heart:text-red-500 group-hover/heart:fill-red-500"
-                                                }`}
-                                            />
+                                            {loadingById[course._id] ? (
+                                                <div className="w-5 h-5 border-2 border-red-500 border-t-transparent rounded-full animate-spin"></div>
+                                            ) : (
+                                                <Heart
+                                                    className={`w-5 h-5 transition-all ${
+                                                        isInWishlist(course._id)
+                                                            ? "text-red-500 fill-red-500"
+                                                            : "text-gray-700 group-hover/heart:text-red-500 group-hover/heart:fill-red-500"
+                                                    }`}
+                                                />
+                                            )}
                                         </button>
                                     </div>
 

@@ -16,6 +16,7 @@ import Courses from "../pages/user/Courses";
 import CourseDetails from "../pages/user/CourseDetails";
 import { UserLayout } from "../layouts/UserLayout";
 import Wishlist from "../pages/user/WishList";
+import Cart from "../pages/user/Cart";
 
 export default function UserRoutes() {
     return (
@@ -37,6 +38,7 @@ export default function UserRoutes() {
                     <Route path="/courses" element={<Courses />} />
                     <Route path="/courses/:courseId" element={<CourseDetails />} />
                     <Route path="/wishlist" element={<Wishlist/> } />
+                    <Route path="cart" element={<Cart/> } />
                 </Route>
             </Route>
         </Routes>

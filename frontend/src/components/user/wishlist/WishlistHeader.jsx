@@ -1,13 +1,9 @@
 import { Heart, RefreshCw, Trash2, ShoppingCart } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
-const WishlistHeader = ({ 
-    itemCount, 
-    totalValue, 
-    onRefresh, 
-    onClearAll, 
-    onViewCart, 
-    loading 
-}) => {
+const WishlistHeader = ({ itemCount, totalValue, onRefresh, onClearAll, loading, clearLoading }) => {
+
+    const navigate = useNavigate();
     return (
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
             <div>
@@ -39,16 +35,18 @@ const WishlistHeader = ({
 
                 <button
                     onClick={onClearAll}
-                    disabled={itemCount === 0 || loading}
+                    disabled={itemCount === 0 || clearLoading}
                     className="flex items-center gap-2 px-4 py-2.5 bg-white border-2 border-red-300 text-red-600 rounded-xl font-medium hover:bg-red-50 hover:border-red-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                     title="Clear all items"
                 >
-                    <Trash2 className="h-5 w-5" />
-                    <span className="hidden sm:inline">Clear All</span>
+                    <Trash2 className={`h-5 w-5 ${clearLoading ? "animate-spin" : ""}`} />
+                    <span className="hidden sm:inline">{clearLoading ? "Clearing..." : "Clear All"}</span>
                 </button>
 
                 <button
-                    onClick={onViewCart}
+                    onClick={() => {
+                        navigate("/user/cart");
+                    }}
                     className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-emerald-500 to-cyan-500 text-white rounded-xl font-medium hover:from-emerald-600 hover:to-cyan-600 transition-all shadow-md"
                     title="Go to cart"
                 >
