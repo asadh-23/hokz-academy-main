@@ -16,6 +16,7 @@ import AddCourse from "../pages/tutor/AddCourse";
 import AddLesson from "../pages/tutor/AddLesson";
 import ManageCourses from "../pages/tutor/ManageCourses";
 import EditCourse from "../pages/tutor/EditCourse";
+import Coupon from "../pages/tutor/Coupon";
 
 export default function TutorRoutes() {
     return (
@@ -40,7 +41,7 @@ export default function TutorRoutes() {
                     <Route path="/courses/:courseId/add-lesson" element={<AddLesson />} />
                     <Route path="/courses" element={<ManageCourses/> } />
                     <Route path="/courses/:courseId/edit" element={<EditCourse/> } />
-                    
+                    <Route path="/coupons" element={<Coupon/> } />
                 </Route>
             </Route>
 

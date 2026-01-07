@@ -32,7 +32,7 @@ const CourseDetails = () => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
 
-    const course = useSelector(selectUserSelectedCourse);
+    const courseData = useSelector(selectUserSelectedCourse);
     const loading = useSelector(selectUserCourseDetailsLoading);
 
     const cart = useSelector(selectUserCart);
@@ -44,7 +44,6 @@ const CourseDetails = () => {
     useEffect(() => {
         const loadPageData = async () => {
             try {
-              
                 await dispatch(fetchUserCourseDetails(courseId)).unwrap();
 
                 await Promise.allSettled([dispatch(fetchUserCart()), dispatch(fetchUserWishlist())]);
@@ -59,6 +58,11 @@ const CourseDetails = () => {
             loadPageData();
         }
     }, [courseId, dispatch, navigate]);
+
+
+    const handleContinueLearning = () => {
+        navigate(`/user/learn/${courseId}`);
+    };
 
     const handleAddToCart = async () => {
         const isInCart = cart?.items?.some((item) => item.course?._id === courseId);
@@ -90,7 +94,7 @@ const CourseDetails = () => {
         }
     };
 
-    if (loading || !course) {
+    if (loading || !courseData) {
         return (
             <div className="flex justify-center items-center min-h-screen bg-gray-50">
                 <PageLoader text="Loading course details..." />
@@ -99,15 +103,11 @@ const CourseDetails = () => {
     }
 
     // Calculate totals from denormalized fields
-    const totalLessons = course.lessonsCount || 0;
-    const totalDurationSeconds = course.totalDurationSeconds || 0;
+    const totalLessons = courseData.course.lessonsCount || 0;
+    const totalDurationSeconds = courseData.course.totalDurationSeconds || 0;
     const hours = Math.floor(totalDurationSeconds / 3600);
     const minutes = Math.floor((totalDurationSeconds % 3600) / 60);
     const seconds = totalDurationSeconds % 60;
-
-    // Calculate offer price
-    const offerPrice =
-        course.offerPercentage > 0 ? (course.price * (1 - course.offerPercentage / 100)).toFixed(2) : course.price;
 
     const isAddingToCart = addToCartLoadingById[courseId] || false;
     const isTogglingWishlist = wishlistLoadingById[courseId] || false;
@@ -115,14 +115,14 @@ const CourseDetails = () => {
 
     return (
         <div className="min-h-screen bg-gray-50 font-sans text-gray-900">
-            <CourseHero course={course} />
+            <CourseHero courseData={courseData} />
 
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <div className="lg:grid lg:grid-cols-3 lg:gap-12">
                     {/* Left Column - Course Content */}
                     <div className="lg:col-span-2 space-y-10">
                         <CourseOverview
-                            course={course}
+                            courseData={courseData}
                             totalLessons={totalLessons}
                             hours={hours}
                             minutes={minutes}
@@ -137,18 +137,17 @@ const CourseDetails = () => {
                         <div>
                             <h2 className="text-2xl font-bold text-gray-900 mb-4">Description</h2>
                             <div className="prose prose-indigo text-gray-600 max-w-none">
-                                <p className="whitespace-pre-wrap">{course.description}</p>
+                                <p className="whitespace-pre-wrap">{courseData.course.description}</p>
                             </div>
                         </div>
 
-                        <CourseInstructor tutor={course.tutor} averageRating={course.averageRating} />
+                        <CourseInstructor tutor={courseData.course.tutor} averageRating={courseData.course.averageRating} />
                     </div>
 
                     {/* Right Column - Sidebar */}
                     <div className="lg:col-span-1 relative">
                         <CourseSidebar
-                            course={course}
-                            offerPrice={offerPrice}
+                            courseData={courseData}
                             hours={hours}
                             minutes={minutes}
                             seconds={seconds}
@@ -159,6 +158,7 @@ const CourseDetails = () => {
                             isInCart={isInCart}
                             isAddingToCart={isAddingToCart}
                             isTogglingWishlist={isTogglingWishlist}
+                            onContinueLearning={handleContinueLearning}
                         />
                     </div>
                 </div>

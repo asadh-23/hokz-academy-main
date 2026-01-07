@@ -19,11 +19,13 @@ import adminCategoryRoutes from './routes/admin/categoryRoutes.js';
 import tutorProfileRoutes from './routes/tutor/profileRoutes.js';
 import tutorCourseRoutes from './routes/tutor/courseRoutes.js';
 import tutorLessonRoutes from "./routes/tutor/lessonRoutes.js";
+import tutorCouponRoutes from "./routes/tutor/couponRoutes.js";
 
 import userProfileRoutes from './routes/user/profileRoutes.js';
 import userCourseRoutes from "./routes/user/CourseRoutes.js";
 import userWishlistRoutes from "./routes/user/wishlistRoutes.js"
 import userCartRoutes from "./routes/user/cartRoutes.js";
+import userPaymentRoutes from "./routes/user/paymentRoutes.js"
 
 import { notFound, errorHandler } from "./middlewares/errorHandler.js";
 
@@ -73,12 +75,14 @@ app.use('/api/admin', adminCategoryRoutes);
 
 app.use('/api/tutor', tutorProfileRoutes);
 app.use('/api/tutor', tutorCourseRoutes);
-app.use("/api/tutor", tutorLessonRoutes)
+app.use("/api/tutor", tutorLessonRoutes);
+app.use("/api/tutor", tutorCouponRoutes);
 
 app.use('/api/user', userProfileRoutes);
 app.use("/api/user", userCourseRoutes);
 app.use("/api/user", userWishlistRoutes);
 app.use("/api/user", userCartRoutes);
+app.use("/api/user", userPaymentRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

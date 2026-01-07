@@ -152,46 +152,39 @@ export default function OtpVerify() {
     // UI
     // ==========================================================
     return (
-        <div className="min-h-screen flex items-center justify-center bg-[#eddfc3]">
-            <div className="bg-white rounded-3xl px-8 py-10 shadow-2xl max-w-md w-full text-center relative">
-                {/* X BUTTON */}
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 p-4">
+            <div className="bg-white rounded-3xl px-8 py-10 shadow-2xl max-w-md w-full text-center relative border border-gray-100">
+                {/* Close Button */}
                 <button
-                    className="absolute right-8 top-7 text-xl text-gray-400 hover:text-gray-700"
+                    className="absolute right-6 top-6 w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-all"
                     onClick={() => navigate(`/${role}/register`)}
+                    title="Close"
                 >
-                    &times;
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
                 </button>
 
-                {/* ICON */}
+                {/* Email Icon */}
                 <div className="mb-6">
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        strokeWidth={1.5}
-                        stroke="#D94D22"
-                        className="w-16 h-16 mx-auto"
-                    >
-                        <rect x="3" y="6" width="18" height="12" rx="3" fill="#FFB347" />
-                        <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            stroke="#D94D22"
-                            strokeWidth={1.5}
-                            d="M3 8l9 6 9-6"
-                        />
-                    </svg>
+                    <div className="w-20 h-20 mx-auto bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
+                        <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                        </svg>
+                    </div>
                 </div>
 
-                <h2 className="text-2xl font-bold mb-2 text-gray-900">
-                    Verify Your Email Address
+                <h2 className="text-3xl font-bold mb-3 text-gray-900">
+                    Verify Your Email
                 </h2>
-                <p className="text-xs text-gray-500 mb-7 max-w-xs mx-auto">
-                    We have sent a 6-digit OTP to your email: <b>{email}</b>
+                <p className="text-sm text-gray-600 mb-8 max-w-sm mx-auto">
+                    We've sent a 6-digit verification code to
+                    <br />
+                    <span className="font-semibold text-gray-900">{email}</span>
                 </p>
 
-                {/* OTP BOXES */}
-                <div className="flex gap-5 mb-7">
+                {/* OTP Input Boxes */}
+                <div className="flex gap-3 justify-center mb-8">
                     {otp.map((val, i) => (
                         <input
                             key={i}
@@ -200,50 +193,68 @@ export default function OtpVerify() {
                             value={val}
                             onChange={(e) => handleChange(i, e)}
                             onKeyDown={(e) => handleKeyDown(i, e)}
-                            className={`w-14 h-16 text-center font-bold text-2xl rounded-xl border focus:ring-2 transition ${
-                                val ? "border-orange-400" : "border-gray-300"
+                            className={`w-12 h-14 text-center font-bold text-2xl rounded-xl border-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all ${
+                                val 
+                                    ? "border-indigo-500 bg-indigo-50" 
+                                    : "border-gray-300 bg-white hover:border-gray-400"
                             }`}
                         />
                     ))}
                 </div>
 
-                <div className="mb-6 text-sm">
-                    Want to change your email?
+                {/* Change Email Link */}
+                <div className="mb-6 text-sm text-gray-600">
+                    Wrong email?{" "}
                     <Link
                         to={`/${role}/register`}
-                        className="underline font-semibold ml-1 text-gray-800 hover:text-orange-500"
+                        className="font-semibold text-indigo-600 hover:text-indigo-700 underline"
                     >
-                        Change Here
+                        Change here
                     </Link>
                 </div>
 
-                {/* VERIFY BUTTON */}
+                {/* Verify Button */}
                 <button
                     onClick={handleVerify}
-                    disabled={isVerifying}
-                    className="bg-orange-400 hover:bg-orange-500 transition font-bold text-white px-14 py-3 rounded-full mb-3 shadow disabled:opacity-50"
+                    disabled={isVerifying || otp.join("").length !== 6}
+                    className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold py-3.5 rounded-xl mb-4 shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-lg"
                 >
-                    {isVerifying ? "Verifying..." : "Verify Email"}
+                    {isVerifying ? (
+                        <span className="flex items-center justify-center gap-2">
+                            <svg className="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            Verifying...
+                        </span>
+                    ) : (
+                        "Verify Email"
+                    )}
                 </button>
 
-                {/* RESEND BUTTON */}
+                {/* Resend Button */}
                 <button
                     onClick={handleResend}
                     disabled={resendDisabled || isResending}
-                    className={`px-4 py-2 rounded-md font-semibold transition ${
+                    className={`w-full py-3 rounded-xl font-semibold transition-all ${
                         resendDisabled || isResending
-                            ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                            : "bg-orange-400 text-white hover:bg-orange-500"
+                            ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                            : "bg-white border-2 border-indigo-600 text-indigo-600 hover:bg-indigo-50"
                     }`}
                 >
-                    {resendDisabled
-                        ? `Resend OTP in ${Math.floor(timer / 60)}:${String(
-                              timer % 60
-                          ).padStart(2, "0")}`
-                        : isResending
-                        ? "Sending..."
-                        : "Resend OTP"}
+                    {resendDisabled ? (
+                        `Resend code in ${Math.floor(timer / 60)}:${String(timer % 60).padStart(2, "0")}`
+                    ) : isResending ? (
+                        "Sending..."
+                    ) : (
+                        "Resend Code"
+                    )}
                 </button>
+
+                {/* Security Note */}
+                <p className="text-xs text-gray-500 mt-6">
+                    🔒 Your information is secure and encrypted
+                </p>
             </div>
         </div>
     );

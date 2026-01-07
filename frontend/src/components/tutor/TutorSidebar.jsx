@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { toast } from "sonner";
 import { useDispatch, useSelector } from "react-redux";
@@ -38,7 +38,8 @@ const TutorSidebar = () => {
         { name: "Overview", icon: "📊", path: "/tutor/dashboard" },
         { name: "Profile", icon: "👤", path: "/tutor/profile" },
         { name: "Courses", icon: "📚", path: "/tutor/courses" },
-        { name: "Revenues", icon: "💰", path: "/tutor/revenues" },
+        { name: "Coupons", icon: "🎟️", path: "/tutor/coupons" },
+        { name: "Wallet", icon: "💰", path: "/tutor/revenues" },
         { name: "Chat & Video", icon: "🎥", path: "/tutor/chat" },
         { name: "LogOut", icon: "🚪" }, // No path -> triggers modal
     ];

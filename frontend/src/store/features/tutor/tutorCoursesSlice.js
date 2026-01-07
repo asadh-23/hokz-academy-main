@@ -102,6 +102,15 @@ export const toggleTutorCourseStatus = createAsyncThunk(
     }
 );
 
+export const fetchTutorCourseList = createAsyncThunk("tutorCourses/fetchList", async (_, { rejectWithValue }) => {
+    try {
+        const res = await tutorAxios.get("/courses/list");
+        return res.data.courses;
+    } catch (err) {
+        return rejectWithValue(err.response?.data?.message);
+    }
+});
+
 // ======================================================
 // INITIAL STATE
 // ======================================================
@@ -130,6 +139,8 @@ const initialState = {
         listed: 0,
         unlisted: 0,
     },
+
+    courseList: [],
 
     // --- Loading states ---
     loadingCourse: false,
@@ -219,6 +230,10 @@ const tutorCoursesSlice = createSlice({
             .addCase(uploadTutorCourseThumbnail.rejected, (state, action) => {
                 state.uploadingThumbnail = false;
             });
+
+        builder.addCase(fetchTutorCourseList.fulfilled, (state, action) => {
+            state.courseList = action.payload;
+        });
     },
 });
 
@@ -240,6 +255,7 @@ export const selectTutorCoursePagination = (state) => state.tutorCourses.paginat
 // Stats (for StatsCards)
 export const selectTutorCourseStats = (state) => state.tutorCourses.stats;
 
+export const selectTutorCourseList = (state) => state.tutorCourses.courseList;
 // Loaders
 export const selectTutorCourseLoading = (state) => state.tutorCourses.loadingCourse;
 export const selectTutorCourseCreating = (state) => state.tutorCourses.creatingCourse;

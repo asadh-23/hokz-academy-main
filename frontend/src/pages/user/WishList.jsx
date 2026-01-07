@@ -21,6 +21,7 @@ import WishlistSearchBar from "../../components/user/wishlist/WishlistSearchBar"
 import WishlistCard from "../../components/user/wishlist/WishlistCard";
 import WishlistEmptyState from "../../components/user/wishlist/WishlistEmptyState";
 import Pagination from "../../components/common/Pagination";
+import { useNavigate } from "react-router-dom";
 
 const WishList = () => {
     const dispatch = useDispatch();
@@ -32,6 +33,11 @@ const WishList = () => {
     const addToCartLoadingById = useSelector(selectUserAddCartLoadingById);
     const cart = useSelector(selectUserCart);
 
+    const navigate = useNavigate();
+
+    const handleContinueLearning = (courseId) => {
+        navigate(`/user/learn/${courseId}`); // Course Details page-ilekko allengil Player-ilekko vidam
+    };
     // Local state
     const [searchQuery, setSearchQuery] = useState("");
     const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -295,6 +301,7 @@ const WishList = () => {
                                     onAddToCart={handleAddToCart}
                                     addToCartLoadingById={addToCartLoadingById}
                                     isInCart={isInCart(item.course?._id)}
+                                    onContinueLearning={handleContinueLearning}
                                 />
                             ))}
                         </div>

@@ -1,5 +1,6 @@
 import Course from "../../models/course/Course.js";
 import Category from "../../models/category/Category.js";
+import CourseProgress from "../../models/course/CourseProgress.js";
 
 export const getAllCourses = async (req, res) => {
     try {
@@ -103,6 +104,8 @@ export const getListedCategories = async (req, res) => {
 export const getCourseDetails = async (req, res) => {
     try {
         const { courseId } = req.params;
+        
+        const userId = req.user?._id;
 
         if (!courseId) {
             return res.status(400).json({
@@ -111,7 +114,7 @@ export const getCourseDetails = async (req, res) => {
             });
         }
 
-        // Fetch course details
+        // 1. Fetch course details
         const course = await Course.findOne({
             _id: courseId,
             isListed: true,
@@ -121,7 +124,6 @@ export const getCourseDetails = async (req, res) => {
             .populate("tutor", "fullName email profileImage")
             .populate("category", "name");
 
-        // Course not found or restricted
         if (!course) {
             return res.status(404).json({
                 success: false,
@@ -129,15 +131,49 @@ export const getCourseDetails = async (req, res) => {
             });
         }
 
-        // Success
+       
+        let isEnrolled = false;
+        if (userId) {
+           
+            const enrollment = await CourseProgress.exists({
+                user: userId,
+                course: courseId,
+            });
+            isEnrolled = !!enrollment;
+        }
+
+        
+        const originalPrice = course.price || 0;
+        const offerPercentage = course.offerPercentage || 0;
+
+        let subTotal = originalPrice;
+        let discountAmount = 0;
+
+        if (offerPercentage > 0) {
+            discountAmount = (originalPrice * offerPercentage) / 100;
+            subTotal = Math.round(originalPrice - discountAmount);
+        }
+
+        const taxAmount = Math.round(subTotal * 0.03); // 3% Tax logic
+        const totalAmount = subTotal + taxAmount;
+
+        // 4. Return Response
         return res.status(200).json({
             success: true,
             message: "Course details fetched successfully",
-            course,
+            
+            courseData: {
+                course,
+                totalMrp: originalPrice,
+                discountAmount,
+                subTotal,
+                taxAmount,
+                totalAmount,
+                isEnrolled: isEnrolled,
+            },
         });
     } catch (err) {
         console.error("Get course details error:", err.message);
-
         return res.status(500).json({
             success: false,
             message: "Something went wrong while fetching course details",

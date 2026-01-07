@@ -56,7 +56,7 @@ export default function TutorRegister() {
             password: passwordValidation.password,
         };
         try {
-            const result = await dispatch(tutorRegister(cleanData));
+            const result = await dispatch(tutorRegister(cleanData)).unwrap();
 
             toast.success(result.message || "Registration successful! Verify your email.");
             navigate("/tutor/verify-otp", { state: { email: cleanData.email, role: "tutor" }, replace: true });

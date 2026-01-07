@@ -21,6 +21,7 @@ import tutorProfileReducer from "./features/tutor/tutorProfileSlice";
 import tutorDashboardReducer from "./features/tutor/tutorDashboardSlice";
 import tutorCoursesReducer from "./features/tutor/tutorCoursesSlice";
 import tutorCategoryReducer from "./features/tutor/tutorCategorySlice";
+import tutorCouponReducer from "./features/tutor/tutorCouponSlice";
 
 // ================== ADMIN ==================
 import adminProfileReducer from "./features/admin/adminProfileSlice";
@@ -56,6 +57,7 @@ export const store = configureStore({
     tutorDashboard: tutorDashboardReducer,
     tutorCourses: tutorCoursesReducer,
     tutorCategories: tutorCategoryReducer,
+    tutorCoupon: tutorCouponReducer,
 
     // ADMIN
     adminProfile: adminProfileReducer,

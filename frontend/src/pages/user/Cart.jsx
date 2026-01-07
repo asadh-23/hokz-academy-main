@@ -11,23 +11,23 @@ import {
     selectUserCartLoading,
     selectUserClearCartLoading,
 } from "../../store/features/user/userCartSlice";
-import { toggleUserWishlist, fetchUserWishlist } from "../../store/features/user/userWishlistSlice";
+import {
+    toggleUserWishlist,
+    fetchUserWishlist,
+} from "../../store/features/user/userWishlistSlice";
 import CartItem from "../../components/user/cart/CartItem";
 import CartEmptyState from "../../components/user/cart/CartEmptyState";
 import OrderSummary from "../../components/user/cart/OrderSummary";
 
 const Cart = () => {
     const dispatch = useDispatch();
+    const navigate = useNavigate();
 
     // Redux selectors
     const cart = useSelector(selectUserCart);
+    const cartItems = cart?.items || [];
     const loading = useSelector(selectUserCartLoading);
     const clearLoading = useSelector(selectUserClearCartLoading);
-
-    const cartItems = cart?.items || [];
-    const subTotal = cart?.subTotal || 0;
-    const tax = cart?.tax || 0;
-    const totalAmount = cart?.totalAmount || 0;
 
     useEffect(() => {
         loadCart();
@@ -42,25 +42,24 @@ const Cart = () => {
         }
     };
 
-    const handleRemoveFromCart = async (itemId, courseTitle) => {
+    const handleRemoveFromCart = async (cartItemId, courseTitle) => {
         try {
-            await dispatch(removeFromUserCart(itemId)).unwrap();
+            await dispatch(removeFromUserCart(cartItemId)).unwrap();
             toast.success(`${courseTitle} removed from cart`);
         } catch (error) {
             toast.error(error || "Failed to remove from cart");
         }
     };
 
-    const handleMoveToWishlist = async (courseId, itemId, courseTitle) => {
+    const handleMoveToWishlist = async (courseId, cartItemId, courseTitle) => {
         try {
+          
             await dispatch(toggleUserWishlist(courseId)).unwrap();
-
-            await dispatch(removeFromUserCart(itemId)).unwrap();
-
+            await dispatch(removeFromUserCart(cartItemId)).unwrap();
+            
             toast.success(`${courseTitle} moved to wishlist`);
         } catch (error) {
-            console.error("Move failed:", error);
-            toast.error("Failed to move to wishlist");
+            toast.error(error || "Failed to move to wishlist");
         }
     };
 
@@ -85,9 +84,10 @@ const Cart = () => {
             toast.info("Your cart is empty");
             return;
         }
-        // TODO: Implement checkout
-        toast.info("Checkout feature coming soon!");
+        navigate("/user/checkout");
     };
+
+    
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
@@ -136,7 +136,7 @@ const Cart = () => {
             </div>
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                {loading && !cart ? (
+                {loading ? (
                     <div className="flex justify-center items-center py-20">
                         <div className="relative">
                             <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-cyan-600"></div>
@@ -151,7 +151,7 @@ const Cart = () => {
                         <div className="lg:col-span-2 space-y-4">
                             {cartItems.map((item) => (
                                 <CartItem
-                                    key={item._id || item.course._id}
+                                    key={item._id}
                                     item={item}
                                     onRemove={handleRemoveFromCart}
                                     onMoveToWishlist={handleMoveToWishlist}
@@ -162,9 +162,10 @@ const Cart = () => {
                         {/* Order Summary */}
                         <div className="lg:col-span-1">
                             <OrderSummary
-                                subtotal={subTotal}
-                                tax={tax}
-                                total={totalAmount}
+                                subtotal={cart.subTotal || 0}
+                                tax={cart.taxAmount || 0}
+                                total={cart.totalAmount || 0}
+                                
                                 itemCount={cartItems.length}
                                 onCheckout={handleCheckout}
                                 loading={loading}

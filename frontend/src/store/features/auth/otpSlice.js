@@ -12,7 +12,7 @@ export const verifyOtp = createAsyncThunk(
     try {
       const res = await publicAxios.post(`/${role}/auth/verify-otp`, {
         email,
-        otp,
+        otpCode: otp, // Changed from 'otp' to 'otpCode' to match backend
       });
       return res.data;// { user, accessToken }
     } catch (err) {

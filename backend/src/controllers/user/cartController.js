@@ -1,6 +1,7 @@
 import Cart from "../../models/cart/Cart.js";
 import Course from "../../models/course/Course.js";
 import mongoose from "mongoose";
+import CourseProgress from "../../models/course/CourseProgress.js";
 
 export const addToUserCart = async (req, res) => {
     try {
@@ -66,7 +67,7 @@ export const addToUserCart = async (req, res) => {
             };
         });
 
-        const taxAmount = Math.round(subTotal * 0.05);
+        const taxAmount = Math.round(subTotal * 0.03);
         const totalAmount = subTotal + taxAmount;
 
         return res.status(200).json({
@@ -76,7 +77,7 @@ export const addToUserCart = async (req, res) => {
                 user: cart.user,
                 items: formattedItems,
                 subTotal: Math.round(subTotal),
-                tax: taxAmount,
+                taxAmount: taxAmount,
                 totalAmount: Math.round(totalAmount),
                 // appliedCoupon: cart.appliedCoupon || null,
             },
@@ -122,49 +123,62 @@ export const getUserCart = async (req, res) => {
             });
         }
 
-        // 2. Filter Valid Items (Logic remains same)
-        const originalItemCount = cart.items.length;
-        const validItems = cart.items.filter((item) => {
+        let validItems = cart.items.filter((item) => {
             return item.course && item.course.isListed && !item.course.isDeleted;
         });
 
-        if (validItems.length < originalItemCount) {
+        if (validItems.length > 0) {
+            const cartCourseIds = validItems.map((item) => item.course._id);
+
+            const enrolledCourses = await CourseProgress.find({
+                user: userId,
+                course: { $in: cartCourseIds },
+            }).select("course");
+
+            if (enrolledCourses.length > 0) {
+                const enrolledCourseIds = new Set(
+                    enrolledCourses.map((e) => e.course.toString())
+                );
+
+                validItems = validItems.filter(
+                    (item) => !enrolledCourseIds.has(item.course._id.toString())
+                );
+            }
+        }
+
+        if (validItems.length !== cart.items.length) {
             cart.items = validItems;
-            await cart.save(); // Save changes to DB
+            await cart.save();
         }
 
         
-        const cartObj = cart.toObject();
-
-      
-
+        let totalMrp = 0;
+        let totalDiscount = 0;
         let subTotal = 0;
 
-        const formattedItems = cartObj.items.map((item) => {
+        const formattedItems = validItems.map((item) => {
             const course = item.course;
-
-       
-            if (!course) return item;
-
+            
             const price = course.price || 0;
             const discount = course.offerPercentage || 0;
+
+            totalMrp += price;
 
             const currentPrice = Math.round(price - (price * discount) / 100);
 
             subTotal += currentPrice;
+            totalDiscount += price - currentPrice;
 
             return {
-                ...item,
+                ...item.toObject(),
                 course: {
-                    ...course, // No need for .toObject() here anymore
-                    currentPrice: currentPrice, // Inject new field
+                    ...course.toObject(),
+                    currentPrice: currentPrice,
                 },
             };
         });
 
-        // 4. Calculate Totals
-        // let appliedCoupon = cart.appliedCoupon || null;
-        const taxAmount = Math.round(subTotal * 0.05);
+        const taxAmount = Math.round(subTotal * 0.03);
         const totalAmount = subTotal + taxAmount;
 
         return res.status(200).json({
@@ -173,10 +187,11 @@ export const getUserCart = async (req, res) => {
                 _id: cart._id,
                 user: cart.user,
                 items: formattedItems,
+                totalMrp: totalMrp,
+                discountAmount: totalDiscount,
                 subTotal: Math.round(subTotal),
-                tax: taxAmount,
+                taxAmount: taxAmount,
                 totalAmount: Math.round(totalAmount),
-                // appliedCoupon: appliedCoupon,
             },
         });
     } catch (err) {
@@ -190,11 +205,10 @@ export const removeFromCart = async (req, res) => {
         const userId = req.user._id;
         const { itemId } = req.params;
 
-      
         const cart = await Cart.findOneAndUpdate(
             { user: userId },
-            { 
-                $pull: { items: { _id: itemId } } 
+            {
+                $pull: { items: { _id: itemId } },
             },
             { new: true }
         ).populate({
@@ -209,21 +223,21 @@ export const removeFromCart = async (req, res) => {
         if (!cart) {
             return res.status(404).json({ message: "Cart not found" });
         }
-        
+
         const cartObj = cart.toObject();
         let subTotal = 0;
 
         const formattedItems = cartObj.items.map((item) => {
             const course = item.course;
-            
+
             // Handle edge case where course might be null (if deleted from DB)
-            if(!course) return item;
+            if (!course) return item;
 
             const price = course.price || 0;
             const discount = course.offerPercentage || 0;
 
             const currentPrice = Math.round(price - (price * discount) / 100);
-            
+
             subTotal += currentPrice;
 
             return {
@@ -236,7 +250,7 @@ export const removeFromCart = async (req, res) => {
         });
 
         // 3. Final Math
-        const taxAmount = Math.round(subTotal * 0.05);
+        const taxAmount = Math.round(subTotal * 0.03);
         const totalAmount = subTotal + taxAmount;
 
         return res.status(200).json({
@@ -249,10 +263,9 @@ export const removeFromCart = async (req, res) => {
                 subTotal: Math.round(subTotal),
                 tax: taxAmount,
                 totalAmount: Math.round(totalAmount),
-                appliedCoupon: cart.appliedCoupon || null
+                appliedCoupon: cart.appliedCoupon || null,
             },
         });
-
     } catch (err) {
         console.error("Remove Cart Error:", err);
         return res.status(500).json({ message: "Failed to remove item" });
@@ -263,11 +276,7 @@ export const clearCart = async (req, res) => {
     try {
         const userId = req.user._id;
 
-        const cart = await Cart.findOneAndUpdate(
-            { user: userId },
-            { $set: { items: [] } },
-            { new: true }
-        );
+        const cart = await Cart.findOneAndUpdate({ user: userId }, { $set: { items: [] } }, { new: true });
 
         if (!cart) {
             return res.status(404).json({ message: "Cart not found" });
@@ -286,7 +295,6 @@ export const clearCart = async (req, res) => {
                 // appliedCoupon: null
             },
         });
-
     } catch (err) {
         console.error("Clear Cart Error:", err);
         return res.status(500).json({ message: "Failed to clear cart" });

@@ -17,6 +17,9 @@ import CourseDetails from "../pages/user/CourseDetails";
 import { UserLayout } from "../layouts/UserLayout";
 import Wishlist from "../pages/user/WishList";
 import Cart from "../pages/user/Cart";
+import Checkout from "../pages/user/Checkout";
+import OrderSuccess from "../pages/user/OrderSuccess";
+import CourseLearning from "../pages/user/CourseLearning";
 
 export default function UserRoutes() {
     return (
@@ -38,7 +41,10 @@ export default function UserRoutes() {
                     <Route path="/courses" element={<Courses />} />
                     <Route path="/courses/:courseId" element={<CourseDetails />} />
                     <Route path="/wishlist" element={<Wishlist/> } />
-                    <Route path="cart" element={<Cart/> } />
+                    <Route path="/cart" element={<Cart/> } />
+                    <Route path="/checkout" element={<Checkout/> } />
+                    <Route path="/order-success" element={<OrderSuccess/> } />
+                    <Route path="/learn/:courseId" element={<CourseLearning/> } />
                 </Route>
             </Route>
         </Routes>

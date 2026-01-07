@@ -140,7 +140,7 @@ CourseSchema.methods.softDelete = async function () {
  *                 false => unpublish (listed=false)
  */
 CourseSchema.methods.setPublished = async function (flagPublished = true) {
-    this.listed = !!flagPublished;
+    this.isListed = !!flagPublished; // Correct field name
     if (flagPublished) this.isActive = true;
     return this.save();
 };

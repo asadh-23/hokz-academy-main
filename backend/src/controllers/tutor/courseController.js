@@ -316,3 +316,29 @@ export const toggleListCourse = async (req, res) => {
         });
     }
 };
+
+export const getCourseList = async (req, res) => {
+    try {
+        const tutorId = req.user._id;
+
+        const courses = await Course.find({ 
+            tutor: tutorId,
+            isDeleted: false,
+        })
+        .select("_id title") 
+        .sort({ createdAt: -1 })
+        .lean();
+
+        return res.status(200).json({
+            success: true,
+            courses,
+        });
+
+    } catch (error) {
+        console.error("Error fetching course list:", error);
+        return res.status(500).json({ 
+            success: false, 
+            message: "Failed to fetch course list" 
+        });
+    }
+};

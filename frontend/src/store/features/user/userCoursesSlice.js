@@ -32,7 +32,7 @@ export const fetchUserCourseDetails = createAsyncThunk(
     async (courseId, { rejectWithValue }) => {
         try {
             const res = await userAxios.get(`/courses/${courseId}`);
-            return res.data.course;
+            return res.data.courseData;
         } catch (err) {
             return rejectWithValue(err.response?.data?.message || "Failed to fetch course details");
         }

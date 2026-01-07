@@ -213,7 +213,7 @@ export const loginTutor = async (req, res) => {
             success: true,
             message: "Login successful",
             accessToken,
-            user: {
+            tutor: {
                 role: "tutor",
                 _id: savedTutor._id,
                 fullName: savedTutor.fullName,

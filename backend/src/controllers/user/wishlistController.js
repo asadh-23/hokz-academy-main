@@ -1,5 +1,6 @@
 import Wishlist from "../../models/interaction/Wishlist.js";
 import Course from "../../models/course/Course.js";
+import CourseProgress from "../../models/course/CourseProgress.js";
 
 export const addToWishlist = async (req, res) => {
     try {
@@ -26,7 +27,6 @@ export const addToWishlist = async (req, res) => {
             ],
         });
 
-    
         return res.status(201).json({ success: true, item: populatedItem });
     } catch (err) {
         const status = err.status || 500;
@@ -59,12 +59,34 @@ export const getUserWishlist = async (req, res) => {
             .sort({ createdAt: -1 })
             .lean();
 
-        // Filter out items whose courses are deleted/unlisted
-        const validItems = wishlistItems.filter((item) => item.course);
+        if (!wishlistItems.length) {
+            return res.status(200).json({ success: true, wishlist: [] });
+        }
 
-        return res.status(200).json({
+        const wishlistCourseIds = wishlistItems.filter((item) => item.course).map((item) => item.course._id);
+
+        const enrolledCourses = await CourseProgress.find({
+            user: userId,
+            course: { $in: wishlistCourseIds },
+        }).select("course");
+
+        const enrolledCourseIds = new Set(enrolledCourses.map((e) => e.course.toString()));
+
+        const finalWishlist = wishlistItems.map((item) => {
+            if (!item.course) return item;
+
+            return {
+                ...item,
+                course: {
+                    ...item.course,
+                    isEnrolled: enrolledCourseIds.has(item.course._id.toString()),
+                },
+            };
+        });
+
+        res.status(200).json({
             success: true,
-            wishlist: validItems,
+            wishlist: finalWishlist,
         });
     } catch (error) {
         console.error("Get wishlist error:", error);
@@ -93,17 +115,13 @@ export const clearWishlist = async (req, res) => {
     try {
         const userId = req.user._id;
 
-        await Wishlist.updateMany(
-            { user: userId, isDeleted: false },
-            { $set: { isDeleted: true, deletedAt: new Date() } }
-        );
+        await Wishlist.updateMany({ user: userId, isDeleted: false }, { $set: { isDeleted: true, deletedAt: new Date() } });
 
         return res.status(200).json({ success: true, message: "Wishlist cleared successfully" });
     } catch (err) {
         return res.status(500).json({ success: false, message: "Failed to clear wishlist" });
     }
 };
-
 
 // export const isInWishlist = async (req, res) => {
 //     try {

@@ -29,7 +29,7 @@ export default function TutorLogin() {
             return toast.error("Please fill all required fields");
         }
         try {
-            const result = await dispatch(tutorLogin(cleanData));
+            const result = await dispatch(tutorLogin(cleanData)).unwrap();
 
             toast.success(result.message || "Login successful");
 
