@@ -14,13 +14,17 @@ const CourseSidebar = ({
     isAddingToCart,
     isTogglingWishlist,
     onContinueLearning,
+    isEnrolled, // ✅ 1. Accept this prop directly
 }) => {
-    if (!courseData) return null;
+    
+    // Safety check
+    if (!courseData?.course) return null;
 
     const course = courseData.course;
-    const isEnrolled = courseData.isEnrolled || false;
-
     const navigate = useNavigate();
+
+    // ✅ 2. Use the prop first, fallback to courseData if needed
+    const isUserEnrolled = isEnrolled || courseData.isEnrolled || false;
 
     const handleEnrollNow = () => {
         navigate("/user/checkout", { state: { courseData } });
@@ -37,29 +41,35 @@ const CourseSidebar = ({
     return (
         <div className="sticky top-24">
             <div className="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden lg:-mt-64 relative z-10">
+                
+                {/* --- Thumbnail Section --- */}
                 <div
                     className="relative aspect-video group cursor-pointer"
-                    onClick={isEnrolled ? onContinueLearning : undefined}
+                    onClick={isUserEnrolled ? onContinueLearning : undefined}
                 >
                     <img src={course.thumbnailUrl} alt={course.title} className="w-full h-full object-cover" />
+                    
+                    {/* Overlay */}
                     <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-colors flex items-center justify-center">
                         <div className="bg-white/90 rounded-full p-4 shadow-lg group-hover:scale-110 transition-transform">
-                            {isEnrolled ? (
+                            {isUserEnrolled ? (
                                 <PlayCircle className="w-8 h-8 text-emerald-600 ml-0.5" />
                             ) : (
                                 <Play className="w-8 h-8 text-indigo-600 ml-1" />
                             )}
                         </div>
                     </div>
+                    
                     <div className="absolute bottom-4 left-0 right-0 text-center">
                         <span className="font-bold text-white drop-shadow-md">
-                            {isEnrolled ? "Continue Watching" : "Preview this course"}
+                            {isUserEnrolled ? "Continue Watching" : "Preview this course"}
                         </span>
                     </div>
                 </div>
 
                 <div className="p-6">
-                    {isEnrolled ? (
+                    {/* --- Price / Status Section --- */}
+                    {isUserEnrolled ? (
                         <div className="flex items-center gap-3 mb-6 p-4 bg-emerald-50 text-emerald-700 rounded-xl border border-emerald-100">
                             <CheckCircle className="w-6 h-6" />
                             <div>
@@ -73,7 +83,9 @@ const CourseSidebar = ({
                                 <span className="text-3xl font-bold text-emerald-600">Free</span>
                             ) : (
                                 <>
-                                    <span className="text-3xl font-bold text-gray-900">₹{courseData.subTotal}</span>
+                                    <span className="text-3xl font-bold text-gray-900">
+                                        ₹{courseData.subTotal || course.price}
+                                    </span>
                                     {course.offerPercentage > 0 && (
                                         <>
                                             <span className="text-gray-400 line-through mb-1">₹{course.price}</span>
@@ -87,7 +99,8 @@ const CourseSidebar = ({
                         </div>
                     )}
 
-                    {isEnrolled ? (
+                    {/* --- Action Buttons --- */}
+                    {isUserEnrolled ? (
                         <button
                             onClick={onContinueLearning}
                             className="w-full py-4 px-6 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-lg hover:shadow-emerald-200 flex items-center justify-center gap-2 transition-all mb-6 active:scale-[0.98]"
@@ -97,7 +110,9 @@ const CourseSidebar = ({
                         </button>
                     ) : (
                         <>
+                            {/* Cart & Wishlist Buttons */}
                             <div className="flex gap-3 mb-3">
+                                {/* Only show Add to Cart if not free (Optional logic, removing cart for free items is standard) */}
                                 <button
                                     onClick={handleCartAction}
                                     disabled={isAddingToCart}
@@ -131,6 +146,7 @@ const CourseSidebar = ({
                                 </button>
                             </div>
 
+                            {/* Buy Now / Enroll Now Button */}
                             <button
                                 onClick={handleEnrollNow}
                                 className="relative w-full py-3.5 px-6 bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 hover:from-emerald-600 hover:via-teal-600 hover:to-cyan-600 text-white font-bold rounded-xl transition-all mb-6 shadow-lg hover:shadow-xl hover:shadow-emerald-200 active:scale-[0.98] group overflow-hidden"
@@ -147,6 +163,7 @@ const CourseSidebar = ({
                         </>
                     )}
 
+                    {/* --- Course Features List --- */}
                     <div className="space-y-3">
                         <h4 className="font-bold text-sm text-gray-900">This course includes:</h4>
                         <ul className="text-sm text-gray-600 space-y-2.5">
@@ -175,6 +192,7 @@ const CourseSidebar = ({
                         </ul>
                     </div>
 
+                    {/* Share Button */}
                     <div className="flex justify-center pt-6 mt-6 border-t border-gray-100">
                         <button className="flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-indigo-600 transition-colors">
                             <Share2 className="w-4 h-4" />

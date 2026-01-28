@@ -39,7 +39,7 @@ const ManageCourses = () => {
                     limit: filters.limit,
                     search: filters.search,
                     status: filters.status,
-                })
+                }),
             ).unwrap();
             setFirstLoad(false);
         } catch (error) {
@@ -85,7 +85,7 @@ const ManageCourses = () => {
                         await dispatch(
                             toggleTutorCourseStatus({
                                 courseId,
-                            })
+                            }),
                         ).unwrap();
 
                         toast.success(`${courseTitle} ${actionText}ed successfully`);
@@ -100,8 +100,12 @@ const ManageCourses = () => {
         });
     };
 
-    const handleExam = (courseId) => {
-        console.log("Manage exam:", courseId);
+    const handleExam = (course) => {
+        if (course.exam) {
+            navigate(`/tutor/course/${course._id}/manage-exam`);
+        } else {
+            navigate(`/tutor/course/${course._id}/add-exam`);
+        }
     };
 
     const handleSettings = (courseId) => {
@@ -259,11 +263,11 @@ const ManageCourses = () => {
                                     {/* Exam + Settings */}
                                     <div className="grid grid-cols-2 gap-3">
                                         <button
-                                            onClick={() => handleExam(course._id)}
+                                            onClick={() => handleExam(course)}
                                             className="px-4 py-3 bg-gradient-to-r from-purple-50 to-violet-50 text-purple-600 rounded-xl text-sm font-bold hover:from-purple-100 hover:to-violet-100 transition-all flex items-center justify-center gap-2 border-2 border-purple-200 hover:border-purple-300 shadow-sm"
                                         >
                                             <MdOutlineSchool className="text-lg" />
-                                            Exam
+                                            {course.exam ? "Manage Exam" : "Create Exam"}
                                         </button>
 
                                         <button

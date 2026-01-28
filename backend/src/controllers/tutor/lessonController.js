@@ -88,9 +88,11 @@ export const createLesson = async (req, res) => {
             pdfUrl,
             pdfKey,
             order: existingCount,
+            isPublished: true,
         });
 
         await Course.findByIdAndUpdate(courseId, {
+            $push: { lessons: lesson._id },
             $inc: {
                 lessonsCount: 1,
                 totalDurationSeconds: duration || 0,
@@ -259,7 +261,6 @@ export const deleteLesson = async (req, res) => {
     try {
         const { lessonId } = req.params;
 
-      
         const lesson = await Lesson.findById(lessonId);
         if (!lesson) {
             return res.status(404).json({
@@ -268,7 +269,6 @@ export const deleteLesson = async (req, res) => {
             });
         }
 
-       
         const course = await Course.findById(lesson.course).select("tutor");
         if (!course || course.tutor.toString() !== req.user._id.toString()) {
             return res.status(403).json({
@@ -277,20 +277,16 @@ export const deleteLesson = async (req, res) => {
             });
         }
 
-       
         const lessonDuration = lesson.duration;
         const lessonOrder = lesson.order;
 
-       
         const filesToDelete = [];
         if (lesson.videoKey) filesToDelete.push(lesson.videoKey);
         if (lesson.thumbnailKey) filesToDelete.push(lesson.thumbnailKey);
         if (lesson.pdfKey) filesToDelete.push(lesson.pdfKey);
 
-       
         await lesson.deleteOne();
 
-        
         await Course.findByIdAndUpdate(lesson.course, {
             $inc: {
                 lessonsCount: -1,
@@ -298,7 +294,6 @@ export const deleteLesson = async (req, res) => {
             },
         });
 
-        
         await Lesson.updateMany({ course: lesson.course, order: { $gt: lessonOrder } }, { $inc: { order: -1 } });
 
         // 8️⃣ Delete S3 files asynchronously

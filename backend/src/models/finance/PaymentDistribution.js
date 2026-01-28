@@ -27,7 +27,7 @@ const PaymentDistributionSchema = new mongoose.Schema({
   adminShareAmount: { type: Number, required: true },  // 10% (Example)
   tutorShareAmount: { type: Number, required: true },  // 90% (Example)
   adminCommissionRate: { type: Number, default: 10 },  // Percentage used
-
+  taxCollected: {type: Number, default:0},
   // Status regarding Wallet Update
   isReleasedToWallet: {
     type: Boolean,

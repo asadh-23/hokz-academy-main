@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "sonner";
@@ -45,7 +45,6 @@ const CourseDetails = () => {
         const loadPageData = async () => {
             try {
                 await dispatch(fetchUserCourseDetails(courseId)).unwrap();
-
                 await Promise.allSettled([dispatch(fetchUserCart()), dispatch(fetchUserWishlist())]);
             } catch (error) {
                 console.error("Failed to load course:", error);
@@ -59,12 +58,33 @@ const CourseDetails = () => {
         }
     }, [courseId, dispatch, navigate]);
 
+    // Extract Course and Enrollment Status
+    const course = courseData?.course;
+    const isEnrolled = courseData?.isEnrolled || false;
+
+    // Memoized Time Calculation
+    const { totalLessons, hours, minutes, seconds } = useMemo(() => {
+        if (!course) return { totalLessons: 0, hours: 0, minutes: 0, seconds: 0 };
+
+        const totalLessons = course.lessonsCount || 0;
+        const totalDurationSeconds = course.totalDurationSeconds || 0;
+        const hours = Math.floor(totalDurationSeconds / 3600);
+        const minutes = Math.floor((totalDurationSeconds % 3600) / 60);
+        const seconds = totalDurationSeconds % 60;
+
+        return { totalLessons, hours, minutes, seconds };
+    }, [course]);
 
     const handleContinueLearning = () => {
         navigate(`/user/learn/${courseId}`);
     };
 
     const handleAddToCart = async () => {
+        if (isEnrolled) {
+            navigate(`/user/learn/${courseId}`);
+            return;
+        }
+
         const isInCart = cart?.items?.some((item) => item.course?._id === courseId);
         if (isInCart) {
             toast.info("Course is already in your cart");
@@ -102,13 +122,6 @@ const CourseDetails = () => {
         );
     }
 
-    // Calculate totals from denormalized fields
-    const totalLessons = courseData.course.lessonsCount || 0;
-    const totalDurationSeconds = courseData.course.totalDurationSeconds || 0;
-    const hours = Math.floor(totalDurationSeconds / 3600);
-    const minutes = Math.floor((totalDurationSeconds % 3600) / 60);
-    const seconds = totalDurationSeconds % 60;
-
     const isAddingToCart = addToCartLoadingById[courseId] || false;
     const isTogglingWishlist = wishlistLoadingById[courseId] || false;
     const isInCart = cart?.items?.some((item) => item.course?._id === courseId) || false;
@@ -131,17 +144,23 @@ const CourseDetails = () => {
 
                         <CourseMotivation />
 
-                        <CourseCurriculum totalLessons={totalLessons} hours={hours} minutes={minutes} seconds={seconds} />
+                        <CourseCurriculum
+                            courseData={courseData}
+                            totalLessons={totalLessons}
+                            hours={hours}
+                            minutes={minutes}
+                            seconds={seconds}
+                        />
 
                         {/* Description */}
                         <div>
                             <h2 className="text-2xl font-bold text-gray-900 mb-4">Description</h2>
                             <div className="prose prose-indigo text-gray-600 max-w-none">
-                                <p className="whitespace-pre-wrap">{courseData.course.description}</p>
+                                <p className="whitespace-pre-wrap">{course.description}</p>
                             </div>
                         </div>
 
-                        <CourseInstructor tutor={courseData.course.tutor} averageRating={courseData.course.averageRating} />
+                        <CourseInstructor tutor={course.tutor} averageRating={course.averageRating} />
                     </div>
 
                     {/* Right Column - Sidebar */}
@@ -159,6 +178,7 @@ const CourseDetails = () => {
                             isAddingToCart={isAddingToCart}
                             isTogglingWishlist={isTogglingWishlist}
                             onContinueLearning={handleContinueLearning}
+                            isEnrolled={isEnrolled}
                         />
                     </div>
                 </div>
@@ -167,8 +187,10 @@ const CourseDetails = () => {
             {/* --- Footer --- */}
             <footer className="bg-white border-t border-gray-200 mt-20 py-12">
                 <div className="max-w-7xl mx-auto px-4 text-center">
-                    <div className="font-bold text-xl text-gray-800 mb-4">LearnFlow</div>
-                    <p className="text-gray-500 text-sm">&copy; 2024 LearnFlow Inc. All rights reserved.</p>
+                    <div className="font-bold text-xl text-gray-800 mb-4">Hokz Academy</div> {/* 👇 2. Name Updated */}
+                    <p className="text-gray-500 text-sm">
+                        &copy; {new Date().getFullYear()} Hokz Academy. All rights reserved.
+                    </p>
                 </div>
             </footer>
         </div>

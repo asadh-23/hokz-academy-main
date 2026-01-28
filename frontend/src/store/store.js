@@ -13,6 +13,7 @@ import emailChangeReducer from "./features/auth/emailChangeSlice";
 import userProfileReducer from "./features/user/userProfileSlice";
 import userDashboardReducer from "./features/user/userDashboardSlice";
 import userCoursesReducer from "./features/user/userCoursesSlice";
+import courseProgressReducer from "./features/user/courseProgressSlice";
 import userWishlistReducer from "./features/user/userWishlistSlice";
 import userCartReducer from "./features/user/userCartSlice";
 
@@ -49,6 +50,7 @@ export const store = configureStore({
     userProfile: userProfileReducer,
     userDashboard: userDashboardReducer,
     userCourses: userCoursesReducer,
+    courseProgress: courseProgressReducer,
     userWishlist: userWishlistReducer,
     userCart: userCartReducer,
 

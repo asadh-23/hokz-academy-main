@@ -17,7 +17,7 @@ const RatingBreakdownSchema = new Schema(
         twoStar: { type: Number, default: 0 },
         oneStar: { type: Number, default: 0 },
     },
-    { _id: false }
+    { _id: false },
 );
 
 const CourseSchema = new Schema(
@@ -48,7 +48,7 @@ const CourseSchema = new Schema(
         offerPercentage: { type: Number, default: 0, min: 0, max: 100 },
 
         // Visibility / lifecycle flags
-        isActive: {type: Boolean, default: true, index: true},
+        isActive: { type: Boolean, default: true, index: true },
         isListed: { type: Boolean, default: false, index: true },
         isBanned: { type: Boolean, default: false },
         banReason: { type: String, default: "" },
@@ -64,7 +64,11 @@ const CourseSchema = new Schema(
         // References (light-touch): keep arrays short or only store counts/ids
         reviews: [{ type: Schema.Types.ObjectId, ref: "Review" }], // optional use-case
         lessons: [{ type: Schema.Types.ObjectId, ref: "Lesson" }], // lessons managed separately
-        quiz: { type: Schema.Types.ObjectId, ref: "Quiz" },
+        // In Course Model
+        exam: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Exam",
+        },
 
         // Metadata
         language: { type: String, default: "English" },
@@ -78,7 +82,7 @@ const CourseSchema = new Schema(
         notificationSent: { type: Boolean, default: false },
         isDeleted: { type: Boolean, default: false, index: true }, // soft delete
     },
-    { timestamps: true }
+    { timestamps: true },
 );
 
 /**
@@ -230,7 +234,7 @@ CourseSchema.statics.searchAndPaginate = async function (options = {}) {
 
     if (typeof options.isPublished === "boolean") {
         // map to listing visible status
-        filter.listed = options.isPublished;
+        filter.isListed = options.isPublished;
         filter.isActive = true;
     }
 
@@ -252,7 +256,7 @@ CourseSchema.statics.searchAndPaginate = async function (options = {}) {
             .skip(skip)
             .limit(limit)
             .populate("category", "name slug") // adjust projections as needed
-            .populate("tutor", "full_name profileImage")
+            .populate("tutor", "fullName profileImage")
             .lean(),
     ]);
 
@@ -284,7 +288,7 @@ CourseSchema.statics.getReviews = async function (courseId, opts = {}) {
     if (sort === "most_helpful") sortOption = { "helpfulVotes.length": -1 };
 
     return Review.find(query)
-        .populate("user", "full_name profileImage")
+        .populate("user", "fullName profileImage")
         .sort(sortOption)
         .skip((Number(page) - 1) * Number(limit))
         .limit(Number(limit))

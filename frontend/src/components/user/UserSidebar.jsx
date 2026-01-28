@@ -2,7 +2,7 @@ import { NavLink, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { User, BookOpen, ShoppingBag, Heart, ShoppingCart, Award, LogOut, ChevronRight } from "lucide-react";
 
-import { logoutUser, selectUser } from "../../store/features/auth/userAuthSlice";
+import { selectUser, logoutUser } from "../../store/features/auth/userAuthSlice";
 
 import defaultProfileImage from "../../assets/images/default-profile-image.webp";
 
@@ -35,7 +35,7 @@ const UserSidebar = ({ isOpen, onClose }) => {
         },
         {
             name: "My Courses",
-            path: "/user/my-courses",
+            path: "/user/courses/my-courses",
             icon: BookOpen,
             color: "text-purple-600",
             bgColor: "bg-purple-50",

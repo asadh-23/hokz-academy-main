@@ -20,6 +20,11 @@ import Cart from "../pages/user/Cart";
 import Checkout from "../pages/user/Checkout";
 import OrderSuccess from "../pages/user/OrderSuccess";
 import CourseLearning from "../pages/user/CourseLearning";
+import CourseExam from "../pages/user/CourseExam";
+import MyCourses from "../pages/user/MyCourses";
+import MyOrders from "../pages/user/MyOrders";
+import Certificates from "../pages/user/Certificates";
+
 
 export default function UserRoutes() {
     return (
@@ -45,6 +50,10 @@ export default function UserRoutes() {
                     <Route path="/checkout" element={<Checkout/> } />
                     <Route path="/order-success" element={<OrderSuccess/> } />
                     <Route path="/learn/:courseId" element={<CourseLearning/> } />
+                    <Route path="/course/:courseId/exam" element={<CourseExam/> } />
+                    <Route path="/courses/my-courses" element={<MyCourses/> } />
+                    <Route path="/orders" element={<MyOrders/> } />
+                    <Route path="/certificates" element={<Certificates/> } />
                 </Route>
             </Route>
         </Routes>

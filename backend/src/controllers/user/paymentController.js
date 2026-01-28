@@ -1,7 +1,7 @@
 import Razorpay from "razorpay";
 import crypto from "crypto";
 import dotenv from "dotenv";
-
+import mongoose from "mongoose";
 // Models
 import Course from "../../models/course/Course.js";
 import Cart from "../../models/cart/Cart.js";
@@ -12,6 +12,7 @@ import Wallet from "../../models/finance/Wallet.js";
 import WalletTransaction from "../../models/finance/WalletTransaction.js";
 import Coupon from "../../models/marketing/Coupon.js";
 import CouponUsage from "../../models/marketing/CouponUsage.js";
+import Enrollment from "../../models/course/Enrollment.js";
 
 dotenv.config();
 
@@ -261,44 +262,54 @@ export const createOrder = async (req, res) => {
 };
 
 export const verifyPayment = async (req, res) => {
+    let session;
+
     try {
+        session = await mongoose.startSession();
+        session.startTransaction();
+
         const { razorpay_order_id, razorpay_payment_id, razorpay_signature, courses, isDirectPurchase, appliedCoupons } =
             req.body;
-
         const userId = req.user._id;
         const email = req.user.email;
 
+        // 1. Signature Verification
         const body = razorpay_order_id + "|" + razorpay_payment_id;
         const expectedSignature = crypto
             .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
             .update(body.toString())
             .digest("hex");
 
-        const isAuthentic = expectedSignature === razorpay_signature;
-
-        if (!isAuthentic) {
+        if (expectedSignature !== razorpay_signature) {
+            await session.abortTransaction();
+            session.endSession();
             return res.status(400).json({ success: false, message: "Invalid payment signature" });
         }
 
-        const existingOrder = await Order.findOne({ razorpayOrderId: razorpay_order_id });
+        // 2. Check Duplicate
+        const existingOrder = await Order.findOne({ razorpayOrderId: razorpay_order_id }).session(session);
         if (existingOrder) {
-            return res.status(200).json({
-                success: true,
-                message: "Order already processed",
-                orderId: existingOrder._id,
-            });
+            await session.abortTransaction();
+            session.endSession();
+            return res.status(200).json({ success: true, message: "Order already processed", orderId: existingOrder._id });
         }
 
-        const dbCourses = await Course.find({ _id: { $in: courses } }).populate("tutor");
-
-        if (dbCourses.length === 0) {
+        // 3. Fetch Courses
+        const dbCourses = await Course.find({ _id: { $in: courses } })
+            .populate("tutor")
+            .session(session);
+        if (!dbCourses.length) {
+            await session.abortTransaction();
+            session.endSession();
             return res.status(400).json({ success: false, message: "Courses not found" });
         }
 
+        // 4. Calculate Totals
         let totalMrp = 0;
         let totalAmount = 0;
         const orderItems = [];
         const tutorRevenueMap = {};
+        const tutorBaseSalesMap = {};
 
         for (const course of dbCourses) {
             const price = course.price || 0;
@@ -315,12 +326,10 @@ export const verifyPayment = async (req, res) => {
             });
 
             const tutorId = course.tutor._id.toString();
+
             if (!tutorRevenueMap[tutorId]) {
-                tutorRevenueMap[tutorId] = {
-                    tutorId: tutorId,
-                    courses: [],
-                    totalSales: 0,
-                };
+                tutorRevenueMap[tutorId] = { tutorId, courses: [], totalSales: 0 };
+                tutorBaseSalesMap[tutorId] = 0;
             }
 
             tutorRevenueMap[tutorId].courses.push({
@@ -330,50 +339,49 @@ export const verifyPayment = async (req, res) => {
             });
 
             tutorRevenueMap[tutorId].totalSales += discountedPrice;
+            tutorBaseSalesMap[tutorId] += discountedPrice;
         }
 
         const totalCourseDiscount = totalMrp - totalAmount;
 
+        // 5. Coupon Logic
         let totalCouponDiscount = 0;
         const validatedCoupons = [];
+        const tutorTotalCouponMap = {};
 
         if (appliedCoupons && Object.keys(appliedCoupons).length > 0) {
             const usedCouponCodes = new Set();
-
             for (const [tutorId, tutorCouponsData] of Object.entries(appliedCoupons)) {
                 if (!tutorRevenueMap[tutorId]) continue;
-
                 const couponsArray = Array.isArray(tutorCouponsData) ? tutorCouponsData : [tutorCouponsData];
 
                 for (const couponData of couponsArray) {
+                    if (!couponData.code) continue;
                     const couponCode = couponData.code.toUpperCase();
                     if (usedCouponCodes.has(couponCode)) continue;
 
-                    const coupon = await Coupon.findOne({
-                        code: couponCode,
-                        tutor: tutorId,
-                        isActive: true,
-                    });
+                    const coupon = await Coupon.findOne({ code: couponCode, tutor: tutorId, isActive: true }).session(
+                        session,
+                    );
 
                     if (coupon && coupon.isValid()) {
                         const userUsageCount = await CouponUsage.countDocuments({
                             coupon: coupon._id,
                             user: userId,
-                        });
+                        }).session(session);
 
                         if (userUsageCount < coupon.usagePerUser) {
                             const tutorSubtotal = tutorRevenueMap[tutorId].totalSales;
-                            const discountAmount = coupon.calculateDiscount(tutorSubtotal);
+                            // Ensure calculateDiscount function exists in your Coupon Model Schema
+                            const discountAmount = coupon.calculateDiscount ? coupon.calculateDiscount(tutorSubtotal) : 0;
 
                             totalCouponDiscount += discountAmount;
-                            tutorRevenueMap[tutorId].totalSales -= discountAmount;
+                            tutorRevenueMap[tutorId].totalSales -= discountAmount; // Reduce revenue share
 
-                            validatedCoupons.push({
-                                coupon: coupon,
-                                discountAmount: discountAmount,
-                                tutorId: tutorId,
-                            });
+                            if (!tutorTotalCouponMap[tutorId]) tutorTotalCouponMap[tutorId] = 0;
+                            tutorTotalCouponMap[tutorId] += discountAmount;
 
+                            validatedCoupons.push({ coupon, discountAmount, tutorId });
                             usedCouponCodes.add(couponCode);
                         }
                     }
@@ -381,132 +389,214 @@ export const verifyPayment = async (req, res) => {
             }
         }
 
+        // 6. Final Calculation
         const subtotalAfterCoupon = Math.max(0, totalAmount - totalCouponDiscount);
         const taxAmount = Math.round(subtotalAfterCoupon * 0.03);
         const finalCalculatedAmount = subtotalAfterCoupon + taxAmount;
 
-        const rzpOrder = await razorpay.orders.fetch(razorpay_order_id);
-        const amountPaidInPaise = rzpOrder.amount_paid;
-        const calculatedAmountInPaise = finalCalculatedAmount * 100;
+        // 7. Save Order (Using create with array for transaction safety)
+        const [newOrder] = await Order.create(
+            [
+                {
+                    user: userId,
+                    email: email,
+                    razorpayOrderId: razorpay_order_id,
+                    razorpayPaymentId: razorpay_payment_id,
+                    razorpaySignature: razorpay_signature,
+                    items: orderItems,
+                    totalAmount: totalAmount,
+                    discountAmount: totalCourseDiscount + totalCouponDiscount,
+                    couponDiscount: totalCouponDiscount,
+                    appliedCoupons: validatedCoupons.map((vc) => ({
+                        coupon: vc.coupon._id,
+                        tutorId: vc.tutorId,
+                        discountAmount: vc.discountAmount,
+                    })),
+                    taxAmount: taxAmount,
+                    finalAmount: finalCalculatedAmount,
+                    status: "paid",
+                    paymentMethod: "razorpay",
+                },
+            ],
+            { session },
+        );
 
-        if (Math.abs(amountPaidInPaise - calculatedAmountInPaise) > 100) {
-            return res.status(400).json({
-                success: false,
-                message: "Payment amount mismatch. Please contact support.",
-            });
-        }
-
-        const newOrder = new Order({
-            user: userId,
-            email: email,
-            razorpayOrderId: razorpay_order_id,
-            razorpayPaymentId: razorpay_payment_id,
-            razorpaySignature: razorpay_signature,
-            items: orderItems,
-            totalAmount: totalAmount,
-            discountAmount: totalCourseDiscount + totalCouponDiscount,
-            couponDiscount: totalCouponDiscount,
-            appliedCoupons: validatedCoupons.map((vc) => ({
-                coupon: vc.coupon._id,
-                tutorId: vc.tutorId,
-                discountAmount: vc.discountAmount,
-            })),
-            taxAmount: taxAmount,
-            finalAmount: finalCalculatedAmount,
-            status: "paid",
-            paymentMethod: "razorpay",
-        });
-
-        await newOrder.save();
-
-        const couponUsagePromises = validatedCoupons.map(async (vc) => {
-            await new CouponUsage({
+        // 8. Bulk Save Coupon Usage
+        if (validatedCoupons.length > 0) {
+            const couponUsageDocs = validatedCoupons.map((vc) => ({
                 coupon: vc.coupon._id,
                 user: userId,
                 order: newOrder._id,
                 discountAmount: vc.discountAmount,
-            }).save();
+            }));
+            await CouponUsage.insertMany(couponUsageDocs, { session });
 
-            await Coupon.findByIdAndUpdate(vc.coupon._id, {
-                $inc: { usedCount: 1 },
-            });
-        });
-        await Promise.all(couponUsagePromises);
+            // Update Counts (Loop is fine here as it's usually small)
+            for (const vc of validatedCoupons) {
+                await Coupon.findByIdAndUpdate(vc.coupon._id, { $inc: { usedCount: 1 } }, { session });
+            }
+        }
 
-        const revenuePromises = Object.values(tutorRevenueMap).map(async (data) => {
-            const adminCommissionRate = 10;
-            const adminShare = Math.round((data.totalSales * adminCommissionRate) / 100);
-            const tutorShare = data.totalSales - adminShare;
+        // 9. Create Enrollments (Bulk)
+        const enrollmentDocs = dbCourses.map((course) => {
+            const tutorId = course.tutor._id.toString();
+            const originalPrice = course.price || 0;
+            const offerPercentage = course.offerPercentage || 0;
+            const priceAfterOffer = Math.round(originalPrice - (originalPrice * offerPercentage) / 100);
 
-            await new PaymentDistribution({
-                orderId: newOrder._id,
-                tutor: data.tutorId,
-                courses: data.courses,
-                totalAmount: data.totalSales,
-                adminShareAmount: adminShare,
-                tutorShareAmount: tutorShare,
-                adminCommissionRate: adminCommissionRate,
-                isReleasedToWallet: true,
-            }).save();
+            let couponDeduction = 0;
+            const totalTutorSales = tutorBaseSalesMap[tutorId] || 0;
+            const totalTutorCoupon = tutorTotalCouponMap[tutorId] || 0;
 
-            let wallet = await Wallet.findOne({ owner: data.tutorId });
-            if (!wallet) {
-                wallet = await Wallet.create({ owner: data.tutorId, ownerType: "Tutor" });
+            if (totalTutorSales > 0 && totalTutorCoupon > 0) {
+                couponDeduction = (priceAfterOffer / totalTutorSales) * totalTutorCoupon;
             }
 
-            await Wallet.findByIdAndUpdate(wallet._id, {
-                $inc: {
-                    balance: tutorShare,
-                    totalEarnings: tutorShare,
-                },
-            });
+            const finalPricePaid = Math.max(0, Math.round(priceAfterOffer - couponDeduction));
 
-            await WalletTransaction.create({
-                walletId: wallet._id,
-                type: "credit",
-                category: "course_sale",
-                amount: tutorShare,
-                description: `Revenue from Order #${newOrder.razorpayOrderId}`,
+            return {
+                user: userId,
+                course: course._id,
+                tutor: course.tutor._id,
                 orderId: newOrder._id,
-                status: "completed",
-            });
+                pricePaid: finalPricePaid,
+                status: "active",
+                enrolledAt: new Date(),
+            };
         });
-        await Promise.all(revenuePromises);
 
-        const enrollmentPromises = dbCourses.map((course) => {
-            return CourseProgress.findOneAndUpdate(
+        await Enrollment.insertMany(enrollmentDocs, { session });
+
+        // 10. Update Progress (Loop is needed for upsert logic)
+        for (const course of dbCourses) {
+            await CourseProgress.findOneAndUpdate(
                 { user: userId, course: course._id },
-                {
-                    $setOnInsert: {
-                        completedLessons: [],
-                        isCompleted: false,
-                        completedAt: null,
-                        completionPercentage: 0,
-                    },
-                },
-                { upsert: true, new: true }
+                { $setOnInsert: { completedLessons: [], isCompleted: false, completionPercentage: 0 } },
+                { upsert: true, new: true, session: session },
             );
-        });
-        await Promise.all(enrollmentPromises);
-
-        const updateCourseCounts = dbCourses.map((course) => {
-            return Course.findByIdAndUpdate(course._id, {
-                $inc: { enrolledCount: 1 },
-            });
-        });
-        await Promise.all(updateCourseCounts);
-
-        if (!isDirectPurchase) {
-            await Cart.findOneAndDelete({ user: userId });
         }
+
+        // 11. Update Course Counts
+        await Course.updateMany({ _id: { $in: courses } }, { $inc: { enrolledCount: 1 } }, { session });
+
+        // 12. Distribute Revenue
+        for (const data of Object.values(tutorRevenueMap)) {
+            const adminCommissionRate = 10;
+            const taxPercentage = 3;
+            const realSalesAmount = data.totalSales;
+            const adminShare = Math.round((realSalesAmount * adminCommissionRate) / 100);
+            const taxAmount = Math.round((realSalesAmount * taxPercentage) / 100);
+            const tutorShare = realSalesAmount - adminShare;
+
+            await PaymentDistribution.create(
+                [
+                    {
+                        orderId: newOrder._id,
+                        tutor: data.tutorId,
+                        courses: data.courses,
+
+                        totalAmount: realSalesAmount,
+
+                        tutorShareAmount: tutorShare,
+
+                        adminShareAmount: adminShare,
+                        taxCollected: taxAmount,
+
+                        adminCommissionRate: adminCommissionRate,
+                        isReleasedToWallet: true,
+                    },
+                ],
+                { session },
+            );
+
+            // Atomic Wallet Update
+            let wallet = await Wallet.findOne({ owner: data.tutorId }).session(session);
+            if (!wallet) {
+                const [newWallet] = await Wallet.create([{ owner: data.tutorId, ownerType: "Tutor" }], { session });
+                wallet = newWallet;
+            }
+
+            await Wallet.findByIdAndUpdate(
+                wallet._id,
+                {
+                    $inc: { balance: tutorShare, totalEarnings: tutorShare },
+                },
+                { session },
+            );
+
+            await WalletTransaction.create(
+                [
+                    {
+                        walletId: wallet._id,
+                        type: "credit",
+                        category: "course_sale",
+                        amount: tutorShare,
+                        description: `Revenue from Order #${newOrder.razorpayOrderId}`,
+                        orderId: newOrder._id,
+                        status: "completed",
+                    },
+                ],
+                { session },
+            );
+        }
+
+        // 13. Clear Cart
+        if (!isDirectPurchase) {
+            await Cart.findOneAndDelete({ user: userId }).session(session);
+        }
+
+        // ✅ COMMIT
+        await session.commitTransaction();
+        session.endSession();
 
         return res.status(200).json({
             success: true,
-            message: "Payment verified and Order placed successfully",
+            message: "Payment verified successfully",
             order: newOrder,
         });
     } catch (error) {
-        console.error("Verification Error:", error);
-        res.status(500).json({ message: "Internal Server Error" });
+        console.error("❌ Verification Failed:", error);
+        // ✅ Safe Abort Logic
+        if (session) {
+            await session.abortTransaction();
+            session.endSession();
+        }
+        res.status(500).json({ message: "Payment Verification Failed", error: error.message });
+    }
+};
+
+export const getMyOrders = async (req, res) => {
+    try {
+        const userId = req.user._id;
+
+        const orders = await Order.find({ user: userId })
+            .populate({
+                path: "items.course",
+                select: "title thumbnailUrl category tutor",
+                populate: [
+                    {
+                        path: "tutor",
+                        select: "fullName",
+                    },
+                    {
+                        path: "category",
+                        select: "name",
+                    },
+                ],
+            })
+            .sort({ createdAt: -1 });
+
+        res.status(200).json({
+            success: true,
+            message: "Orders fetched successfully",
+            data: orders,
+        });
+    } catch (error) {
+        console.error("Get My Orders Error:", error);
+        res.status(500).json({
+            success: false,
+            message: "Failed to fetch orders",
+            error: error.message,
+        });
     }
 };

@@ -37,12 +37,14 @@ backend/
 │   │   ├── user/
 │   │   │   ├── authController.js       # User authentication
 │   │   │   ├── profileController.js    # User profile management
-│   │   │   └── courseController.js     # User course operations
+│   │   │   ├── courseController.js     # User course operations
+│   │   │   └── paymentController.js    # Payment & coupon operations
 │   │   ├── tutor/
 │   │   │   ├── authController.js       # Tutor authentication
 │   │   │   ├── profileController.js    # Tutor profile management
 │   │   │   ├── courseController.js     # Tutor course management
-│   │   │   └── lessonController.js     # Tutor lesson management
+│   │   │   ├── lessonController.js     # Tutor lesson management
+│   │   │   └── couponController.js     # Tutor coupon management
 │   │   └── admin/
 │   │       ├── authController.js       # Admin authentication
 │   │       ├── profileController.js    # Admin profile management
@@ -83,22 +85,30 @@ backend/
 │   │   │   ├── Report.js               # Report model
 │   │   │   └── TutorResponse.js        # Tutor response model
 │   │   └── finance/                    # Finance models
-│   │       ├── Order.js                # Order model
+│   │       ├── Order.js                # Order model (enhanced with multiple coupons)
+│   │       ├── PaymentDistribution.js  # Payment distribution model
+│   │       ├── Wallet.js               # Wallet model
+│   │       ├── WalletTransaction.js    # Wallet transaction model
 │   │       ├── Transaction.js          # Transaction model
 │   │       ├── Payout.js               # Payout model
 │   │       └── Revenue.js              # Revenue model
+│   │   ├── marketing/                  # Marketing models
+│   │   │   ├── Coupon.js               # Coupon model
+│   │   │   └── CouponUsage.js          # Coupon usage tracking
 │   │
 │   ├── routes/                         # API routes
 │   │   ├── authRoutes.js               # Shared auth routes
 │   │   ├── user/
 │   │   │   ├── authRoutes.js           # /user/auth/* routes
 │   │   │   ├── profileRoutes.js        # /user/* routes (protected)
-│   │   │   └── courseRoutes.js         # /user/courses/* routes
+│   │   │   ├── courseRoutes.js         # /user/courses/* routes
+│   │   │   └── paymentRoutes.js        # /user/payment/* routes (checkout, coupons)
 │   │   ├── tutor/
 │   │   │   ├── authRoutes.js           # /tutor/auth/* routes
 │   │   │   ├── profileRoutes.js        # /tutor/* routes (protected)
 │   │   │   ├── courseRoutes.js         # /tutor/courses/* routes
-│   │   │   └── lessonRoutes.js          # /tutor/lessons/* routes
+│   │   │   ├── lessonRoutes.js         # /tutor/lessons/* routes
+│   │   │   └── couponRoutes.js         # /tutor/coupons/* routes
 │   │   └── admin/
 │   │       ├── authRoutes.js           # /admin/auth/* routes
 │   │       ├── profileRoutes.js        # /admin/* routes (protected)
@@ -187,7 +197,30 @@ frontend/
 │   │   ├── user/                       # User components
 │   │   │   ├── UserHeader.jsx          # Header with sidebar toggle
 │   │   │   ├── UserSidebar.jsx         # Toggleable sidebar
-│   │   │   └── UserFooter.jsx
+│   │   │   ├── UserFooter.jsx
+│   │   │   ├── checkout/               # Checkout components
+│   │   │   │   ├── PaymentSummary.jsx  # Enhanced checkout with multi-coupon support
+│   │   │   │   ├── CouponBrowseModal.jsx # Coupon browsing modal
+│   │   │   │   ├── TutorSelector.jsx   # Tutor selection component
+│   │   │   │   ├── CoursesList.jsx     # Checkout courses list
+│   │   │   │   └── StudentDetailsForm.jsx # Student details form
+│   │   │   ├── cart/                   # Shopping cart components
+│   │   │   │   ├── CartItem.jsx        # Individual cart item
+│   │   │   │   ├── OrderSummary.jsx    # Cart order summary
+│   │   │   │   └── CartEmptyState.jsx  # Empty cart state
+│   │   │   ├── wishlist/               # Wishlist components
+│   │   │   │   ├── WishlistHeader.jsx  # Wishlist page header
+│   │   │   │   ├── WishlistCard.jsx    # Individual wishlist item
+│   │   │   │   ├── WishlistSearchBar.jsx # Search functionality
+│   │   │   │   ├── FilterDropdown.jsx  # Filter options
+│   │   │   │   └── WishlistEmptyState.jsx # Empty wishlist state
+│   │   │   └── courseDetails/          # Course details components
+│   │   │       ├── CourseHero.jsx      # Course hero section
+│   │   │       ├── CourseOverview.jsx  # Course overview
+│   │   │       ├── CourseCurriculum.jsx # Course curriculum
+│   │   │       ├── CourseInstructor.jsx # Instructor info
+│   │   │       ├── CourseMotivation.jsx # Motivation section
+│   │   │       └── CourseSidebar.jsx   # Course sidebar
 │   │   │
 │   │   ├── tutor/                      # Tutor components
 │   │   │   ├── TutorHeader.jsx         # Fixed header
@@ -195,6 +228,12 @@ frontend/
 │   │   │   ├── TutorFooter.jsx
 │   │   │   ├── AnimatedChart.jsx       # Dashboard chart
 │   │   │   ├── LessonsList.jsx         # Lesson management component
+│   │   │   ├── coupon/                 # Coupon management components
+│   │   │   │   ├── CouponStats.jsx     # Coupon statistics cards
+│   │   │   │   ├── CouponTable.jsx     # Coupon listing table
+│   │   │   │   ├── CouponActions.jsx   # Coupon action buttons
+│   │   │   │   ├── CouponEmptyState.jsx # Empty state component
+│   │   │   │   └── CreateCouponModal.jsx # Coupon creation modal
 │   │   │   └── tutorProfile/           # Tutor profile components
 │   │   │       ├── Field.jsx
 │   │   │       ├── ReadOnlyField.jsx
@@ -266,6 +305,8 @@ frontend/
 │   │   │   ├── CoursesRefactored.jsx   # Browse courses - Redux version
 │   │   │   ├── CourseDetails.jsx       # Course details page (protected)
 │   │   │   ├── WishList.jsx            # User wishlist (protected)
+│   │   │   ├── Cart.jsx                # Shopping cart (protected)
+│   │   │   ├── Checkout.jsx            # Checkout page with multi-coupon support (protected)
 │   │   │   └── auth/
 │   │   │       ├── UserLogin.jsx       # User login (public)
 │   │   │       ├── UserLoginRefactored.jsx # User login - Redux version
@@ -278,6 +319,7 @@ frontend/
 │   │   │   ├── EditCourse.jsx          # Edit course form (protected)
 │   │   │   ├── AddLesson.jsx           # Add lessons to course (protected)
 │   │   │   ├── ManageCourses.jsx       # Course management dashboard (protected)
+│   │   │   ├── Coupon.jsx              # Coupon management page (protected)
 │   │   │   └── auth/
 │   │   │       ├── TutorLogin.jsx      # Tutor login (public)
 │   │   │       └── TutorRegister.jsx   # Tutor registration (public)
@@ -321,12 +363,14 @@ frontend/
 │   │       │   ├── userProfileSlice.js # User profile & operations
 │   │       │   ├── userDashboardSlice.js # User dashboard
 │   │       │   ├── userCoursesSlice.js # User course browsing
-│   │       │   └── userWishlistSlice.js # User wishlist
+│   │       │   ├── userWishlistSlice.js # User wishlist
+│   │       │   └── userCartSlice.js    # User shopping cart
 │   │       │
 │   │       ├── tutor/                  # Tutor slices
 │   │       │   ├── tutorProfileSlice.js # Tutor profile & operations
 │   │       │   ├── tutorDashboardSlice.js # Tutor dashboard
 │   │       │   ├── tutorCoursesSlice.js # Tutor course management
+│   │       │   ├── tutorCouponSlice.js  # Tutor coupon management
 │   │       │   └── tutorCategorySlice.js # Tutor categories
 │   │       │
 │   │       └── admin/                  # Admin slices
@@ -391,10 +435,12 @@ frontend/
 /user/auth/*          → User authentication (public)
 /user/*               → User profile & operations (protected)
 /user/courses/*       → User course browsing (protected)
+/user/payment/*       → Payment & coupon operations (protected)
 /tutor/auth/*         → Tutor authentication (public)
 /tutor/*              → Tutor profile (protected)
 /tutor/courses/*      → Tutor course management (protected)
 /tutor/lessons/*      → Tutor lesson management (protected)
+/tutor/coupons/*      → Tutor coupon management (protected)
 /admin/auth/*         → Admin authentication (public)
 /admin/*              → Admin profile (protected)
 /admin/categories/*   → Category management (protected)
@@ -415,6 +461,8 @@ frontend/
 /user/courses              → Browse courses (protected)
 /user/courses/:id          → Course details (protected)
 /user/wishlist             → User wishlist (protected)
+/user/cart                 → Shopping cart (protected)
+/user/checkout             → Checkout with multi-coupon support (protected)
 /tutor/login               → Tutor login
 /tutor/register            → Tutor registration
 /tutor/dashboard           → Tutor dashboard (protected)
@@ -423,6 +471,7 @@ frontend/
 /tutor/edit-course/:id     → Edit course form (protected)
 /tutor/add-lesson          → Add lessons to course (protected)
 /tutor/manage-courses      → Manage all courses (protected)
+/tutor/coupons             → Coupon management (protected)
 /admin/login               → Admin login
 /admin/dashboard           → Admin dashboard (protected)
 /admin/profile             → Admin profile (protected)
@@ -496,6 +545,11 @@ frontend/
   
 - ✅ **userWishlistSlice.js** - Wishlist operations
 
+- ✅ **userCartSlice.js** - Shopping cart operations
+  - Add/Remove items
+  - Update quantities
+  - Cart calculations
+
 **Tutor Slices:**
 - ✅ **tutorProfileSlice.js** - Tutor profile & operations
   - Profile management
@@ -507,6 +561,11 @@ frontend/
   - Create, Update, Delete courses
   - Upload thumbnails
   - List/Unlist courses
+  
+- ✅ **tutorCouponSlice.js** - Coupon management
+  - Create, Update, Delete coupons
+  - Fetch tutor coupons
+  - Usage statistics
   
 - ✅ **tutorCategorySlice.js** - Category operations
 
@@ -785,11 +844,133 @@ Created comprehensive course management for tutors:
 
 ---
 
-**Last Updated:** November 2024  
-**Architecture:** Redux Toolkit + Centralized API Layer  
-**Status:** Production-Ready Foundation ✅
+**Last Updated:** January 2025  
+**Architecture:** Redux Toolkit + Centralized API Layer + Advanced Coupon System  
+**Status:** Production-Ready with Multi-Coupon Support ✅
 
-### 12. Course Browsing System (User)
+### 12. Coupon System Implementation (MAJOR UPDATE)
+**Complete coupon management system with advanced features:**
+
+#### **Backend Models & Controllers:**
+- ✅ **Coupon.js** - Coupon model with validation methods
+  - Discount types (percentage/fixed)
+  - Usage limits and expiry dates
+  - Tutor-specific coupons
+  - Minimum purchase requirements
+  
+- ✅ **CouponUsage.js** - Coupon usage tracking
+  - User usage history
+  - Order association
+  - Discount amount tracking
+
+**Controllers:**
+- ✅ **couponController.js** - Tutor coupon management
+  - Create, update, delete coupons
+  - List tutor coupons
+  - Usage statistics
+  
+- ✅ **paymentController.js** - Enhanced payment processing
+  - Multiple coupon validation
+  - Tutor-wise coupon application
+  - Revenue distribution with discounts
+
+#### **Frontend Components:**
+
+**Tutor Coupon Management:**
+- ✅ **Coupon.jsx** - Main coupon management page
+  - Coupon statistics and overview
+  - Create, edit, delete coupons
+  - Usage analytics
+  
+- ✅ **CreateCouponModal.jsx** - Coupon creation modal
+  - Form validation
+  - Discount type selection
+  - Usage limit configuration
+  
+- ✅ **CouponTable.jsx** - Coupon listing table
+  - Sortable columns
+  - Status indicators
+  - Action buttons
+  
+- ✅ **CouponStats.jsx** - Coupon statistics cards
+- ✅ **CouponActions.jsx** - Coupon action buttons
+- ✅ **CouponEmptyState.jsx** - Empty state component
+
+**User Checkout System:**
+- ✅ **PaymentSummary.jsx** - Enhanced checkout summary
+  - **Multiple Coupons Per Tutor**: Users can apply multiple eligible coupons from same tutor
+  - **Tutor Selection**: Dropdown to choose tutor for coupon browsing
+  - **Grouped Display**: Coupons grouped by tutor with individual/bulk removal
+  - **Smart Validation**: Prevents duplicate coupon codes across all tutors
+  - **Price Breakdown**: Separate display of product and coupon discounts
+  
+- ✅ **CouponBrowseModal.jsx** - Coupon browsing modal
+  - **Enhanced UI**: Shows coupon eligibility and status
+  - **Multiple Application**: No restriction on coupons per tutor
+  - **Clear Messaging**: Informational display for applied coupons
+  - **Duplicate Prevention**: Visual indicators for already applied coupons
+  
+- ✅ **TutorSelector.jsx** - Tutor selection component
+  - **Conditional Display**: Only shows when multiple tutors in cart
+  - **Course Count**: Shows number of courses per tutor
+  - **Auto-selection**: Automatically selects single tutor
+
+#### **Key Features:**
+
+**1. Tutor-wise Coupon Selection:**
+- Students can browse coupons by tutor
+- Conditional tutor selection (only for multiple tutors)
+- Clear attribution of coupons to tutors
+
+**2. Multiple Coupons Per Tutor:**
+- Users can apply multiple eligible coupons from same tutor
+- Backward compatible data structure (single coupon → array)
+- Individual and bulk coupon removal options
+- Grouped display with tutor headers
+
+**3. Duplicate Prevention System:**
+- **Frontend Validation**: Real-time checking across all applied coupons
+- **Backend Validation**: Server-side duplicate prevention
+- **Cross-tutor Prevention**: Same coupon code cannot be used for different tutors
+- **Usage Limit Enforcement**: Individual coupon usage limits maintained
+
+**4. Enhanced User Experience:**
+- **Visual Grouping**: Multiple coupons from same tutor are visually grouped
+- **Clear Attribution**: Each coupon shows tutor name and savings
+- **Smart Messaging**: Informational messages instead of blocking actions
+- **Flexible Removal**: Remove individual coupons or all from a tutor
+
+**5. Advanced Price Calculation:**
+- **Accurate Totals**: All discounts calculated correctly
+- **Revenue Distribution**: Tutor revenue properly reduced by their coupons
+- **Tax Calculation**: Tax calculated on final discounted amount
+- **Order Processing**: Each coupon usage recorded individually
+
+#### **Data Structure:**
+```javascript
+// Before (Single Coupon Per Tutor)
+appliedCoupons = {
+  [tutorId]: { code, discountAmount, tutorName, ... }
+}
+
+// After (Multiple Coupons Per Tutor)
+appliedCoupons = {
+  [tutorId]: [
+    { code, discountAmount, tutorName, ... },
+    { code, discountAmount, tutorName, ... }
+  ]
+}
+```
+
+#### **Business Benefits:**
+- **Increased Savings**: Students can maximize discounts by stacking coupons
+- **Better UX**: Clear, intuitive interface for managing multiple coupons
+- **Flexible Rules**: Tutors can create multiple coupons knowing students can combine them
+- **Data Integrity**: Robust validation prevents abuse while enabling legitimate stacking
+
+---
+
+### 13. Course Browsing System (User)
 Created course browsing and details pages:
 
 **Pages:**
@@ -819,7 +1000,7 @@ Created course browsing and details pages:
 
 ---
 
-### 13. Common Components
+### 14. Common Components
 Reusable components across the application:
 
 **Loading & Error:**
@@ -849,7 +1030,7 @@ Reusable components across the application:
 
 ---
 
-### 14. Route Guards System
+### 15. Route Guards System
 Comprehensive route protection:
 
 **Generic Guards:**

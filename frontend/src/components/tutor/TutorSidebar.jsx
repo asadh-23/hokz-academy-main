@@ -39,7 +39,8 @@ const TutorSidebar = () => {
         { name: "Profile", icon: "👤", path: "/tutor/profile" },
         { name: "Courses", icon: "📚", path: "/tutor/courses" },
         { name: "Coupons", icon: "🎟️", path: "/tutor/coupons" },
-        { name: "Wallet", icon: "💰", path: "/tutor/revenues" },
+        { name: "Orders", icon: "📊", path: "/tutor/orders" },
+        { name: "Wallet", icon: "💰", path: "/tutor/wallet" },
         { name: "Chat & Video", icon: "🎥", path: "/tutor/chat" },
         { name: "LogOut", icon: "🚪" }, // No path -> triggers modal
     ];

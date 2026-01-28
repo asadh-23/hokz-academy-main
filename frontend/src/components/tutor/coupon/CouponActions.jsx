@@ -33,11 +33,11 @@ const CouponActions = ({
                         <option value="active">Active</option>
                         <option value="expired">Expired</option>
                         <option value="scheduled">Scheduled</option>
+                        <option value="inactive">Inactive</option>
+                        <option value="sold out">Sold Out</option>
                     </select>
 
-                    <button className="p-2.5 border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors">
-                        <Download className="w-5 h-5 text-gray-600" />
-                    </button>
+                    
 
                     <button
                         onClick={onCreateClick}

@@ -17,6 +17,11 @@ import AddLesson from "../pages/tutor/AddLesson";
 import ManageCourses from "../pages/tutor/ManageCourses";
 import EditCourse from "../pages/tutor/EditCourse";
 import Coupon from "../pages/tutor/Coupon";
+import AddExam from "../pages/tutor/AddExam";
+import ExamManagement from "../pages/tutor/ExamManagement";
+import EditExam from "../pages/tutor/EditExam";
+import WalletPage from "../pages/tutor/Wallet";
+import Order from "../pages/tutor/Order";
 
 export default function TutorRoutes() {
     return (
@@ -42,6 +47,12 @@ export default function TutorRoutes() {
                     <Route path="/courses" element={<ManageCourses/> } />
                     <Route path="/courses/:courseId/edit" element={<EditCourse/> } />
                     <Route path="/coupons" element={<Coupon/> } />
+                    <Route path="/course/:courseId/add-exam" element={<AddExam/> } />
+                    <Route path="/course/:courseId/manage-exam" element={<ExamManagement /> } />
+                    <Route path="/course/:courseId/edit-exam" element={<EditExam /> } />
+                    <Route path="/wallet" element={<WalletPage/> } />
+                    <Route path="/orders" element={<Order/> } />
+                    
                 </Route>
             </Route>
 

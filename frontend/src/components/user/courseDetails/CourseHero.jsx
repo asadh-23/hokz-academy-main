@@ -2,7 +2,7 @@ import { Star, AlertCircle, Globe } from "lucide-react";
 
 const CourseHero = ({ courseData }) => {
     // 1. Safety Check: If course is not loaded yet, show nothing or a skeleton
-    if (!courseData) return null;
+    if (!courseData?.course) return null;
     const course = courseData.course
 
     return (

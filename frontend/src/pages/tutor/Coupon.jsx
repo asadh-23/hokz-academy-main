@@ -45,12 +45,25 @@ const Coupon = () => {
                 coupon.code.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 coupon.title.toLowerCase().includes(searchQuery.toLowerCase());
 
+            // Helper function to derive status (same as in CouponTable)
+            const getCouponStatus = (coupon) => {
+                const now = new Date();
+                const start = new Date(coupon.startDate);
+                const expiry = new Date(coupon.expiryDate);
+
+                if (!coupon.isActive) return "inactive";
+                if (expiry < now) return "expired";
+                if (coupon.usageLimit && coupon.usedCount >= coupon.usageLimit) return "sold out";
+                if (now < start) return "scheduled";
+
+                return "active";
+            };
+
             // Filter Logic (Fixed)
             let matchesFilter = true;
-            if (filterStatus === "active") {
-                matchesFilter = coupon.isActive === true;
-            } else if (filterStatus === "inactive") {
-                matchesFilter = coupon.isActive === false;
+            if (filterStatus !== "all") {
+                const couponStatus = getCouponStatus(coupon);
+                matchesFilter = couponStatus === filterStatus;
             }
 
             return matchesSearch && matchesFilter;

@@ -109,13 +109,6 @@ const tutorSchema = new mongoose.Schema(
         lastActive: { type: Date },
         lastLogin: { type: Date },
 
-        // ---------------- RELATIONS ----------------
-        courses: [
-            {
-                type: mongoose.Schema.Types.ObjectId,
-                ref: "courses",
-            },
-        ],
         notifications: [notificationSchema],
 
         // ---------------- TOKENS ----------------
@@ -133,7 +126,7 @@ const tutorSchema = new mongoose.Schema(
             enum: ["tutor"],
         },
     },
-    { timestamps: true }
+    { timestamps: true },
 );
 
 // ------------------ PASSWORD ENCRYPTION ------------------

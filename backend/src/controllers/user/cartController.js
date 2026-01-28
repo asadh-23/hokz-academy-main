@@ -1,7 +1,7 @@
 import Cart from "../../models/cart/Cart.js";
 import Course from "../../models/course/Course.js";
 import mongoose from "mongoose";
-import CourseProgress from "../../models/course/CourseProgress.js";
+import Enrollment from "../../models/course/Enrollment.js";
 
 export const addToUserCart = async (req, res) => {
     try {
@@ -123,35 +123,41 @@ export const getUserCart = async (req, res) => {
             });
         }
 
+        // 1. Filter Out Invalid Courses (Deleted/Unlisted)
         let validItems = cart.items.filter((item) => {
             return item.course && item.course.isListed && !item.course.isDeleted;
         });
 
+        // 2. Filter Out Already Enrolled Courses (The Fix 🛠️)
         if (validItems.length > 0) {
             const cartCourseIds = validItems.map((item) => item.course._id);
 
-            const enrolledCourses = await CourseProgress.find({
+            // Use Enrollment Model (Source of Truth for Purchase)
+            const activeEnrollments = await Enrollment.find({
                 user: userId,
                 course: { $in: cartCourseIds },
+                status: "active", // Only check active purchases
             }).select("course");
 
-            if (enrolledCourses.length > 0) {
+            if (activeEnrollments.length > 0) {
                 const enrolledCourseIds = new Set(
-                    enrolledCourses.map((e) => e.course.toString())
+                    activeEnrollments.map((e) => e.course.toString())
                 );
 
+                // Remove item if user owns it
                 validItems = validItems.filter(
                     (item) => !enrolledCourseIds.has(item.course._id.toString())
                 );
             }
         }
 
+        // 3. Auto-Update Cart in DB if items changed
         if (validItems.length !== cart.items.length) {
             cart.items = validItems;
             await cart.save();
         }
 
-        
+        // 4. Calculate Totals
         let totalMrp = 0;
         let totalDiscount = 0;
         let subTotal = 0;

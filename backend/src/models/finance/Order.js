@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 const OrderItemSchema = new mongoose.Schema({
     course: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Course", // Make sure this matches your Course model name
+        ref: "Course",
         required: true,
     },
     price: { type: Number, required: true }, // MRP at purchase time

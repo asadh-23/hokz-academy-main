@@ -1,7 +1,7 @@
 import { PlayCircle, Clock, Award, Globe } from "lucide-react";
 
 const CourseOverview = ({ courseData, totalLessons, hours, minutes, seconds }) => {
-    if(!courseData) return null;
+    if(!courseData?.course) return null;
     const course = courseData.course;
     
     return (

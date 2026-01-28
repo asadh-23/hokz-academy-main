@@ -7,6 +7,9 @@ import { Toaster } from "sonner";
 import { Provider } from "react-redux";
 import { store } from "./store/store.js";
 import { setStoreRef } from "./api/setupInterceptors";
+import { Buffer } from "buffer";
+window.Buffer = Buffer;
+
 
 // Set store reference for interceptors to avoid circular dependency
 setStoreRef(store);

@@ -23,7 +23,7 @@ export const fetchUserCourses = createAsyncThunk(
         } catch (err) {
             return rejectWithValue(err.response?.data?.message || "Failed to fetch courses");
         }
-    }
+    },
 );
 
 // Fetch single course details
@@ -36,7 +36,7 @@ export const fetchUserCourseDetails = createAsyncThunk(
         } catch (err) {
             return rejectWithValue(err.response?.data?.message || "Failed to fetch course details");
         }
-    }
+    },
 );
 
 // Fetch listed categories
@@ -49,8 +49,17 @@ export const fetchUserListedCategories = createAsyncThunk(
         } catch (err) {
             return rejectWithValue(err.response?.data?.message || "Failed to fetch categories");
         }
-    }
+    },
 );
+
+export const fetchMyCourses = createAsyncThunk("courses/fetchMyCourses", async (_, { rejectWithValue }) => {
+    try {
+        const response = await userAxios.get("/courses/my-courses");
+        return response.data.data;
+    } catch (error) {
+        return rejectWithValue(error.response?.data?.message || "Failed to fetch courses");
+    }
+});
 
 // ======================================================
 // INITIAL STATE
@@ -60,6 +69,7 @@ const initialState = {
     courses: [],
     selectedCourse: null,
     categories: [],
+    myCourses: [],
 
     filters: {
         search: "",
@@ -80,6 +90,7 @@ const initialState = {
     loadingCourses: false,
     loadingCourseDetails: false,
     loadingCategories: false,
+    loadingMyCourses: false,
 };
 
 // ======================================================
@@ -151,6 +162,20 @@ const userCoursesSlice = createSlice({
             .addCase(fetchUserListedCategories.rejected, (state, action) => {
                 state.loadingCategories = false;
             });
+
+        builder
+            .addCase(fetchMyCourses.pending, (state) => {
+                state.loadingMyCourses = true;
+                
+            })
+            .addCase(fetchMyCourses.fulfilled, (state, action) => {
+                state.loadingMyCourses = false;
+                state.myCourses = action.payload;
+            })
+            .addCase(fetchMyCourses.rejected, (state, action) => {
+                state.loadingMyCourses= false;
+                
+            });
     },
 });
 
@@ -172,5 +197,8 @@ export const selectUserCoursePagination = (state) => state.userCourses.paginatio
 export const selectUserCoursesLoading = (state) => state.userCourses.loadingCourses;
 
 export const selectUserCourseDetailsLoading = (state) => state.userCourses.loadingCourseDetails;
+
+export const selectMyCourses = (state) => state.userCourses.myCourses;
+export const selectMyCoursesLoading = (state) => state.userCourses.loadingMyCourses;
 
 export default userCoursesSlice.reducer;

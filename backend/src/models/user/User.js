@@ -56,14 +56,6 @@ const userSchema = mongoose.Schema(
             type: String,
             default: null,
         },
-        courses: [
-            {
-                course: { type: mongoose.Schema.Types.ObjectId, ref: "courses" },
-                enrollmentDate: { type: Date, default: Date.now },
-                progress: { type: Number, default: 0 },
-                completionStatus: { type: Boolean, default: false },
-            },
-        ],
         wallet: {
             type: Number,
             default: 0,
@@ -98,7 +90,7 @@ const userSchema = mongoose.Schema(
     },
     {
         timestamps: true,
-    }
+    },
 );
 
 // Pre-save: Hash password before saving new or modified user

@@ -1,6 +1,6 @@
 import Wishlist from "../../models/interaction/Wishlist.js";
 import Course from "../../models/course/Course.js";
-import CourseProgress from "../../models/course/CourseProgress.js";
+import Enrollment from "../../models/course/Enrollment.js";
 
 export const addToWishlist = async (req, res) => {
     try {
@@ -38,13 +38,14 @@ export const getUserWishlist = async (req, res) => {
     try {
         const userId = req.user._id;
 
+        // 1. Fetch Wishlist Items with Course Details
         const wishlistItems = await Wishlist.find({
             user: userId,
             isDeleted: false,
         })
             .populate({
                 path: "course",
-                select: "title slug thumbnailUrl price offerPercentage tutor category averageRating totalReviews lessonsCount totalDurationSeconds isListed",
+                select: "title slug thumbnailUrl price offerPercentage tutor category averageRating totalReviews lessonsCount totalDurationSeconds isListed isActive",
                 populate: [
                     {
                         path: "tutor",
@@ -63,18 +64,19 @@ export const getUserWishlist = async (req, res) => {
             return res.status(200).json({ success: true, wishlist: [] });
         }
 
-        const wishlistCourseIds = wishlistItems.filter((item) => item.course).map((item) => item.course._id);
+        const validWishlistItems = wishlistItems.filter((item) => item.course);
+        const wishlistCourseIds = validWishlistItems.map((item) => item.course._id);
 
-        const enrolledCourses = await CourseProgress.find({
+        const activeEnrollments = await Enrollment.find({
             user: userId,
             course: { $in: wishlistCourseIds },
+            status: "active",
         }).select("course");
 
-        const enrolledCourseIds = new Set(enrolledCourses.map((e) => e.course.toString()));
+        const enrolledCourseIds = new Set(activeEnrollments.map((e) => e.course.toString()));
 
-        const finalWishlist = wishlistItems.map((item) => {
-            if (!item.course) return item;
-
+        // 4. Merge Data
+        const finalWishlist = validWishlistItems.map((item) => {
             return {
                 ...item,
                 course: {
@@ -122,27 +124,3 @@ export const clearWishlist = async (req, res) => {
         return res.status(500).json({ success: false, message: "Failed to clear wishlist" });
     }
 };
-
-// export const isInWishlist = async (req, res) => {
-//     try {
-//         const userId = req.user._id;
-//         const { courseId } = req.params;
-
-//         const item = await Wishlist.findOne({
-//             user: userId,
-//             course: courseId,
-//             isDeleted: false,
-//         });
-
-//         return res.status(200).json({
-//             success: true,
-//             inWishlist: !!item,
-//         });
-//     } catch (error) {
-//         console.error("Check wishlist error:", error);
-//         return res.status(500).json({
-//             success: false,
-//             message: "Failed to check wishlist state",
-//         });
-//     }
-// };

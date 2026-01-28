@@ -2,46 +2,48 @@ import React, { useEffect, useMemo } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { CheckCircle, PlayCircle, Download, Search, Receipt, ChevronRight, Mail, ExternalLink } from "lucide-react";
 import confetti from "canvas-confetti";
+import InvoicePDF from "../../components/user/pdfs/InvoicePDF";
+import { PDFDownloadLink } from "@react-pdf/renderer";
+import { useSelector } from "react-redux";
+import { selectUser } from "../../store/features/auth/userAuthSlice";
 
 const OrderSuccess = () => {
     const navigate = useNavigate();
     const location = useLocation();
 
     const { purchasedCourses, orderData } = location.state || {};
+    const user = useSelector(selectUser);
 
     useEffect(() => {
         if (!purchasedCourses || !orderData) {
-            navigate("/", { replace: true });
+            navigate("/user/courses", { replace: true });
         }
     }, [purchasedCourses, orderData, navigate]);
 
     useEffect(() => {
-        if (!purchasedCourses) return;
+    if (!purchasedCourses || sessionStorage.getItem("confettiShown")) return;
 
-        const end = Date.now() + 3000;
-        const colors = ["#4F46E5", "#10B981", "#F59E0B"];
+    sessionStorage.setItem("confettiShown", "true");
 
-        (function frame() {
-            confetti({
-                particleCount: 3,
-                angle: 60,
-                spread: 55,
-                origin: { x: 0 },
-                colors,
-            });
-            confetti({
-                particleCount: 3,
-                angle: 120,
-                spread: 55,
-                origin: { x: 1 },
-                colors,
-            });
+    const end = Date.now() + 2000;
 
-            if (Date.now() < end) {
-                requestAnimationFrame(frame);
-            }
-        })();
-    }, [purchasedCourses]);
+    (function frame() {
+        confetti({
+            particleCount: 3,
+            angle: 60,
+            spread: 55,
+            origin: { x: 0 },
+        });
+        confetti({
+            particleCount: 3,
+            angle: 120,
+            spread: 55,
+            origin: { x: 1 },
+        });
+
+        if (Date.now() < end) requestAnimationFrame(frame);
+    })();
+}, [purchasedCourses]);
 
     const formatDate = (dateString) => {
         if (!dateString) return "";
@@ -52,9 +54,6 @@ const OrderSuccess = () => {
         });
     };
 
-    const handleDownloadInvoice = () => {
-        window.print();
-    };
 
     if (!purchasedCourses || !orderData) return null;
 
@@ -98,7 +97,7 @@ const OrderSuccess = () => {
 
                                         <div className="mt-4 flex justify-between items-center">
                                             <button
-                                                onClick={() => navigate(`/course/${course._id}`)}
+                                                onClick={() => navigate(`/user/learn/${course._id}`)}
                                                 className="flex items-center gap-2 text-indigo-600 font-bold text-sm"
                                             >
                                                 <PlayCircle size={18} />
@@ -121,13 +120,21 @@ const OrderSuccess = () => {
                                 Browse More Courses
                             </Link>
 
-                            <button
-                                onClick={handleDownloadInvoice}
-                                className="flex-1 flex justify-center items-center gap-2 border py-4 rounded-xl"
+                            <PDFDownloadLink
+                                document={<InvoicePDF orderData={orderData} courses={purchasedCourses} student={user} />}
+                                fileName={`hokz academy-Invoice_${orderData.razorpayOrderId}.pdf`}
+                                className="flex-1"
                             >
-                                <Download size={20} />
-                                Download Invoice
-                            </button>
+                                {({ blob, url, loading, error }) => (
+                                    <button
+                                        disabled={loading}
+                                        className="w-full flex justify-center items-center gap-2 border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 py-4 rounded-xl font-bold transition-all disabled:opacity-50"
+                                    >
+                                        <Download size={20} />
+                                        {loading ? "Generating..." : "Download Invoice"}
+                                    </button>
+                                )}
+                            </PDFDownloadLink>
                         </div>
                     </div>
 
