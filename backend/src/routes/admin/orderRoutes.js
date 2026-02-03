@@ -1,11 +1,12 @@
 import express from "express";
 import { isAdmin, verifyToken } from "../../middlewares/authMiddleware.js";
-import { getAdminDashboardStats } from "../../controllers/admin/dashboardController.js";
+import { getAllOrders, getOrderDetails } from "../../controllers/admin/orderController.js";
 
 const adminRouter = express.Router();
 
 adminRouter.use(verifyToken, isAdmin);
 
-adminRouter.get("/dashboard", getAdminDashboardStats);
+adminRouter.get("/orders", getAllOrders);
+adminRouter.get("/orders/:orderId", getOrderDetails);
 
 export default adminRouter;

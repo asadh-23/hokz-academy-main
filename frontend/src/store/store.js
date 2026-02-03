@@ -21,7 +21,6 @@ import userCartReducer from "./features/user/userCartSlice";
 import tutorProfileReducer from "./features/tutor/tutorProfileSlice";
 import tutorDashboardReducer from "./features/tutor/tutorDashboardSlice";
 import tutorCoursesReducer from "./features/tutor/tutorCoursesSlice";
-import tutorCategoryReducer from "./features/tutor/tutorCategorySlice";
 import tutorCouponReducer from "./features/tutor/tutorCouponSlice";
 
 // ================== ADMIN ==================
@@ -30,6 +29,10 @@ import adminDashboardReducer from "./features/admin/adminDashboardSlice";
 import adminCategoryReducer from "./features/admin/adminCategorySlice";
 import adminUserReducer from "./features/admin/adminUserSlice";
 import adminTutorReducer from "./features/admin/adminTutorSlice";
+import adminCourseReducer from "./features/admin/adminCourseSlice";
+
+// ================== COMMON ==================
+import categoryReducer from './features/public/categorySlice';
 
 // ======================================================
 // STORE CONFIG
@@ -58,7 +61,6 @@ export const store = configureStore({
     tutorProfile: tutorProfileReducer,
     tutorDashboard: tutorDashboardReducer,
     tutorCourses: tutorCoursesReducer,
-    tutorCategories: tutorCategoryReducer,
     tutorCoupon: tutorCouponReducer,
 
     // ADMIN
@@ -67,6 +69,11 @@ export const store = configureStore({
     adminCategories: adminCategoryReducer,
     adminUsers: adminUserReducer,
     adminTutors: adminTutorReducer,
+    adminCourses: adminCourseReducer,
+
+    // COMMON
+    categories: categoryReducer,
+
   },
 
   devTools: import.meta.env.MODE !== "production",

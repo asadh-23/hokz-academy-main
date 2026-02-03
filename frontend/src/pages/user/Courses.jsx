@@ -4,11 +4,9 @@ import { toast } from "sonner";
 import { useDispatch, useSelector } from "react-redux";
 import {
     fetchUserCourses,
-    fetchUserListedCategories,
     setUserCourseFilters,
     clearUserCourseFilters,
     selectUserCourses,
-    selectUserCategories,
     selectUserCourseFilters,
     selectUserCoursePagination,
     selectUserCoursesLoading,
@@ -21,6 +19,7 @@ import {
 } from "../../store/features/user/userWishlistSlice";
 import Pagination from "../../components/common/Pagination";
 import { Link } from "react-router-dom";
+import { fetchListedCategories, selectListedCategories } from "../../store/features/public/categorySlice";
 
 const Courses = () => {
     const dispatch = useDispatch();
@@ -28,7 +27,7 @@ const Courses = () => {
 
     // Redux selectors
     const courses = useSelector(selectUserCourses);
-    const categories = useSelector(selectUserCategories);
+    const categories = useSelector(selectListedCategories);
     const filters = useSelector(selectUserCourseFilters);
     const pagination = useSelector(selectUserCoursePagination);
     const loading = useSelector(selectUserCoursesLoading);
@@ -45,7 +44,7 @@ const Courses = () => {
 
     // Fetch categories and wishlist on mount
     useEffect(() => {
-        dispatch(fetchUserListedCategories());
+        dispatch(fetchListedCategories());
         dispatch(fetchUserWishlist());
     }, [dispatch]);
 

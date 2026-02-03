@@ -9,12 +9,13 @@ import tutorAuthRoutes from './routes/tutor/authRoutes.js';
 import userAuthRoutes from './routes/user/authRoutes.js';
 
 import adminProfileRoutes from './routes/admin/profileRoutes.js';
-import adminUserManagementRoutes from './routes/admin/userManagementRoutes.js';
-// import adminTutorManagementRoutes from './routes/admin/tutorManagementRoutes.js';
+import adminUserRoutes from './routes/admin/userRoutes.js';
+import adminTutorRoutes from './routes/admin/tutorRoutes.js';
 import adminCategoryRoutes from './routes/admin/categoryRoutes.js';
-// import adminCourseManagementRoutes from './routes/admin/courseManagementRoutes.js';
-// import adminOrderManagementRoutes from './routes/admin/orderManagementRoutes.js';
-// import adminDashboardRoutes from './routes/admin/dashboardRoutes.js';
+import adminCourseRoutes from './routes/admin/courseRoutes.js';
+import adminOrderRoutes from './routes/admin/orderRoutes.js'
+import adminDashboardRoutes from "./routes/admin/dashboardRoutes.js";
+import adminWalletRoutes from "./routes/admin/walletRoutes.js";
 
 import tutorProfileRoutes from './routes/tutor/profileRoutes.js';
 import tutorCourseRoutes from './routes/tutor/courseRoutes.js';
@@ -32,6 +33,9 @@ import userCartRoutes from "./routes/user/cartRoutes.js";
 import userPaymentRoutes from "./routes/user/paymentRoutes.js"
 import userCourseProgress from "./routes/user/courseProgressRoutes.js"
 import userExamRoutes from "./routes/user/examRoutes.js";
+
+// COMMON
+import publicRoutes from "./routes/public/publicRoutes.js";
 
 import { notFound, errorHandler } from "./middlewares/errorHandler.js";
 
@@ -72,12 +76,13 @@ app.use('/api/tutor/auth', tutorAuthRoutes);
 app.use('/api/user/auth', userAuthRoutes);
 
 app.use('/api/admin', adminProfileRoutes);
-app.use('/api/admin', adminUserManagementRoutes);
+app.use('/api/admin', adminUserRoutes);
+app.use('/api/admin', adminTutorRoutes);
 app.use('/api/admin', adminCategoryRoutes);
-// app.use('/api/admin', adminTutorManagementRoutes);
-// app.use('/api/admin', adminCourseManagementRoutes);
-// app.use('/api/admin', adminOrderManagementRoutes);
-// app.use('/api/admin', adminDashboardRoutes);
+app.use('/api/admin', adminCourseRoutes);
+app.use('/api/admin', adminOrderRoutes);
+app.use('/api/admin', adminDashboardRoutes);
+app.use('/api/admin', adminWalletRoutes);
 
 app.use('/api/tutor', tutorProfileRoutes);
 app.use('/api/tutor', tutorCourseRoutes);
@@ -96,6 +101,9 @@ app.use("/api/user", userCartRoutes);
 app.use("/api/user", userPaymentRoutes);
 app.use("/api/user", userCourseProgress);
 app.use("/api/user", userExamRoutes);
+
+
+app.use("/api", publicRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

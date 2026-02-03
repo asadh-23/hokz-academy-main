@@ -89,6 +89,9 @@ export const getAllCourses = async (req, res) => {
 export const getListedCategories = async (req, res) => {
     try {
         const categories = await Category.find({ isListed: true }).select("_id name").sort({ name: 1 });
+        if(!categories){
+            return res.status(400).json({success: false, message: "Failed to fetch categories"});
+        }
 
         return res.status(200).json({
             success: true,

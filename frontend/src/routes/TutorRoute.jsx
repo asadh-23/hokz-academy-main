@@ -22,6 +22,7 @@ import ExamManagement from "../pages/tutor/ExamManagement";
 import EditExam from "../pages/tutor/EditExam";
 import WalletPage from "../pages/tutor/Wallet";
 import Order from "../pages/tutor/Order";
+import OrderDetails from "../pages/tutor/OrderDetails";
 
 export default function TutorRoutes() {
     return (
@@ -52,6 +53,7 @@ export default function TutorRoutes() {
                     <Route path="/course/:courseId/edit-exam" element={<EditExam /> } />
                     <Route path="/wallet" element={<WalletPage/> } />
                     <Route path="/orders" element={<Order/> } />
+                    <Route path="/orders/:orderId" element={<OrderDetails/> } />
                     
                 </Route>
             </Route>

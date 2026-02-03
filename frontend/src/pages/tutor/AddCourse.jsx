@@ -12,11 +12,8 @@ import {
     selectTutorCourseCreating,
     selectTutorThumbnailUploading,
 } from "../../store/features/tutor/tutorCoursesSlice";
-import {
-    fetchTutorCategories,
-    selectTutorCategories,
-    selectTutorCategoryLoading,
-} from "../../store/features/tutor/tutorCategorySlice";
+import { fetchListedCategories, selectCategoryLoading, selectListedCategories } from "../../store/features/public/categorySlice";
+
 
 const AddCourse = () => {
     const dispatch = useDispatch();
@@ -35,14 +32,14 @@ const AddCourse = () => {
     const fileInputRef = useRef(null);
 
     // Redux selectors
-    const categories = useSelector(selectTutorCategories);
-    const categoriesLoading = useSelector(selectTutorCategoryLoading);
+    const categories = useSelector(selectListedCategories);
+    const categoriesLoading = useSelector(selectCategoryLoading);
     const isSubmitting = useSelector(selectTutorCourseCreating);
     const isUploadingThumbnail = useSelector(selectTutorThumbnailUploading);
 
     // Fetch categories on mount using Redux thunk
     useEffect(() => {
-        dispatch(fetchTutorCategories());
+        dispatch(fetchListedCategories());
     }, [dispatch]);
 
     const handleInputChange = (e) => {

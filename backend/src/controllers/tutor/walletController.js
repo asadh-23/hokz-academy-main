@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import Wallet from "../../models/finance/Wallet.js";
 import PaymentDistribution from "../../models/finance/PaymentDistribution.js";
 
@@ -5,65 +6,95 @@ export const getTutorWallet = async (req, res) => {
     try {
         const tutorId = req.user._id;
 
-        let wallet = await Wallet.findOne({ owner: tutorId });
+        const [wallet, statsData, recentTransactions] = await Promise.all([
+            Wallet.findOne({ owner: tutorId }),
 
-        if (!wallet) {
-            return res.status(200).json({
-                success: true,
-                data: {
-                    totalEarnings: 0,
-                    currentBalance: 0,
-                    transactions: []
+            PaymentDistribution.aggregate([
+                { $match: { tutor: new mongoose.Types.ObjectId(tutorId) } },
+                {
+                    $group: {
+                        _id: null,
+                        totalPlatformSales: {
+                            $sum: {
+                                $add: [
+                                    "$totalAmount",
+                                    { $ifNull: ["$taxCollected", 0] }
+                                ]
+                            }
+                        },
+                        totalTutorEarnings: { $sum: "$tutorShareAmount" },
+                        totalTransactionsCount: { $sum: 1 }
+                    }
                 }
-            });
-        }
+            ]),
 
-        const distributions = await PaymentDistribution.find({ tutor: tutorId })
-            .populate({
-                path: "orderId",
-                select: "createdAt razorpayPaymentId",
-                populate: {
-                    path: "user",
-                    select: "fullName email profileImage phone"
-                }
+            PaymentDistribution.find({ tutor: tutorId })
+                .populate({
+                    path: "orderId",
+                    select: "createdAt razorpayPaymentId",
+                    populate: {
+                        path: "user",
+                        select: "fullName email profileImage"
+                    }
+                })
+                .populate({
+                    path: "courses.courseId",
+                    select: "thumbnailUrl"
+                })
+                .sort({ createdAt: -1 })
+                .limit(20)
+        ]);
+
+        const formattedTransactions = recentTransactions
+            .map(dist => {
+                if (!dist.orderId) return null;
+
+                const purchasedCourses = dist.courses.map(c => ({
+                    title: c.courseTitle,
+                    thumbnail:
+                        c.courseId?.thumbnailUrl ||
+                        "https://via.placeholder.com/150"
+                }));
+
+                return {
+                    _id: dist._id,
+                    transactionId:
+                        dist.orderId.razorpayPaymentId || dist.orderId._id,
+                    date: dist.createdAt,
+                    student: {
+                        name: dist.orderId.user?.fullName || "Unknown",
+                        image: dist.orderId.user?.profileImage,
+                        email: dist.orderId.user?.email
+                    },
+                    items: purchasedCourses,
+                    amount: dist.tutorShareAmount,
+                    type: "credit",
+                    status: "success"
+                };
             })
-            .sort({ createdAt: -1 });
+            .filter(Boolean);
 
-        const transactions = distributions.map(dist => {
-            if (!dist.orderId) return null; 
+        const stats = statsData[0] || {
+            totalPlatformSales: 0,
+            totalTutorEarnings: 0,
+            totalTransactionsCount: 0
+        };
 
-            
-            const courseNames = dist.courses.map(c => c.courseTitle).join(", ");
-
-            return {
-                _id: dist._id,
-                transactionId: dist.orderId.razorpayPaymentId || dist.orderId._id,
-                date: dist.createdAt,
-                
-                // Student Details
-                studentName: dist.orderId.user?.fullName || "Unknown",
-                studentEmail: dist.orderId.user?.email || "N/A",
-                studentProfileImage: dist.orderId.user?.profileImage,
-                
-                // Course & Amount
-                courseName: courseNames,
-                amount: dist.tutorShareAmount,
-                
-                status: "Credited",
-                type: "Sale"
-            };
-        }).filter(Boolean);
+        const currentBalance = wallet ? wallet.balance : 0;
 
         res.status(200).json({
             success: true,
             message: "Wallet details fetched successfully",
             data: {
-                totalEarnings: wallet.totalEarnings,
-                currentBalance: wallet.balance,
-                transactions: transactions
+                stats: {
+                    currentBalance: currentBalance,
+                    totalPlatformSales: stats.totalPlatformSales,
+                    totalTransactions: stats.totalTransactionsCount,
+                    totalEarnings: stats.totalTutorEarnings
+                },
+                transactions: formattedTransactions
             }
         });
-
     } catch (error) {
         console.error("Get Tutor Wallet Error:", error);
         res.status(500).json({

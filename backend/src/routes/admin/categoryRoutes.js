@@ -1,6 +1,6 @@
 import express from "express";
 import {
-  getAllCategories,
+  getCategories,
   createCategory,
   updateCategory,
   toggleListCategory,
@@ -11,7 +11,7 @@ const adminRouter = express.Router();
 
 adminRouter.use(verifyToken, isAdmin);
 
-adminRouter.get("/categories", getAllCategories);
+adminRouter.get("/categories", getCategories);
 adminRouter.post("/categories", createCategory);
 adminRouter.put("/categories/:id", updateCategory);
 adminRouter.patch("/categories/:id/toggle-list", toggleListCategory);

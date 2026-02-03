@@ -14,7 +14,8 @@ import {
     selectTutorThumbnailUploading,
     selectTutorSelectedCourse,
 } from "../../store/features/tutor/tutorCoursesSlice";
-import { fetchTutorCategories, selectTutorCategories } from "../../store/features/tutor/tutorCategorySlice";
+import { fetchListedCategories, selectListedCategories } from "../../store/features/public/categorySlice";
+
 
 const EditCourse = () => {
     const dispatch = useDispatch();
@@ -39,7 +40,7 @@ const EditCourse = () => {
     const isUploadingThumbnail = useSelector(selectTutorThumbnailUploading);
 
     const selectedCourse = useSelector(selectTutorSelectedCourse);
-    const categories = useSelector(selectTutorCategories);
+    const categories = useSelector(selectListedCategories);
 
     // Fetch course and categories on mount using Redux thunks
     useEffect(() => {
@@ -57,7 +58,7 @@ const EditCourse = () => {
     }, [dispatch, courseId]);
 
     useEffect(() => {
-        dispatch(fetchTutorCategories());
+        dispatch(fetchListedCategories());
     }, [dispatch]);
 
     // Update form data when course is loaded

@@ -11,7 +11,7 @@ const OrderSummary = ({ subtotal, tax, total, itemCount, onCheckout, loading }) 
                     <span className="font-semibold">₹{Math.round(subtotal)}</span>
                 </div>
                 <div className="flex justify-between text-gray-600">
-                    <span>Tax (5%)</span>
+                    <span>Tax (3%)</span>
                     <span className="font-semibold">₹{Math.round(tax)}</span>
                 </div>
             </div>

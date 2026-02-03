@@ -1,14 +1,12 @@
 import express from "express";
-import { getAllUsers, toggleBlockUser } from "../../controllers/admin/userManagementController.js";
 
 import { verifyToken, isAdmin } from "../../middlewares/authMiddleware.js";
+import { getAdminWallet } from "../../controllers/admin/walletController.js";
 
 const adminRouter = express.Router();
 
 adminRouter.use(verifyToken, isAdmin);
 
-adminRouter.get("/users", getAllUsers);
-
-adminRouter.patch("/users/:userId/toggle-block", toggleBlockUser);
+adminRouter.get("/wallet", getAdminWallet);
 
 export default adminRouter;

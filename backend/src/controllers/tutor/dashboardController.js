@@ -11,7 +11,7 @@ export const getTutorDashboardStats = async (req, res) => {
         const activeCourses = await Course.countDocuments({ tutor: tutorId, isListed: true });
 
         // 2. Total Students (Unique enrollments)
-        const totalStudents = await Enrollment.distinct("user", { tutor: tutorId }).then(users => users.length);
+        const totalStudents = await Enrollment.distinct("user", { tutor: tutorId }).then((users) => users.length);
 
         // 3. Financial Stats (Revenue & Fees) from PaymentDistribution
         const financialStats = await PaymentDistribution.aggregate([
@@ -21,33 +21,37 @@ export const getTutorDashboardStats = async (req, res) => {
                     _id: null,
                     totalRevenue: { $sum: "$tutorShareAmount" }, // 806
                     totalPlatformFees: { $sum: "$adminShareAmount" }, // 90
-                    grossSales: { $sum: "$totalAmount" } // 896
-                }
-            }
+                    grossSales: { $sum: "$totalAmount" }, // 896
+                },
+            },
         ]);
 
         const revenue = financialStats[0]?.totalRevenue || 0;
 
         // 4. Monthly Chart Data (Last 6 Months)
-        const monthlyData = await PaymentDistribution.aggregate([
+        const graphStats = await PaymentDistribution.aggregate([
             { $match: { tutor: tutorId } },
             {
                 $group: {
-                    _id: { 
-                        month: { $month: "$createdAt" }, 
-                        year: { $year: "$createdAt" } 
+                    _id: {
+                        month: { $month: "$createdAt" },
+                        year: { $year: "$createdAt" },
                     },
-                    monthlyRevenue: { $sum: "$tutorShareAmount" },
-                    monthlyExpenses: { $sum: "$adminShareAmount" }
-                }
+                    monthlyRevenue: { $sum: "$totalAmount" },
+                    monthlyProfit: { $sum: "$tutorShareAmount" },
+                },
             },
             { $sort: { "_id.year": 1, "_id.month": 1 } },
-            { $limit: 6 }
+            { $limit: 6 },
         ]);
 
         // Format Chart Data for Frontend (Array of values)
-        const revenueData = monthlyData.map(d => d.monthlyRevenue);
-        const expenseData = monthlyData.map(d => d.monthlyExpenses);
+        const totalRevenueData = graphStats.map((d) => d.monthlyRevenue);
+        const totalProfitData = graphStats.map((d) => d.monthlyProfit);
+        const chartLabels = graphStats.map((d) => {
+            const date = new Date(d._id.year, d._id.month - 1);
+            return date.toLocaleString("default", { month: "short" });
+        });
 
         // 5. Top Courses (Optional)
         const topCourses = await Course.find({ tutor: tutorId })
@@ -64,16 +68,16 @@ export const getTutorDashboardStats = async (req, res) => {
                     totalStudents: totalStudents,
                     totalCourses: totalCourses,
                     activeCourses: activeCourses,
-                    avgRating: 4.8
+                    avgRating: 4.8,
                 },
                 chart: {
-                    revenue: revenueData.length ? revenueData : [0,0,0,0,0,0],
-                    expenses: expenseData.length ? expenseData : [0,0,0,0,0,0]
+                    revenue: totalRevenueData.length ? totalRevenueData : [0, 0, 0, 0, 0, 0],
+                    expenses: totalProfitData.length ? totalProfitData : [0, 0, 0, 0, 0, 0],
+                    labels: chartLabels.length ? chartLabels : ["Jan", "Feb", "Mar", "Apr", "May", "Jun"]
                 },
-                courses: topCourses
-            }
+                courses: topCourses,
+            },
         });
-
     } catch (error) {
         console.error("Dashboard Error:", error);
         res.status(500).json({ success: false, message: "Failed to fetch dashboard data" });

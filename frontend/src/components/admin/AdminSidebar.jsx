@@ -36,9 +36,8 @@ const AdminSidebar = () => {
         { name: "Students", icon: "🎓", path: "/admin/users" },
         { name: "Tutors", icon: "👨‍🏫", path: "/admin/tutors" },
         { name: "Orders", icon: "📋", path: "/admin/orders" },
-        { name: "Coupon", icon: "🎫", path: "/admin/coupon" },
+        { name: "Wallet", icon: "🎫", path: "/admin/Wallet" },
         { name: "Courses", icon: "📚", path: "/admin/courses" },
-        { name: "Legal", icon: "⚖️", path: "/admin/legal" },
         { name: "Logout", icon: "🚪" }, // no path needed
     ];
 

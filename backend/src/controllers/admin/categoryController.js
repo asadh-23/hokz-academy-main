@@ -1,7 +1,7 @@
 import Category from "../../models/category/Category.js";
 import { isNullOrWhitespace } from "../../utils/validation.js";
 
-export const getAllCategories = async (req, res) => {
+export const getCategories = async (req, res) => {
     try {
         const page = Number(req.query.page) || 1;
         const limit = Number(req.query.limit) || 10;

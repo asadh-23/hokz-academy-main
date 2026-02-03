@@ -1,6 +1,12 @@
 import React, { useEffect, useRef, useState } from "react";
 
-const AnimatedChart = ({ revenueData, expenseData }) => {
+const AnimatedChart = ({ 
+  revenueData, 
+  expenseData, 
+  labels,
+  label1 = "Revenue", // Legend Name 1 (Green)
+  label2 = "Expenses" // Legend Name 2 (Red)
+}) => {
   const svgRef = useRef(null);
   const [animationProgress, setAnimationProgress] = useState(0);
 
@@ -124,21 +130,11 @@ const AnimatedChart = ({ revenueData, expenseData }) => {
     Math.round((maxValue / 6) * i)
   );
 
-  const months = [
-    "Jan",
-    "Feb",
-    "Mar",
-    "Apr",
-    "May",
-    "Jun",
-    "Jul",
-    "Aug",
-    "Sep",
-    "Oct",
-    "Nov",
-    "Dec",
-  ];
-  const xLabels = months.slice(0, dataLength);
+  // Dynamic X-Axis Labels Logic
+  const defaultMonths = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const xLabels = labels && labels.length > 0 
+      ? labels 
+      : defaultMonths.slice(0, dataLength);
 
   // ---------- RENDER ----------
   return (
@@ -163,6 +159,7 @@ const AnimatedChart = ({ revenueData, expenseData }) => {
           </linearGradient>
         </defs>
 
+        {/* Line 1 Area (Green) */}
         <path
           d={`${createPath(data1, animationProgress)} L ${
             width - padding
@@ -170,6 +167,7 @@ const AnimatedChart = ({ revenueData, expenseData }) => {
           fill="url(#rev)"
         />
 
+        {/* Line 2 Area (Red) */}
         <path
           d={`${createPath(data2, animationProgress)} L ${
             width - padding
@@ -177,6 +175,7 @@ const AnimatedChart = ({ revenueData, expenseData }) => {
           fill="url(#exp)"
         />
 
+        {/* Line 1 Stroke */}
         <path
           d={createPath(data1, animationProgress)}
           fill="none"
@@ -184,6 +183,7 @@ const AnimatedChart = ({ revenueData, expenseData }) => {
           strokeWidth="3"
         />
 
+        {/* Line 2 Stroke */}
         <path
           d={createPath(data2, animationProgress)}
           fill="none"
@@ -194,6 +194,7 @@ const AnimatedChart = ({ revenueData, expenseData }) => {
         {createDots(data1, animationProgress, "#10b981")}
         {createDots(data2, animationProgress, "#ef4444")}
 
+        {/* Y-Axis Labels */}
         {yLabels.map((val, i) => {
           const y = height - padding - (i * (height - 2 * padding)) / 6;
           return (
@@ -210,11 +211,12 @@ const AnimatedChart = ({ revenueData, expenseData }) => {
           );
         })}
 
+        {/* X-Axis Labels */}
         {xLabels.map((m, i) => {
-          const x = getX(i, dataLength);
+          const x = getX(i, xLabels.length); // Adjusted to use xLabels length
           return (
             <text
-              key={m}
+              key={i}
               x={x}
               y={height - padding + 20}
               textAnchor="middle"
@@ -227,14 +229,19 @@ const AnimatedChart = ({ revenueData, expenseData }) => {
         })}
       </svg>
 
+      {/* Dynamic Legend */}
       <div className="flex justify-center gap-6 mt-4">
         <div className="flex items-center gap-2">
           <span className="w-3 h-3 bg-emerald-500 rounded-full" />
-          <span className="text-xs font-semibold">Revenue</span>
+          <span className="text-xs font-semibold uppercase tracking-wide text-gray-600">
+            {label1}
+          </span>
         </div>
         <div className="flex items-center gap-2">
           <span className="w-3 h-3 bg-red-500 rounded-full" />
-          <span className="text-xs font-semibold">Expenses</span>
+          <span className="text-xs font-semibold uppercase tracking-wide text-gray-600">
+            {label2}
+          </span>
         </div>
       </div>
     </div>
