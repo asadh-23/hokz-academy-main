@@ -3,6 +3,8 @@ import Order from "../../models/finance/Order.js";
 
 export const getAdminWallet = async (req, res) => {
     try {
+        const admin = req.user;
+        
         const [statsData, recentTransactions, totalTxnCount] = await Promise.all([
             PaymentDistribution.aggregate([
                 {

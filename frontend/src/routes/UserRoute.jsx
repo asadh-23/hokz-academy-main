@@ -24,6 +24,7 @@ import CourseExam from "../pages/user/CourseExam";
 import MyCourses from "../pages/user/MyCourses";
 import MyOrders from "../pages/user/MyOrders";
 import Certificates from "../pages/user/Certificates";
+import ChatLayout from "../pages/chat/ChatLayout";
 
 
 export default function UserRoutes() {
@@ -54,7 +55,9 @@ export default function UserRoutes() {
                     <Route path="/courses/my-courses" element={<MyCourses/> } />
                     <Route path="/orders" element={<MyOrders/> } />
                     <Route path="/certificates" element={<Certificates/> } />
+                    
                 </Route>
+                <Route path='/chat' element={<ChatLayout/> } />
             </Route>
         </Routes>
     );

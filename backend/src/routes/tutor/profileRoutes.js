@@ -11,7 +11,7 @@ import {
     resendPasswordChangeOtp,
 } from "../../controllers/tutor/profileController.js";
 import { verifyToken, isTutor } from "../../middlewares/authMiddleware.js";
-import upload from "../../middlewares/multerMiddleware.js";
+import imageUpload from "../../middlewares/imageUploadMiddleware.js";
 
 const tutorRouter = express.Router();
 
@@ -21,7 +21,7 @@ tutorRouter.use(verifyToken, isTutor);
 // Profile management
 tutorRouter.get("/profile", getTutorProfile);
 tutorRouter.put("/profile", updateTutorProfile);
-tutorRouter.post("/profile/image", upload.single("profileImageFile"), updateTutorProfileImage);
+tutorRouter.post("/profile/image", imageUpload.single("profileImageFile"), updateTutorProfileImage);
 
 // Email change
 tutorRouter.post("/request-email-change", requestEmailChange);

@@ -12,6 +12,9 @@ import {
     validatePassword,
 } from "../../../../frontend/src/utils/validation.js";
 
+import { OAuth2Client } from "google-auth-library";
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
 export const registerUser = async (req, res) => {
     try {
         const { fullName, phone, email, password } = req.body;
@@ -230,6 +233,7 @@ export const loginUser = async (req, res) => {
                 email: savedUser.email,
                 phone: savedUser.phone,
                 profileImage: savedUser.profileImage,
+                isVerified: true,
             },
         });
     } catch (error) {
@@ -240,19 +244,25 @@ export const loginUser = async (req, res) => {
 
 export const googleAuth = async (req, res) => {
     try {
-        const { name, email, googleId, profileImage } = req.body;
-        if (!email || !googleId) {
-            return res.status(400).json({
-                message: "Invalid Google data",
-            });
+        const { credential } = req.body;
+        if (!credential) {
+            return res.status(400).json({ message: "No token provided" });
         }
+
+        const ticket = await client.verifyIdToken({
+            idToken: credential,
+            audience: process.env.VITE_GOOGLE_CLIENT_ID,
+        });
+
+        const payload = ticket.getPayload();
+        const { name, email, sub: googleId, picture } = payload;
 
         let user = (await User.findOne({ googleId })) || (await User.findOne({ email }));
 
         if (user && user.isBlocked) {
-            return res
-                .status(403)
-                .json({ message: "Your account has been blocked by the administrator. Please contact support." });
+            return res.status(403).json({
+                message: "Your account has been blocked by the administrator. Please contact support.",
+            });
         }
 
         if (!user) {
@@ -260,20 +270,21 @@ export const googleAuth = async (req, res) => {
                 fullName: name,
                 email,
                 googleId,
-                profileImage,
+                profileImage: picture,
                 isVerified: true,
+                role: "user", // Schema default enum check cheyyuka
             });
         } else {
             if (!user.googleId) {
                 user.googleId = googleId;
-                user.profileImage = profileImage;
+                user.profileImage = picture;
                 user.isVerified = true;
-                user.lastLogin = new Date();
             }
+            user.lastLogin = new Date();
         }
 
+        // Set Cookies and get Access Token
         const accessToken = setAuthTokens(res, user);
-
         const savedUser = await user.save();
 
         return res.status(200).json({
@@ -291,7 +302,7 @@ export const googleAuth = async (req, res) => {
             },
         });
     } catch (error) {
-        console.log("Google auth error : ", error);
+        console.error("User Google auth error : ", error);
         return res.status(500).json({ message: "Google login failed" });
     }
 };

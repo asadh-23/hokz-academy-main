@@ -69,7 +69,8 @@ export const getTutorWallet = async (req, res) => {
                     items: purchasedCourses,
                     amount: dist.tutorShareAmount,
                     type: "credit",
-                    status: "success"
+                    status: dist.isReleasedToWallet ? "success" : "pending",
+                    unlockDate: dist.unlockDate,
                 };
             })
             .filter(Boolean);
@@ -81,6 +82,7 @@ export const getTutorWallet = async (req, res) => {
         };
 
         const currentBalance = wallet ? wallet.balance : 0;
+        const pendingBalance = wallet ? wallet.pendingBalance || 0 : 0;
 
         res.status(200).json({
             success: true,
@@ -88,6 +90,7 @@ export const getTutorWallet = async (req, res) => {
             data: {
                 stats: {
                     currentBalance: currentBalance,
+                    pendingBalance: pendingBalance,
                     totalPlatformSales: stats.totalPlatformSales,
                     totalTransactions: stats.totalTransactionsCount,
                     totalEarnings: stats.totalTutorEarnings

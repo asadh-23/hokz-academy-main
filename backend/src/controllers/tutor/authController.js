@@ -12,6 +12,9 @@ import {
     validatePassword,
 } from "../../../../frontend/src/utils/validation.js";
 
+import { OAuth2Client } from "google-auth-library";
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
 export const registerTutor = async (req, res) => {
     try {
         const { fullName, phone, email, password } = req.body;
@@ -51,7 +54,7 @@ export const registerTutor = async (req, res) => {
         const lastOtp = await OTP.findOne({
             email: trimmedEmail,
             purpose: "registration",
-            role: "tutor"
+            role: "tutor",
         }).sort({ createdAt: -1 });
 
         if (lastOtp) {
@@ -231,9 +234,18 @@ export const loginTutor = async (req, res) => {
 
 export const googleAuth = async (req, res) => {
     try {
-        const { name, email, googleId, profileImage } = req.body;
+        const { credential } = req.body;
+        if (!credential) {
+            return res.status(400).json({ message: "No token provided" });
+        }
 
-        if (!email || !googleId) return res.status(400).json({ message: "Invalid Google data" });
+        const ticket = await client.verifyIdToken({
+            idToken: credential,
+            audience: process.env.VITE_GOOGLE_CLIENT_ID,
+        });
+
+        const payload = ticket.getPayload();
+        const { name, email, sub: googleId, picture } = payload;
 
         let tutor = (await Tutor.findOne({ googleId })) || (await Tutor.findOne({ email }));
 
@@ -247,20 +259,22 @@ export const googleAuth = async (req, res) => {
             tutor = await Tutor.create({
                 fullName: name,
                 email,
-                profileImage,
                 googleId,
+                profileImage: picture,
                 isVerified: true,
+                role: "tutor",
             });
         } else {
             if (!tutor.googleId) {
                 tutor.googleId = googleId;
-                tutor.profileImage = profileImage;
+                tutor.profileImage = picture;
                 tutor.isVerified = true;
-                tutor.lastLogin = new Date();
             }
+            tutor.lastLogin = new Date();
         }
-        const accessToken = setAuthTokens(res, tutor);
 
+        // Set Cookies and get Access Token
+        const accessToken = setAuthTokens(res, tutor);
         const savedTutor = await tutor.save();
 
         return res.status(200).json({
@@ -278,7 +292,7 @@ export const googleAuth = async (req, res) => {
             },
         });
     } catch (error) {
-        console.log("Tutor google Login failed");
+        console.error("Tutor Google Login failed : ", error);
         return res.status(500).json({ message: "Google login failed" });
     }
 };

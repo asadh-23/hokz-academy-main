@@ -7,7 +7,7 @@ import { publicAxios } from "../../../api/publicAxios";
 
 export const googleAuth = createAsyncThunk("googleAuth/googleAuth", async ({ credential, role }, { rejectWithValue }) => {
     try {
-        const res = await publicAxios.post(`/${role}/google-auth`, { credential });
+        const res = await publicAxios.post(`/${role}/auth/google-auth`, { credential });
         return res.data; // { user, accessToken }
     } catch (err) {
         return rejectWithValue(err.response?.data?.message || "Google authentication failed");

@@ -2,6 +2,8 @@ import Course from "../../models/course/Course.js";
 import mongoose from "mongoose";
 import Lesson from "../../models/course/Lesson.js";
 import { uploadToS3, deleteFromS3 } from "../../services/s3UploadService.js";
+import Enrollment from "../../models/course/Enrollment.js";
+import { sendNotification } from "../../utils/notificationSender.js";
 
 export const uploadLessonFile = async (req, res) => {
     try {
@@ -99,6 +101,25 @@ export const createLesson = async (req, res) => {
             },
         });
 
+        const enrolledStudents = await Enrollment.find({
+            course: courseId,
+            status: "active",
+        }).select("user");
+
+        if (enrolledStudents.length > 0) {
+            const notificationPromises = enrolledStudents.map((enrollment) => {
+                return sendNotification({
+                    recipientId: enrollment.user,
+                    senderId: req.user._id,
+                    type: "lesson_added",
+                    message: `New Lesson: "${title}" added to ${course.title}`,
+                    relatedId: courseId,
+                });
+            });
+
+           
+            await Promise.all(notificationPromises);
+        }
         return res.status(201).json({
             success: true,
             message: `${title} saved`,
@@ -226,7 +247,7 @@ export const updateLesson = async (req, res) => {
                 if (failures.length > 0) {
                     console.error(
                         `Failed to delete ${failures.length} files from S3:`,
-                        failures.map((f) => f.reason)
+                        failures.map((f) => f.reason),
                     );
                 }
             });

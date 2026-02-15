@@ -3,7 +3,7 @@ import Category from "../../models/category/Category.js";
 import mongoose from "mongoose";
 import Lesson from "../../models/course/Lesson.js";
 import Enrollment from "../../models/course/Enrollment.js";
-import PaymentDistribution from "../../models/finance/PaymentDistribution.js";
+import { sendNotification } from "../../utils/notificationSender.js";
 
 export const getAllCourses = async (req, res) => {
     try {
@@ -182,7 +182,7 @@ export const getCourseDetails = async (req, res) => {
 export const toggleBlockCourse = async (req, res) => {
     try {
         const { courseId } = req.params;
-
+        const adminId = req.user ? req.user._id : null;
         if (!mongoose.Types.ObjectId.isValid(courseId)) {
             return res.status(400).json({
                 success: false,
@@ -191,7 +191,7 @@ export const toggleBlockCourse = async (req, res) => {
         }
 
         // 1️⃣ Get current course
-        const course = await Course.findById(courseId).select("isListed");
+        const course = await Course.findById(courseId).select("isListed title tutor");
 
         if (!course) {
             return res.status(404).json({
@@ -204,6 +204,21 @@ export const toggleBlockCourse = async (req, res) => {
         course.isListed = !course.isListed;
         await course.save();
 
+        try {
+            const message = course.isListed
+                ? `Good news! Your course "${course.title}" has been Unblocked By the Admin and is now live.`
+                : `Important: Your course "${course.title}" has been Blocked by the Admin. Please contact support.`;
+
+            await sendNotification({
+                recipientId: course.tutor,
+                senderId: adminId,
+                type: "system",
+                message: message,
+                relatedId: course._id,
+            });
+        } catch (notifError) {
+            console.error("Failed to send block/unblock notification to tutor:", notifError);
+        }
         // 3️⃣ Response
         res.status(200).json({
             success: true,
@@ -239,6 +254,7 @@ export const getLessonDetails = async (req, res) => {
 export const toggleBlockLesson = async (req, res) => {
     try {
         const { lessonId } = req.params;
+        const adminId = req.user ? req.user._id : null;
 
         if (!mongoose.Types.ObjectId.isValid(lessonId)) {
             return res.status(400).json({
@@ -248,7 +264,10 @@ export const toggleBlockLesson = async (req, res) => {
         }
 
         // 1️⃣ Get current publish status
-        const lesson = await Lesson.findById(lessonId).select("isPublished");
+        const lesson = await Lesson.findById(lessonId).select("isPublished title course").populate({
+            path: "course",
+            select: "title tutor",
+        });
 
         if (!lesson) {
             return res.status(404).json({
@@ -262,8 +281,25 @@ export const toggleBlockLesson = async (req, res) => {
             lessonId,
             { isPublished: !lesson.isPublished },
             { new: true },
-        ).select("title description videoUrl pdfUrl duration isPublished order createdAt")
+        ).select("title description videoUrl pdfUrl duration isPublished order createdAt");
+        try {
+            const tutorId = lesson.course?.tutor;
 
+            if (tutorId) {
+                const actionText = updatedLesson.isPublished ? "Published (Unblocked)" : "Unpublished (Blocked)";
+                const message = `Admin has ${actionText} your lesson "${lesson.title}" in the course "${lesson.course?.title}".`;
+
+                await sendNotification({
+                    recipientId: tutorId,
+                    senderId: adminId,
+                    type: "system",
+                    message: message,
+                    relatedId: lesson._id,
+                });
+            }
+        } catch (notifError) {
+            console.error("Failed to send lesson block notification to tutor:", notifError);
+        }
         // 3️⃣ Response
         res.status(200).json({
             success: true,

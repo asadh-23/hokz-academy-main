@@ -13,6 +13,8 @@ import WalletTransaction from "../../models/finance/WalletTransaction.js";
 import Coupon from "../../models/marketing/Coupon.js";
 import CouponUsage from "../../models/marketing/CouponUsage.js";
 import Enrollment from "../../models/course/Enrollment.js";
+import { sendNotification } from "../../utils/notificationSender.js";
+import Admin from "../../models/user/Admin.js";
 
 dotenv.config();
 
@@ -467,6 +469,22 @@ export const verifyPayment = async (req, res) => {
 
         await Enrollment.insertMany(enrollmentDocs, { session });
 
+        // notify tutor
+        try {
+            const notificationPromises = dbCourses.map((course) => {
+                return sendNotification({
+                    recipientId: course.tutor._id,
+                    senderId: userId,
+                    type: "new_enrollment",
+                    message: `Awesome! ${req.user?.fullName || "Someone"} just enrolled in "${course.title}". Check your Orders.`,
+                    relatedId: course._id,
+                });
+            });
+            await Promise.all(notificationPromises);
+        } catch (notifError) {
+            console.error("Failed to send enrollment notification to tutor:", notifError);
+        }
+
         // 10. Update Progress (Loop is needed for upsert logic)
         for (const course of dbCourses) {
             await CourseProgress.findOneAndUpdate(
@@ -479,6 +497,7 @@ export const verifyPayment = async (req, res) => {
         // 11. Update Course Counts
         await Course.updateMany({ _id: { $in: courses } }, { $inc: { enrolledCount: 1 } }, { session });
 
+        let totalAdminCommission = 0;
         // 12. Distribute Revenue
         for (const data of Object.values(tutorRevenueMap)) {
             const adminCommissionRate = 10;
@@ -487,6 +506,9 @@ export const verifyPayment = async (req, res) => {
             const adminShare = Math.round((realSalesAmount * adminCommissionRate) / 100);
             const taxAmount = Math.round((realSalesAmount * taxPercentage) / 100);
             const tutorShare = realSalesAmount - adminShare;
+
+            totalAdminCommission += adminShare;
+            const unlockDate = new Date(Date.now() + 2 * 60 * 1000);
 
             await PaymentDistribution.create(
                 [
@@ -503,7 +525,8 @@ export const verifyPayment = async (req, res) => {
                         taxCollected: taxAmount,
 
                         adminCommissionRate: adminCommissionRate,
-                        isReleasedToWallet: true,
+                        isReleasedToWallet: false,
+                        unlockDate: unlockDate,
                     },
                 ],
                 { session },
@@ -519,7 +542,7 @@ export const verifyPayment = async (req, res) => {
             await Wallet.findByIdAndUpdate(
                 wallet._id,
                 {
-                    $inc: { balance: tutorShare, totalEarnings: tutorShare },
+                    $inc: { pendingBalance: tutorShare, totalEarnings: tutorShare },
                 },
                 { session },
             );
@@ -533,11 +556,64 @@ export const verifyPayment = async (req, res) => {
                         amount: tutorShare,
                         description: `Revenue from Order #${newOrder.razorpayOrderId}`,
                         orderId: newOrder._id,
-                        status: "completed",
+                        status: "pending",
+                        unlockDate: unlockDate,
                     },
                 ],
                 { session },
             );
+        }
+
+        if (totalAdminCommission > 0) {
+          
+            const admin = await Admin.findOne().session(session);
+
+            if (admin) {
+             
+                let adminWallet = await Wallet.findOne({ owner: admin._id }).session(session);
+                if (!adminWallet) {
+                    const [newAdminWallet] = await Wallet.create([{ owner: admin._id, ownerType: "Admin" }], {
+                        session,
+                    });
+                    adminWallet = newAdminWallet;
+                }
+
+              
+                await Wallet.findByIdAndUpdate(
+                    adminWallet._id,
+                    { $inc: { balance: totalAdminCommission, totalEarnings: totalAdminCommission } },
+                    { session },
+                );
+
+                // 4. Admin Wallet Transaction (Completed Status)
+                await WalletTransaction.create(
+                    [
+                        {
+                            walletId: adminWallet._id,
+                            type: "credit",
+                            category: "platform_fee",
+                            amount: totalAdminCommission,
+                            description: `Platform fee from Order #${newOrder.razorpayOrderId}`,
+                            orderId: newOrder._id,
+                            status: "completed",
+                        },
+                    ],
+                    { session },
+                );
+
+                // 5. Admin-ന് Notification അയക്കുന്നു
+                try {
+                    await sendNotification({
+                        recipientId: admin._id,
+                        senderId: userId,
+                        type: "wallet_credit",
+                        message: `₹${totalAdminCommission} added to your wallet as platform fee from a new purchase by ${req.user?.fullName || "a student"}.`,
+                        relatedId: newOrder._id,
+                    });
+                } catch (adminNotifError) {
+                    console.error("Failed to send admin notification:", adminNotifError);
+                }
+            }
         }
 
         // 13. Clear Cart

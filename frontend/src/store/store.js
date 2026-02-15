@@ -33,7 +33,9 @@ import adminCourseReducer from "./features/admin/adminCourseSlice";
 
 // ================== COMMON ==================
 import categoryReducer from './features/public/categorySlice';
-
+import socketReducer from './features/socket/socketSlice'
+import chatReducer from './features/chat/chatSlice';
+import notificationReducer from './features/notification/notificationSlice'
 // ======================================================
 // STORE CONFIG
 // ======================================================
@@ -73,6 +75,9 @@ export const store = configureStore({
 
     // COMMON
     categories: categoryReducer,
+    socket: socketReducer,
+    chat: chatReducer,
+    notifications: notificationReducer,
 
   },
 

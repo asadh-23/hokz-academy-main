@@ -34,6 +34,7 @@ const PaymentDistributionSchema = new mongoose.Schema({
     default: false // Payment received but not yet withdrawable (maybe 30 days hold)
   },
   walletTransactionId: { type: String }, // If you create a WalletTransaction later
+unlockDate: { type: Date },
 
   transactionDate: {
     type: Date,

@@ -6,7 +6,7 @@ import {
     verifyPasswordChange,
     resendPasswordChangeOtp,
 } from "../../controllers/admin/profileController.js";
-import upload from "../../middlewares/multerMiddleware.js";
+import imageUpload from "../../middlewares/imageUploadMiddleware.js";
 import { isAdmin, verifyToken } from "../../middlewares/authMiddleware.js";
 
 const adminRouter = express.Router();
@@ -16,7 +16,7 @@ adminRouter.use(verifyToken, isAdmin);
 
 // Profile management
 adminRouter.get("/profile", getAdminProfile);
-adminRouter.post("/profile/image", upload.single("profileImageFile"), updateAdminProfileImage);
+adminRouter.post("/profile/image", imageUpload.single("profileImageFile"), updateAdminProfileImage);
 
 // Password change
 adminRouter.post("/request-password-change", requestPasswordChange);

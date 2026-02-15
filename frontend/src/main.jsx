@@ -8,6 +8,9 @@ import { Provider } from "react-redux";
 import { store } from "./store/store.js";
 import { setStoreRef } from "./api/setupInterceptors";
 import { Buffer } from "buffer";
+
+import { SocketContextProvider } from "./contexts/SocketContext";
+
 window.Buffer = Buffer;
 
 
@@ -18,7 +21,9 @@ createRoot(document.getElementById("root")).render(
     <StrictMode>
         <BrowserRouter>
             <Provider store={store}>
-                <App />
+                <SocketContextProvider>
+                    <App />
+                </SocketContextProvider>
             </Provider>
             <Toaster
                 position="top-right"

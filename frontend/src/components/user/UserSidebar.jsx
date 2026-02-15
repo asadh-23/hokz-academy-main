@@ -62,6 +62,14 @@ const UserSidebar = ({ isOpen, onClose }) => {
             bgColor: "bg-orange-50",
         },
         {
+            name: "Chat and video",
+            path: "/user/chat",
+            icon: "🎥",
+            color: "text-pink-600",
+            bgColor: "bg-pink-50",
+
+        },
+        {
             name: "Certificates",
             path: "/user/certificates",
             icon: Award,

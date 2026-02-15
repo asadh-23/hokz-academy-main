@@ -28,20 +28,16 @@ export default function GoogleAuth({ role }) {
                 googleAuth({
                     credential: credentialResponse.credential,
                     role,
-                })
+                }),
             ).unwrap();
 
             toast.success(result.message || "Google login successful!");
 
-            // Prepare payload for role-specific auth slice
-            const payload = {
-                user: result.user,
-                accessToken: result.accessToken,
-            };
-
-            // Update the appropriate role-based auth slice
-            if (role === "user") dispatch(userLoginSuccess(payload));
-            if (role === "tutor") dispatch(tutorLoginSuccess(payload));
+            if (role === "user") {
+                dispatch(userLoginSuccess({ user: result.user, accessToken: result.accessToken }));
+            } else if (role === "tutor") {
+                dispatch(tutorLoginSuccess({ tutor: result.user, accessToken: result.accessToken }));
+            }
 
             navigate(`/${role}/dashboard`, { replace: true });
         } catch (error) {

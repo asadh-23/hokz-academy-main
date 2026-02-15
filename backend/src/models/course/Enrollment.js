@@ -35,10 +35,6 @@ const EnrollmentSchema = new mongoose.Schema({
         min: 0
     },
 
-    // Access Status
-    // 'active' -> Can watch videos
-    // 'refunded' -> Access revoked
-    // 'cancelled' -> Payment failed but record exists (optional)
     status: {
         type: String,
         enum: ["active", "refunded", "cancelled"],

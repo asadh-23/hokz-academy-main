@@ -23,6 +23,7 @@ import EditExam from "../pages/tutor/EditExam";
 import WalletPage from "../pages/tutor/Wallet";
 import Order from "../pages/tutor/Order";
 import OrderDetails from "../pages/tutor/OrderDetails";
+import ChatLayout from "../pages/chat/ChatLayout";
 
 export default function TutorRoutes() {
     return (
@@ -55,7 +56,9 @@ export default function TutorRoutes() {
                     <Route path="/orders" element={<Order/> } />
                     <Route path="/orders/:orderId" element={<OrderDetails/> } />
                     
+                    
                 </Route>
+                <Route path="/chat" element={<ChatLayout/> } />
             </Route>
 
             <Route path="*" element={<NotFound />} />

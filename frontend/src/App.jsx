@@ -12,7 +12,7 @@ import TutorRoute from "./routes/TutorRoute";
 import AdminRoute from "./routes/AdminRoute";
 import NotFound from "./pages/error/NotFound";
 import { publicAxios } from "./api/publicAxios";
-
+import NotificationListener from "./components/common/NotificationListener";
 
 function App() {
     const dispatch = useDispatch();
@@ -54,13 +54,18 @@ function App() {
     }
 
     return (
-        <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/user/*" element={<UserRoute />} />
-            <Route path="/tutor/*" element={<TutorRoute />} />
-            <Route path="/admin/*" element={<AdminRoute />} />
-            <Route path="*" element={<NotFound />} />
-        </Routes>
+        <>
+            
+            <NotificationListener />
+
+            <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/user/*" element={<UserRoute />} />
+                <Route path="/tutor/*" element={<TutorRoute />} />
+                <Route path="/admin/*" element={<AdminRoute />} />
+                <Route path="*" element={<NotFound />} />
+            </Routes>
+        </>
     );
 }
 

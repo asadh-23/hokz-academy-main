@@ -145,7 +145,7 @@ const TutorOrders = () => {
                                 Total Net Earnings
                             </p>
                             <h2 className="text-3xl font-extrabold tracking-tight">
-                                {formatCurrency(stats.totalNetEarnings)}
+                                {formatCurrency(stats?.totalNetEarnings || 0)}
                             </h2>
                         </div>
                         <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
@@ -167,7 +167,7 @@ const TutorOrders = () => {
                             <p className="text-gray-500 text-xs font-bold uppercase tracking-wider mb-1">
                                 Total Gross Sales
                             </p>
-                            <h2 className="text-2xl font-bold text-gray-900">{formatCurrency(stats.totalGrossRevenue)}</h2>
+                            <h2 className="text-2xl font-bold text-gray-900">{formatCurrency(stats?.totalGrossRevenue || 0)}</h2>
                         </div>
                         <div className="p-2 bg-green-50 rounded-lg">
                             <DollarSign size={24} className="text-green-600" />
@@ -183,7 +183,7 @@ const TutorOrders = () => {
                             <p className="text-gray-500 text-xs font-bold uppercase tracking-wider mb-1">
                                 Successful Orders
                             </p>
-                            <h2 className="text-2xl font-bold text-gray-900">{stats.totalPaidOrders}</h2>
+                            <h2 className="text-2xl font-bold text-gray-900">{stats?.totalPaidOrders || 0}</h2>
                         </div>
                         <div className="p-2 bg-blue-50 rounded-lg">
                             <ShoppingBag size={24} className="text-blue-600" />
@@ -231,7 +231,7 @@ const TutorOrders = () => {
                     <div className="h-64 flex items-center justify-center">
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
                     </div>
-                ) : orders.length > 0 ? (
+                ) : orders && orders.length > 0 ? (
                     <div className="overflow-x-auto">
                         <table className="w-full text-left border-collapse">
                             <thead>
@@ -388,7 +388,7 @@ const TutorOrders = () => {
                 )}
 
                 {/* --- PAGINATION --- */}
-                {!loading && orders.length > 0 && (
+                {!loading && orders && orders.length > 0 && (
                     <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
                         <Pagination
                             currentPage={pagination.currentPage}

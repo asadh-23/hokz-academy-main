@@ -82,7 +82,6 @@ const CourseLearning = () => {
             }
         }
     };
-    console.log(progressData.certificateData?.score);
 
     const handleManualComplete = async () => {
         await handleToggleComplete(activeLesson._id);

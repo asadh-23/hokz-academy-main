@@ -11,7 +11,7 @@ import {
     resendPasswordChangeOtp,
 } from "../../controllers/user/profileController.js";
 
-import upload from "../../middlewares/multerMiddleware.js";
+import imageUpload from "../../middlewares/imageUploadMiddleware.js";
 import { isUser, verifyToken } from "../../middlewares/authMiddleware.js";
 
 const userRouter = express.Router();
@@ -21,7 +21,7 @@ userRouter.use(verifyToken, isUser);
 // Profile management
 userRouter.get("/profile", getUserProfile);
 userRouter.put("/profile", updateUserProfile);
-userRouter.post("/profile/image", upload.single("profileImageFile"), updateUserProfileImage);
+userRouter.post("/profile/image", imageUpload.single("profileImageFile"), updateUserProfileImage);
 
 // Email change
 userRouter.post("/request-email-change", requestEmailChange);

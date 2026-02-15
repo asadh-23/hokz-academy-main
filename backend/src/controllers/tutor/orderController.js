@@ -144,15 +144,15 @@ export const getTutorOrders = async (req, res) => {
             data: {
                 orders: formattedOrders,
                 stats: {
-                    totalGrossRevenue: stats.totalGrossSales,
-                    totalNetEarnings: stats.totalNetEarnings,
-                    totalPaidOrders: stats.totalSuccessfulOrders,
-                    currentListCount: totalOrdersCount,
+                    totalGrossRevenue: stats.totalGrossSales || 0,
+                    totalNetEarnings: stats.totalNetEarnings || 0,
+                    totalPaidOrders: stats.totalSuccessfulOrders || 0,
+                    currentListCount: totalOrdersCount || 0,
                 },
                 pagination: {
                     totalOrders: totalOrdersCount,
                     currentPage: pageNumber,
-                    totalPages: Math.ceil(totalOrdersCount / limitNumber),
+                    totalPages: Math.ceil(totalOrdersCount / limitNumber) || 1,
                     limit: limitNumber,
                 },
             },

@@ -10,14 +10,14 @@ import {
     getCourseList,
 } from "../../controllers/tutor/courseController.js";
 import { isTutor, verifyToken } from "../../middlewares/authMiddleware.js";
-import { courseThumbnailMiddleware } from "../../middlewares/courseThumbnailMiddleware.js";
+import imageUpload from "../../middlewares/imageUploadMiddleware.js";
 
 const tutorRouter = express.Router();
 
 tutorRouter.use(verifyToken, isTutor);
 
 tutorRouter.get("/categories", getTutorCategories);
-tutorRouter.post("/courses/upload-thumbnail", courseThumbnailMiddleware, uploadCourseThumbnail);
+tutorRouter.post("/courses/upload-thumbnail", imageUpload.single("file"), uploadCourseThumbnail);
 tutorRouter.post("/courses", createCourse);
 tutorRouter.get("/courses/list", getCourseList);
 tutorRouter.get("/courses/", getTutorCourses);
