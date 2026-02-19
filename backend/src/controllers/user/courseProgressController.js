@@ -25,15 +25,34 @@ export const getCourseContent = async (req, res) => {
 
         // 2. Fetch Course Basic Details
         const course = await Course.findById(courseId)
-            .select("title description tutor averageRating lessonsCount exam")
+            .select("title description tutor averageRating lessonsCount exam isBanned isDeleted tutor")
             .populate("tutor", "fullName profileImage");
 
         if (!course) {
             return res.status(404).json({ success: false, message: "Course not found" });
         }
 
+        if (course.isBanned) {
+            return res.status(200).json({
+                success: true,
+                isBanned: true,
+                message: "This course has been suspended by the administrator.",
+                data: {
+                    course: { title: "Course Suspended", description: "This course is currently unavailable." },
+                    lessons: [],
+                    progress: {
+                        completedLessons: [],
+                        completionPercentage: 0,
+                        isCompleted: false,
+                        isExamPassed: false,
+                    },
+                    certificateData: null,
+                },
+            });
+        }
+
         // 3. Fetch Lessons
-        const lessons = await Lesson.find({ course: courseId, isPublished: true })
+        const lessons = await Lesson.find({ course: courseId, isPublished: true, isBanned: false})
             .sort({ order: 1 })
             .select("title description duration videoUrl order isFreePreview pdfUrl");
 
@@ -137,4 +156,3 @@ export const updateLessonProgress = async (req, res) => {
         return res.status(500).json({ success: false, message: "Internal Server Error" });
     }
 };
-

@@ -12,7 +12,7 @@ export const requestEmailChange = createAsyncThunk(
   async ({ newEmail, role }, { rejectWithValue }) => {
     try {
       const axiosInstance = role === "user" ? userAxios : tutorAxios;
-      const res = await axiosInstance.post("/request-email-change", {
+      const res = await axiosInstance.post("/profile/request-email-change", {
         newEmail,
       });
       return res.data; // { success, message }
@@ -30,7 +30,7 @@ export const verifyEmailChangeOtp = createAsyncThunk(
   async ({ otpCode, email, role }, { rejectWithValue }) => {
     try {
       const axiosInstance = role === "user" ? userAxios : tutorAxios;
-      const res = await axiosInstance.post("/verify-email-change", {
+      const res = await axiosInstance.post("/profile/verify-email-change", {
         otpCode,
         email,
       });
@@ -49,7 +49,7 @@ export const resendEmailChangeOtp = createAsyncThunk(
   async ({ email, role }, { rejectWithValue }) => {
     try {
       const axiosInstance = role === "user" ? userAxios : tutorAxios;
-      const res = await axiosInstance.post("/resend-email-change-otp", {
+      const res = await axiosInstance.post("/profile/resend-email-change-otp", {
         email,
       });
       return res.data;

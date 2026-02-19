@@ -7,8 +7,8 @@ const adminRouter = express.Router();
 
 adminRouter.use(verifyToken, isAdmin);
 
-adminRouter.get("/users", getAllUsers);
+adminRouter.get("/", getAllUsers);
 
-adminRouter.patch("/users/:userId/toggle-block", toggleBlockUser);
+adminRouter.patch("/:userId/toggle-block", toggleBlockUser);
 
 export default adminRouter;

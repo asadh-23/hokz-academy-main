@@ -19,9 +19,9 @@ const tutorRouter = express.Router();
 tutorRouter.use(verifyToken, isTutor);
 
 // Profile management
-tutorRouter.get("/profile", getTutorProfile);
-tutorRouter.put("/profile", updateTutorProfile);
-tutorRouter.post("/profile/image", imageUpload.single("profileImageFile"), updateTutorProfileImage);
+tutorRouter.get("/", getTutorProfile);
+tutorRouter.put("/", updateTutorProfile);
+tutorRouter.post("/image", imageUpload.single("profileImageFile"), updateTutorProfileImage);
 
 // Email change
 tutorRouter.post("/request-email-change", requestEmailChange);

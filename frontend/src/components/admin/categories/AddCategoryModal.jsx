@@ -2,12 +2,12 @@ import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "sonner";
 import { createAdminCategory } from "../../../store/features/admin/adminCategorySlice";
-import { isNullOrWhitespace } from "../../../utils/validation";
+import { validateText } from "../../../utils/validation";
 
 const AddCategoryModal = ({ isOpen, onClose, onSuccess }) => {
     const dispatch = useDispatch();
     const { loading } = useSelector((state) => state.adminCategories);
-    
+
     const [formData, setFormData] = useState({
         name: "",
         description: "",
@@ -35,16 +35,18 @@ const AddCategoryModal = ({ isOpen, onClose, onSuccess }) => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        if (isNullOrWhitespace(formData.name)) {
-            return toast.error("Category name is required");
+        const nameValidation = validateText(formData.name, 3, 30, "Category name");
+        if (!nameValidation.isValid) {
+            return toast.error(nameValidation.message || "Enter a valid Category name");
         }
-        if (isNullOrWhitespace(formData.description)) {
-            return toast.error("Description is required");
+        const descriptionValidation = validateText(formData.description, 3, 200, "Category Description");
+        if (!descriptionValidation.isValid) {
+            return toast.error(descriptionValidation.message || "Enter a valid Category name");
         }
 
         const payload = {
-            name: formData.name.trim(),
-            description: formData.description.trim(),
+            name: nameValidation.value,
+            description: descriptionValidation.value,
         };
 
         try {

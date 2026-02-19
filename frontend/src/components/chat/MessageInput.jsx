@@ -9,7 +9,7 @@ import {
     PhotoIcon,
 } from "@heroicons/react/24/solid";
 
-import { sendMessage } from "../../store/features/chat/chatSlice";
+import { sendMessage, addOptimisticMessage } from "../../store/features/chat/chatSlice";
 import { useSocket } from "../../contexts/SocketContext";
 import { selectUser } from "../../store/features/auth/userAuthSlice";
 import { selectTutor } from "../../store/features/auth/tutorAuthSlice";
@@ -88,15 +88,42 @@ const MessageInput = ({ chatId, receiverId }) => {
 
         if (!hasContent || !hasTarget) return;
 
-        // Dispatch Action
-        dispatch(
-            sendMessage({
-                chatId,
-                receiverId,
-                text,
-                file,
-            }),
-        );
+        // Create temporary ID for optimistic update
+        const tempId = `temp_${Date.now()}_${Math.random()}`;
+
+        // Create optimistic message object
+        const optimisticMessage = {
+            tempId,
+            _id: tempId,
+            senderId: currentUserId,
+            text: text.trim(),
+            createdAt: new Date().toISOString(),
+            isRead: false,
+            isDelivered: false,
+            pending: true, // Flag to show loading indicator
+        };
+
+        // If file exists, add file preview data
+        if (file) {
+            optimisticMessage.fileType = file.type.startsWith("image")
+                ? "image"
+                : file.type.startsWith("video")
+                ? "video"
+                : file.type === "application/pdf"
+                ? "pdf"
+                : "file";
+            optimisticMessage.fileUrl = preview; // Use the preview URL temporarily
+            optimisticMessage.fileName = file.name;
+        } else {
+            optimisticMessage.fileType = "text";
+        }
+
+        // Add optimistic message to Redux state immediately
+        dispatch(addOptimisticMessage(optimisticMessage));
+
+        // Store values before clearing
+        const messageText = text;
+        const messageFile = file;
 
         // Immediate Cleanup
         socket.emit("stop_typing", { receiverId, senderId: currentUserId });
@@ -104,6 +131,17 @@ const MessageInput = ({ chatId, receiverId }) => {
 
         setText("");
         clearFile();
+
+        // Dispatch actual send action with tempId
+        dispatch(
+            sendMessage({
+                chatId,
+                receiverId,
+                text: messageText,
+                file: messageFile,
+                tempId, // Pass tempId to match with optimistic message
+            }),
+        );
     };
 
     const handleKeyDown = (e) => {

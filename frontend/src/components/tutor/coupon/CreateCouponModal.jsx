@@ -8,6 +8,7 @@ import {
     selectCouponCreateLoading,
     selectCouponUpdateLoading,
 } from "../../../store/features/tutor/tutorCouponSlice";
+import { validateText } from "../../../utils/validation";
 
 const CreateCouponModal = ({ isOpen, onClose, editData = null }) => {
     const dispatch = useDispatch();
@@ -45,9 +46,7 @@ const CreateCouponModal = ({ isOpen, onClose, editData = null }) => {
 
                 discountValue: editData.discountValue?.toString() || "",
                 // Only set maxDiscount if the discount type is percentage
-                maxDiscount: editData.discountType === "percentage" 
-                    ? (editData.maxDiscountAmount?.toString() || "") 
-                    : "",
+                maxDiscount: editData.discountType === "percentage" ? editData.maxDiscountAmount?.toString() || "" : "",
                 minPurchase: editData.minPurchaseAmount?.toString() || "",
 
                 usagePerUser: editData.usagePerUser?.toString() || "1",
@@ -100,60 +99,82 @@ const CreateCouponModal = ({ isOpen, onClose, editData = null }) => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        if (!formData.code.trim()) return toast.error("Coupon code is required");
-        if (!formData.title.trim()) return toast.error("Title is required");
-        if (!formData.discountValue) return toast.error("Discount value is required");
-        if (!formData.startDate) return toast.error("Start date is required");
-        if (!formData.expiryDate) return toast.error("Expiry date is required");
+        const codeValidation = validateText(formData.code, 3, 8, "Coupon Code");
+        if (!codeValidation.isValid) return toast.error(codeValidation.message);
 
-        // ✅ Logical Validations
-        if (Number(formData.discountValue) < 0) {
-            return toast.error("Discount value cannot be negative");
+        if (/\s/.test(formData.code)) return toast.error("Coupon Code cannot contain spaces");
+
+        // 2. TITLE & DESCRIPTION
+        const titleValidation = validateText(formData.title, 4, 40, "Coupon Title");
+        if (!titleValidation.isValid) return toast.error(titleValidation.message);
+
+        const descriptionValidation = validateText(formData.description, 20, 200, "Description");
+        if (!descriptionValidation.isValid) return toast.error(descriptionValidation.message);
+
+        // 3. DISCOUNT VALUES
+        const discountValue = Number(formData.discountValue);
+        if (isNaN(discountValue) || discountValue <= 0) {
+            return toast.error("Discount value must be greater than 0");
         }
 
-        if (formData.discountType === "percentage" && Number(formData.discountValue) > 100) {
+        if (formData.discountType === "percentage" && discountValue > 100) {
             return toast.error("Percentage discount cannot exceed 100%");
         }
 
-        if (new Date(formData.startDate) >= new Date(formData.expiryDate)) {
+        // 4. USAGE LIMITS
+        const usagePerUser = Number(formData.usagePerUser);
+        if (isNaN(usagePerUser) || usagePerUser <= 0) {
+            return toast.error("Usage per user must be at least 1");
+        }
+
+        const totalUsageLimit = Number(formData.totalUsageLimit);
+        if (isNaN(totalUsageLimit) || totalUsageLimit < usagePerUser) {
+            return toast.error("Total usage limit cannot be less than usage per user");
+        }
+
+        // 5. DATE VALIDATION (Strict)
+        if (!formData.startDate || !formData.expiryDate) return toast.error("Dates are required");
+
+        const start = new Date(formData.startDate);
+        const expiry = new Date(formData.expiryDate);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0); // Reset time for comparison
+
+        if (!isEditMode && start < today) {
+            return toast.error("Start date cannot be in the past");
+        }
+
+        if (start >= expiry) {
             return toast.error("Expiry date must be after the start date");
         }
 
-        // Validate max discount for percentage type
-        if (formData.discountType === "percentage" && formData.maxDiscount) {
-            if (Number(formData.maxDiscount) <= 0) {
-                return toast.error("Max discount must be greater than 0");
-            }
+        // 6. MIN PURCHASE & MAX DISCOUNT
+        const minPurchase = formData.minPurchase ? Number(formData.minPurchase) : 0;
+        if (isNaN(minPurchase) || minPurchase < 0) return toast.error("Invalid Minimum Purchase amount");
+
+        // Logic: Fixed discount aanenkil athu min purchase-nekkal koodan paadilla
+        if (formData.discountType === "fixed" && discountValue >= minPurchase) {
+            return toast.error("Discount amount cannot be greater than or equal to Minimum Purchase amount");
         }
 
         const couponData = {
-            code: formData.code.toUpperCase(),
-            title: formData.title,
-            description: formData.description,
+            code: codeValidation.value.toUpperCase(), // Coupon code eppozhum upper case aakkunnath nallath
+            title: titleValidation.value,
+            description: descriptionValidation.value,
             discountType: formData.discountType,
-
-            discountValue: Number(formData.discountValue),
-            // Only include maxDiscountAmount for percentage type
-            maxDiscountAmount: formData.discountType === "percentage" && formData.maxDiscount 
-                ? Number(formData.maxDiscount) 
-                : undefined,
-            minPurchaseAmount: formData.minPurchase ? Number(formData.minPurchase) : 0,
-
+            discountValue: discountValue,
+            maxDiscountAmount:
+                formData.discountType === "percentage" && formData.maxDiscount ? Number(formData.maxDiscount) : undefined,
+            minPurchaseAmount: minPurchase,
             startDate: formData.startDate,
             expiryDate: formData.expiryDate,
-
-            usagePerUser: Number(formData.usagePerUser),
-            usageLimit: formData.totalUsageLimit ? Number(formData.totalUsageLimit) : undefined,
+            usagePerUser: usagePerUser,
+            usageLimit: totalUsageLimit || undefined,
         };
 
         try {
             if (isEditMode) {
-                await dispatch(
-                    updateTutorCoupon({
-                        couponId: editData._id,
-                        couponData,
-                    })
-                ).unwrap();
+                await dispatch(updateTutorCoupon({ couponId: editData._id, couponData })).unwrap();
                 toast.success("Coupon updated successfully!");
             } else {
                 await dispatch(createTutorCoupon(couponData)).unwrap();
@@ -161,7 +182,7 @@ const CreateCouponModal = ({ isOpen, onClose, editData = null }) => {
             }
             onClose();
         } catch (error) {
-            toast.error(error || (isEditMode ? "Failed to update coupon" : "Failed to create coupon"));
+            toast.error(error || (isEditMode ? "Failed to update" : "Failed to create"));
         }
     };
 
@@ -227,7 +248,9 @@ const CreateCouponModal = ({ isOpen, onClose, editData = null }) => {
                     </div>
 
                     {/* Row 3: Discount Type, Value, Max Discount */}
-                    <div className={`grid grid-cols-1 gap-4 ${formData.discountType === "percentage" ? "md:grid-cols-3" : "md:grid-cols-2"}`}>
+                    <div
+                        className={`grid grid-cols-1 gap-4 ${formData.discountType === "percentage" ? "md:grid-cols-3" : "md:grid-cols-2"}`}
+                    >
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">
                                 Discount Type <span className="text-red-500">*</span>
@@ -242,10 +265,9 @@ const CreateCouponModal = ({ isOpen, onClose, editData = null }) => {
                                 <option value="fixed">Fixed Amount (₹)</option>
                             </select>
                             <p className="text-xs text-gray-500 mt-1">
-                                {formData.discountType === "percentage" 
+                                {formData.discountType === "percentage"
                                     ? "Discount as a percentage of the total amount"
-                                    : "Fixed discount amount in rupees"
-                                }
+                                    : "Fixed discount amount in rupees"}
                             </p>
                         </div>
 
@@ -289,9 +311,7 @@ const CreateCouponModal = ({ isOpen, onClose, editData = null }) => {
                                     min="0"
                                     className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                                 />
-                                <p className="text-xs text-gray-500 mt-1">
-                                    Cap the maximum discount amount
-                                </p>
+                                <p className="text-xs text-gray-500 mt-1">Cap the maximum discount amount</p>
                             </div>
                         )}
                     </div>
@@ -388,8 +408,8 @@ const CreateCouponModal = ({ isOpen, onClose, editData = null }) => {
                                     ? "Updating..."
                                     : "Creating..."
                                 : isEditMode
-                                ? "Update Coupon"
-                                : "Create Coupon"}
+                                  ? "Update Coupon"
+                                  : "Create Coupon"}
                         </button>
                     </div>
                 </form>

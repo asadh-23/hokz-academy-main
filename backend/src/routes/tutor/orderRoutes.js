@@ -7,7 +7,7 @@ const tutorRouter = express.Router();
 
 tutorRouter.use(verifyToken, isTutor);
 
-tutorRouter.get("/orders", getTutorOrders);
-tutorRouter.get("/orders/:orderId", getOrderDetails);
+tutorRouter.get("/", getTutorOrders);
+tutorRouter.get("/:orderId", getOrderDetails);
 
 export default tutorRouter;

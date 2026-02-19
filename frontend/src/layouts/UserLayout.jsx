@@ -3,6 +3,8 @@ import { Outlet } from "react-router-dom";
 import UserHeader from "../components/user/UserHeader";
 import UserSidebar from "../components/user/UserSidebar";
 import UserFooter from "../components/user/UserFooter";
+import Header from "../components/common/PublicHeader";
+
 
 export const UserLayout = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -14,8 +16,8 @@ export const UserLayout = () => {
     return (
         <div className="min-h-screen flex flex-col bg-gray-50">
             {/* Header */}
-            <UserHeader onMenuClick={toggleSidebar} />
-
+            {/* <UserHeader onMenuClick={toggleSidebar} /> */}
+            <Header/>
             <div className="flex flex-1 relative">
                 {/* Overlay */}
                 {isSidebarOpen && (

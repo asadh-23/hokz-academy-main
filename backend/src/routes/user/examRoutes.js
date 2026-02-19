@@ -6,7 +6,7 @@ const examRouter = express.Router();
 
 examRouter.use(verifyToken, isUser);
 
-examRouter.get("/exam/:courseId", getExamByCourse);
-examRouter.post("/exam/submit", submitExam);
+examRouter.get("/:courseId", getExamByCourse);
+examRouter.post("/submit", submitExam);
 
 export default examRouter;

@@ -30,7 +30,7 @@ import tutorChatRoutes from './routes/tutor/chatRoutes.js';
 import tutorNotificationRoutes from './routes/tutor/notificationRoutes.js'
 
 import userProfileRoutes from './routes/user/profileRoutes.js';
-import userCourseRoutes from "./routes/user/CourseRoutes.js";
+import userCourseRoutes from "./routes/user/courseRoutes.js";
 import userWishlistRoutes from "./routes/user/wishlistRoutes.js"
 import userCartRoutes from "./routes/user/cartRoutes.js";
 import userPaymentRoutes from "./routes/user/paymentRoutes.js"
@@ -38,6 +38,7 @@ import userCourseProgress from "./routes/user/courseProgressRoutes.js"
 import userExamRoutes from "./routes/user/examRoutes.js";
 import userChatRoutes from './routes/user/chatRoutes.js';
 import userNotificationRoutes from './routes/user/notificationRoutes.js'
+import userTutorRoutes from './routes/user/tutorRoutes.js'
 
 // COMMON
 import publicRoutes from "./routes/public/publicRoutes.js";
@@ -75,41 +76,41 @@ app.get('/', (req, res) => {
 app.use('/api/auth', authRoutes);
 
 app.use('/api/admin/auth', adminAuthRoutes);
+app.use('/api/admin/profile', adminProfileRoutes);
+app.use('/api/admin/users', adminUserRoutes);
+app.use('/api/admin/tutors', adminTutorRoutes);
+app.use('/api/admin/categories', adminCategoryRoutes);
+app.use('/api/admin/courses', adminCourseRoutes);
+app.use('/api/admin/orders', adminOrderRoutes);
+app.use('/api/admin/dashboard', adminDashboardRoutes);
+app.use('/api/admin/wallet', adminWalletRoutes);
+app.use('/api/admin/notifications', adminNotificationRoutes);
+
 app.use('/api/tutor/auth', tutorAuthRoutes);
+app.use('/api/tutor/profile', tutorProfileRoutes);
+app.use('/api/tutor/courses', tutorCourseRoutes);
+app.use("/api/tutor/lessons", tutorLessonRoutes);
+app.use("/api/tutor/coupons", tutorCouponRoutes);
+app.use("/api/tutor/exam", tutorExamRoutes);
+app.use("/api/tutor/wallet", tutorWalletRoutes);
+app.use("/api/tutor/orders", tutorOrderRoutes);
+app.use("/api/tutor/dashboard", tutorDashboardRoutes);
+app.use("/api/tutor/chat", tutorChatRoutes);
+app.use("/api/tutor/notifications", tutorNotificationRoutes);
+
 app.use('/api/user/auth', userAuthRoutes);
+app.use("/api/user/profile", userProfileRoutes);
+app.use("/api/user/courses", userCourseRoutes);
+app.use("/api/user/wishlist", userWishlistRoutes);
+app.use("/api/user/cart", userCartRoutes);
+app.use("/api/user/payment", userPaymentRoutes);
+app.use("/api/user/learning", userCourseProgress);
+app.use("/api/user/exam", userExamRoutes);
+app.use("/api/user/chat", userChatRoutes);
+app.use("/api/user/notification", userNotificationRoutes);
+app.use("/api/user/tutors", userTutorRoutes);
 
-app.use('/api/admin', adminProfileRoutes);
-app.use('/api/admin', adminUserRoutes);
-app.use('/api/admin', adminTutorRoutes);
-app.use('/api/admin', adminCategoryRoutes);
-app.use('/api/admin', adminCourseRoutes);
-app.use('/api/admin', adminOrderRoutes);
-app.use('/api/admin', adminDashboardRoutes);
-app.use('/api/admin', adminWalletRoutes);
-app.use('/api/admin', adminNotificationRoutes);
-
-app.use('/api/tutor', tutorProfileRoutes);
-app.use('/api/tutor', tutorCourseRoutes);
-app.use("/api/tutor", tutorLessonRoutes);
-app.use("/api/tutor", tutorCouponRoutes);
-app.use("/api/tutor", tutorExamRoutes);
-app.use("/api/tutor", tutorWalletRoutes);
-app.use("/api/tutor", tutorOrderRoutes);
-app.use("/api/tutor", tutorDashboardRoutes);
-app.use("/api/tutor", tutorChatRoutes);
-app.use("/api/tutor", tutorNotificationRoutes)
-
-app.use('/api/user', userProfileRoutes);
-app.use("/api/user", userCourseRoutes);
-app.use("/api/user", userWishlistRoutes);
-app.use("/api/user", userCartRoutes);
-app.use("/api/user", userPaymentRoutes);
-app.use("/api/user", userCourseProgress);
-app.use("/api/user", userExamRoutes);
-app.use("/api/user", userChatRoutes);
-app.use("/api/user", userNotificationRoutes);
-
-app.use("/api", publicRoutes);
+app.use("/api/categories", publicRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

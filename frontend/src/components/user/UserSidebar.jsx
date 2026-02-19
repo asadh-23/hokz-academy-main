@@ -1,6 +1,6 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { User, BookOpen, ShoppingBag, Heart, ShoppingCart, Award, LogOut, ChevronRight } from "lucide-react";
+import { User, BookOpen, ShoppingBag, Heart, ShoppingCart, Award, LogOut, ChevronRight, Users } from "lucide-react";
 
 import { selectUser, logoutUser } from "../../store/features/auth/userAuthSlice";
 
@@ -39,6 +39,13 @@ const UserSidebar = ({ isOpen, onClose }) => {
             icon: BookOpen,
             color: "text-purple-600",
             bgColor: "bg-purple-50",
+        },
+        {
+            name: "Tutors",
+            path: "/user/tutors",
+            icon: Users,
+            color: "text-teal-600",
+            bgColor: "bg-teal-50",
         },
         {
             name: "My Orders",

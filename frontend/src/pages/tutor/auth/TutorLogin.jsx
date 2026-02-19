@@ -6,6 +6,7 @@ import { useDispatch, useSelector } from "react-redux";
 
 import { tutorLogin } from "../../../store/features/auth/tutorAuthSlice";
 import { selectTutorAuthLoading } from "../../../store/features/auth/tutorAuthSlice";
+import { validateEmail, validatePassword } from "../../../utils/validation";
 
 export default function TutorLogin() {
     const [formData, setFormData] = useState({
@@ -20,16 +21,21 @@ export default function TutorLogin() {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        const cleanData = {
-            email: formData.email.trim(),
-            password: formData.password.trim(),
-        };
-
-        if (!cleanData.email || !cleanData.password) {
-            return toast.error("Please fill all required fields");
+        const emailValidation = validateEmail(formData.email);
+        if (!emailValidation.isValid) {
+            return toast.error(emailValidation.message || "Enter a valid email address");
         }
+
+        const passwordValidation = validatePassword(formData.password);
+        if (!passwordValidation.isValid) {
+            return toast.error(passwordValidation.message || "Enter a valid Password");
+        }
+        const payload = {
+            email: emailValidation.value,
+            password: passwordValidation.value,
+        };
         try {
-            const result = await dispatch(tutorLogin(cleanData)).unwrap();
+            const result = await dispatch(tutorLogin(payload)).unwrap();
 
             toast.success(result.message || "Login successful");
 

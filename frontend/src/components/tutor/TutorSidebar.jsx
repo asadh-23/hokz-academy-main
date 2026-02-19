@@ -9,6 +9,7 @@ import {
 } from "../../store/features/auth/tutorAuthSlice";
 
 import defaultProfileImage from "../../assets/images/default-profile-image.webp";
+import { formatText } from "../../utils/formatText";
 
 const TutorSidebar = () => {
     const navigate = useNavigate();
@@ -42,7 +43,7 @@ const TutorSidebar = () => {
         { name: "Orders", icon: "📊", path: "/tutor/orders" },
         { name: "Wallet", icon: "💰", path: "/tutor/wallet" },
         { name: "Chat & Video", icon: "🎥", path: "/tutor/chat" },
-        { name: "LogOut", icon: "🚪" }, // No path -> triggers modal
+        { name: "LogOut", icon: "🚪" },
     ];
 
     return (
@@ -58,7 +59,7 @@ const TutorSidebar = () => {
                             className="w-20 h-20 rounded-full border-4 border-emerald-400 mx-auto mb-3"
                         />
                         <h3 className="text-lg font-semibold text-emerald-600">
-                            {tutorName}
+                            {formatText(tutorName)}
                         </h3>
                     </div>
 

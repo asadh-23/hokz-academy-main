@@ -261,7 +261,7 @@ const Courses = () => {
             {!loading && courses.length === 0 ? (
                 <CourseEmptyState onClearFilters={clearFilters} />
             ) : (
-                <CourseGrid 
+                <CourseGrid
                     courses={courses}
                     formatCurrency={formatCurrency}
                     navigate={navigate}

@@ -7,11 +7,11 @@ const adminRouter = express.Router();
 
 adminRouter.use(verifyToken, isAdmin);
 
-adminRouter.get("/courses", getAllCourses);
-adminRouter.get("/courses/categories", getAllCategories);
-adminRouter.get("/courses/:courseId", getCourseDetails);
-adminRouter.patch("/courses/:courseId/toggle-block", toggleBlockCourse);
-adminRouter.get("/courses/lessons/:lessonId", getLessonDetails);
-adminRouter.patch("/courses/lessons/:lessonId/toggle-block", toggleBlockLesson);
+adminRouter.get("/", getAllCourses);
+adminRouter.get("/categories", getAllCategories);
+adminRouter.get("/:courseId", getCourseDetails);
+adminRouter.patch("/:courseId/toggle-block", toggleBlockCourse);
+adminRouter.get("/lessons/:lessonId", getLessonDetails);
+adminRouter.patch("/lessons/:lessonId/toggle-block", toggleBlockLesson);
 
 export default adminRouter;

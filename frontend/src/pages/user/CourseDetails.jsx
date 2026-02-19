@@ -26,12 +26,15 @@ import CourseMotivation from "../../components/user/courseDetails/CourseMotivati
 import CourseCurriculum from "../../components/user/courseDetails/CourseCurriculum";
 import CourseInstructor from "../../components/user/courseDetails/CourseInstructor";
 import CourseSidebar from "../../components/user/courseDetails/CourseSidebar";
+import { selectUserIsAuthenticated } from "../../store/features/auth/userAuthSlice";
 
 const CourseDetails = () => {
     const { courseId } = useParams();
     const navigate = useNavigate();
     const dispatch = useDispatch();
 
+    const isAuthenticated = useSelector(selectUserIsAuthenticated);
+    
     const courseData = useSelector(selectUserSelectedCourse);
     const loading = useSelector(selectUserCourseDetailsLoading);
 
@@ -45,7 +48,9 @@ const CourseDetails = () => {
         const loadPageData = async () => {
             try {
                 await dispatch(fetchUserCourseDetails(courseId)).unwrap();
-                await Promise.allSettled([dispatch(fetchUserCart()), dispatch(fetchUserWishlist())]);
+                if (isAuthenticated) {
+                    await Promise.allSettled([dispatch(fetchUserCart()), dispatch(fetchUserWishlist())]);
+                }
             } catch (error) {
                 console.error("Failed to load course:", error);
                 toast.error("Could not load course details");
@@ -56,7 +61,7 @@ const CourseDetails = () => {
         if (courseId) {
             loadPageData();
         }
-    }, [courseId, dispatch, navigate]);
+    }, [courseId, dispatch, navigate, isAuthenticated]);
 
     // Extract Course and Enrollment Status
     const course = courseData?.course;
@@ -80,6 +85,12 @@ const CourseDetails = () => {
     };
 
     const handleAddToCart = async () => {
+        // Redirect to login if not authenticated
+        if (!isAuthenticated) {
+            navigate("/user/login");
+            return;
+        }
+
         if (isEnrolled) {
             navigate(`/user/learn/${courseId}`);
             return;
@@ -102,6 +113,12 @@ const CourseDetails = () => {
 
     // Handle Wishlist Toggle
     const handleToggleWishlist = async () => {
+        // Redirect to login if not authenticated
+        if (!isAuthenticated) {
+            navigate("/user/login");
+            return;
+        }
+
         try {
             const result = await dispatch(toggleUserWishlist(courseId)).unwrap();
             if (result.action === "added") {
@@ -179,6 +196,7 @@ const CourseDetails = () => {
                             isTogglingWishlist={isTogglingWishlist}
                             onContinueLearning={handleContinueLearning}
                             isEnrolled={isEnrolled}
+                            isAuthenticated={isAuthenticated}
                         />
                     </div>
                 </div>

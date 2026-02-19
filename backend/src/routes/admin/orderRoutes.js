@@ -6,7 +6,7 @@ const adminRouter = express.Router();
 
 adminRouter.use(verifyToken, isAdmin);
 
-adminRouter.get("/orders", getAllOrders);
-adminRouter.get("/orders/:orderId", getOrderDetails);
+adminRouter.get("/", getAllOrders);
+adminRouter.get("/:orderId", getOrderDetails);
 
 export default adminRouter;

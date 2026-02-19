@@ -60,7 +60,7 @@ const ChangePasswordModal = ({ isOpen, onClose, role }) => {
         if (!passwordValidation.isValid) {
             return setErrors({ newPassword: passwordValidation.message || "Enter a valid new password" });
         }
-        const trimmedNewPassword = passwordValidation.password;
+        const trimmedNewPassword = passwordValidation.value;
         const trimmedCurrentPassword = formData.currentPassword.trim();
 
         if (formData.newPassword !== formData.confirmPassword) {

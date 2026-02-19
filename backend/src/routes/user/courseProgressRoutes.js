@@ -6,7 +6,7 @@ const userRouter = express.Router();
 
 userRouter.use(verifyToken, isUser);
 
-userRouter.get("/learning/:courseId/content", getCourseContent);
-userRouter.post("/learning/progress", updateLessonProgress);
+userRouter.get("/:courseId/content", getCourseContent);
+userRouter.post("/progress", updateLessonProgress);
 
 export default userRouter;

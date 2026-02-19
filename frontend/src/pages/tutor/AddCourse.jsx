@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { toast } from "sonner";
 import { ButtonLoader } from "../../components/common/LoadingSpinner";
-import { isNullOrWhitespace } from "../../utils/validation";
+import { validateText } from "../../utils/validation";
 import { useNavigate } from "react-router-dom";
 import { FiImage, FiEdit2 } from "react-icons/fi";
 import { useDispatch, useSelector } from "react-redux";
@@ -12,8 +12,11 @@ import {
     selectTutorCourseCreating,
     selectTutorThumbnailUploading,
 } from "../../store/features/tutor/tutorCoursesSlice";
-import { fetchListedCategories, selectCategoryLoading, selectListedCategories } from "../../store/features/public/categorySlice";
-
+import {
+    fetchListedCategories,
+    selectCategoryLoading,
+    selectListedCategories,
+} from "../../store/features/public/categorySlice";
 
 const AddCourse = () => {
     const dispatch = useDispatch();
@@ -101,30 +104,43 @@ const AddCourse = () => {
 
         const { title, category, regularPrice, offerPercentage, description, thumbnailUrl, thumbnailKey } = formData;
 
-        // VALIDATION
-        if (isNullOrWhitespace(title)) return toast.error("Course title is required");
-        if (isNullOrWhitespace(category)) return toast.error("Please select a category");
-        if (isNullOrWhitespace(description)) return toast.error("Course description is required");
-        if (!thumbnailUrl) return toast.error("Please upload a course thumbnail");
-
-        const priceNum = Number(regularPrice);
-        if (isNaN(priceNum) || priceNum <= 0) {
-            return toast.error("Please enter a valid price");
+        // 1. TITLE VALIDATION
+        const titleValidation = validateText(title, 5, 80, "Course Title");
+        if (!titleValidation.isValid) {
+            return toast.error(titleValidation.message);
         }
 
-        const offerNum = isNullOrWhitespace(offerPercentage) ? 0 : Number(offerPercentage);
+        // 2. CATEGORY CHECK
+        if (!category) return toast.error("Please select a category");
 
-        if (isNaN(offerNum) || offerNum < 0 || offerNum > 100) {
-            return toast.error("Please enter a valid discount percentage (0–100)");
+        // 3. DESCRIPTION VALIDATION
+        const descriptionValidation = validateText(description, 10, 2000, "Description");
+        if (!descriptionValidation.isValid) {
+            return toast.error(descriptionValidation.message);
+        }
+
+        // 4. THUMBNAIL CHECK
+        if (!thumbnailUrl) return toast.error("Please upload a course thumbnail");
+
+        // 5. PRICE VALIDATION
+        const priceNum = Number(regularPrice);
+        if (isNaN(priceNum) || priceNum <= 0 || priceNum > 1000000) {
+            return toast.error("Please enter a valid price (1 - 1,000,000)");
+        }
+
+        // 6. OFFER PERCENTAGE VALIDATION
+        const offerNum = Number(offerPercentage) || 0;
+        if (isNaN(offerNum) || offerNum >= 100 || offerNum < 0) {
+            return toast.error("Offer percentage must be between 0 and 99");
         }
 
         try {
             const payload = {
-                title: title.trim(),
+                title: titleValidation.value,
                 category,
                 regularPrice: priceNum,
                 offerPercentage: offerNum,
-                description: description.trim(),
+                description: descriptionValidation.value,
                 thumbnailUrl,
                 thumbnailKey,
             };

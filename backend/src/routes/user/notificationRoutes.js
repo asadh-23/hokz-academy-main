@@ -6,8 +6,8 @@ const userRouter = express.Router();
 
 userRouter.use(verifyToken, isUser);
 
-userRouter.get("/notifications", getNotifications);
-userRouter.delete("/notifications", clearNotifications);
+userRouter.get("/", getNotifications);
+userRouter.delete("/", clearNotifications);
 
 
 export default userRouter;

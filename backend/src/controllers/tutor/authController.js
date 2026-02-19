@@ -5,22 +5,17 @@ import Admin from "../../models/user/Admin.js";
 import { sendOtpEmail, sendPasswordResetEmail } from "../../services/emailService.js";
 import { setAuthTokens } from "../../utils/responseHandler.js";
 import crypto from "crypto";
-import {
-    isNullOrWhitespace,
-    validatePhone,
-    validateEmail,
-    validatePassword,
-} from "../../../../frontend/src/utils/validation.js";
-
 import { OAuth2Client } from "google-auth-library";
+import { validateText, validatePhone, validateEmail, validatePassword } from "../../utils/validation.js";
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 export const registerTutor = async (req, res) => {
     try {
         const { fullName, phone, email, password } = req.body;
 
-        if (isNullOrWhitespace(fullName)) {
-            return res.status(400).json({ message: "Full Name is required" });
+        const nameValidation = validateText(fullName, 2, 50, "Full Name");
+        if (!nameValidation.isValid) {
+            return res.status(400).json({ message: nameValidation.message || "Enter a valid Full name" });
         }
 
         const phoneValidation = validatePhone(phone);
@@ -38,7 +33,7 @@ export const registerTutor = async (req, res) => {
             return res.status(400).json({ message: passwordValidation.message || "Enter a valid password" });
         }
 
-        const trimmedEmail = emailValidation.email;
+        const trimmedEmail = emailValidation.value;
 
         const existingUser = await User.findOne({ email: trimmedEmail }).lean();
         const existingTutor = await Tutor.findOne({ email: trimmedEmail }).lean();
@@ -81,14 +76,14 @@ export const registerTutor = async (req, res) => {
 
         if (!existingTutor) {
             await Tutor.create({
-                fullName,
+                fullName: nameValidation.value,
                 email: trimmedEmail,
-                phone,
-                password,
+                phone: phoneValidation.value,
+                password: passwordValidation.value,
             });
         }
 
-        await sendOtpEmail(trimmedEmail, otpCode, fullName);
+        await sendOtpEmail(trimmedEmail, otpCode, nameValidation.value);
 
         return res.status(200).json({
             success: true,
@@ -284,7 +279,7 @@ export const googleAuth = async (req, res) => {
             user: {
                 role: "tutor",
                 _id: savedTutor._id,
-                name: savedTutor.fullName,
+                fullName: savedTutor.fullName,
                 email: savedTutor.email,
                 profileImage: savedTutor.profileImage,
                 phone: savedTutor.phone,
@@ -336,6 +331,11 @@ export const resetPassword = async (req, res) => {
         const { password } = req.body;
         const passwordResetToken = req.params.token;
 
+        const passwordValidation = validatePassword(password);
+        if(!passwordValidation.isValid){
+            return res.status(400).json({ message: passwordValidation.message || "Enter a valid password" });
+        }
+
         const hashedPasswordResetToken = crypto.createHash("sha256").update(passwordResetToken).digest("hex");
 
         const tutor = await Tutor.findOne({
@@ -344,7 +344,7 @@ export const resetPassword = async (req, res) => {
         });
         if (!tutor) return res.status(400).json({ message: "Token is invalid or Expired" });
 
-        tutor.password = password;
+        tutor.password = passwordValidation.value;
         tutor.passwordResetToken = undefined;
         tutor.passwordResetExpiry = undefined;
         await tutor.save();

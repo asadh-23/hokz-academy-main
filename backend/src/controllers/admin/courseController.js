@@ -44,7 +44,7 @@ export const getAllCourses = async (req, res) => {
         const courses = await Course.find(query)
             .populate("tutor", "fullName profileImage email")
             .populate("category", "name")
-            .select("title thumbnailUrl description price offerPercentage isListed enrolledCount createdAt")
+            .select("title thumbnailUrl description price offerPercentage isListed isBanned bannedAt enrolledCount createdAt")
             .sort({ createdAt: -1 }) // Newest First
             .skip(skip)
             .limit(limitNumber);
@@ -191,7 +191,7 @@ export const toggleBlockCourse = async (req, res) => {
         }
 
         // 1️⃣ Get current course
-        const course = await Course.findById(courseId).select("isListed title tutor");
+        const course = await Course.findById(courseId).select("isListed title tutor isBanned");
 
         if (!course) {
             return res.status(404).json({
@@ -201,7 +201,18 @@ export const toggleBlockCourse = async (req, res) => {
         }
 
         // 2️⃣ Toggle isListed
-        course.isListed = !course.isListed;
+        if (!course.isBanned) {
+            course.isBanned = true;
+            course.isListed = false;
+            course.isActive = false;
+            course.bannedAt = new Date();
+        } else {
+            course.isBanned = false;
+            course.isListed = true;
+            course.isActive = true;
+            course.bannedAt = null;
+        }
+
         await course.save();
 
         try {
@@ -254,39 +265,45 @@ export const getLessonDetails = async (req, res) => {
 export const toggleBlockLesson = async (req, res) => {
     try {
         const { lessonId } = req.params;
-        const adminId = req.user ? req.user._id : null;
+        const adminId = req.user._id;
 
         if (!mongoose.Types.ObjectId.isValid(lessonId)) {
-            return res.status(400).json({
-                success: false,
-                message: "Invalid Lesson ID",
-            });
+            return res.status(400).json({ success: false, message: "Invalid Lesson ID" });
         }
 
-        // 1️⃣ Get current publish status
-        const lesson = await Lesson.findById(lessonId).select("isPublished title course").populate({
+        const lesson = await Lesson.findById(lessonId).select("isPublished isBanned title course").populate({
             path: "course",
             select: "title tutor",
         });
 
         if (!lesson) {
-            return res.status(404).json({
-                success: false,
-                message: "Lesson not found",
-            });
+            return res.status(404).json({ success: false, message: "Lesson not found" });
         }
 
-        // 2️⃣ Toggle and update
-        const updatedLesson = await Lesson.findByIdAndUpdate(
-            lessonId,
-            { isPublished: !lesson.isPublished },
-            { new: true },
-        ).select("title description videoUrl pdfUrl duration isPublished order createdAt");
+        let updateData = {};
+        if (!lesson.isBanned) {
+            updateData = {
+                isBanned: true,
+                isPublished: false,
+                bannedAt: new Date(),
+            };
+        } else {
+            updateData = {
+                isBanned: false,
+                isPublished: true,
+                bannedAt: null,
+            };
+        }
+
+        const updatedLesson = await Lesson.findByIdAndUpdate(lessonId, { $set: updateData }, { new: true }).select(
+            "title description videoUrl pdfUrl duration isPublished isBanned bannedAt order createdAt",
+        );
+
+        // 3️⃣ Notification Logic
         try {
             const tutorId = lesson.course?.tutor;
-
             if (tutorId) {
-                const actionText = updatedLesson.isPublished ? "Published (Unblocked)" : "Unpublished (Blocked)";
+                const actionText = updatedLesson.isBanned ? "Blocked" : "Unblocked";
                 const message = `Admin has ${actionText} your lesson "${lesson.title}" in the course "${lesson.course?.title}".`;
 
                 await sendNotification({
@@ -298,20 +315,16 @@ export const toggleBlockLesson = async (req, res) => {
                 });
             }
         } catch (notifError) {
-            console.error("Failed to send lesson block notification to tutor:", notifError);
+            console.error("Notification Error:", notifError);
         }
-        // 3️⃣ Response
+
         res.status(200).json({
             success: true,
-            message: `Lesson has been ${updatedLesson.isPublished ? "Published" : "Unpublished"} successfully`,
+            message: `Lesson has been ${updatedLesson.isBanned ? "Blocked" : "Unblocked"} successfully`,
             data: updatedLesson,
         });
     } catch (error) {
         console.error("Toggle Lesson Status Error:", error);
-        res.status(500).json({
-            success: false,
-            message: "Failed to update lesson status",
-            error: error.message,
-        });
+        res.status(500).json({ success: false, message: "Server Error", error: error.message });
     }
 };

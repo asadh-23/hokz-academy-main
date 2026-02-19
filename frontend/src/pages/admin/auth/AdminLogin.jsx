@@ -21,22 +21,22 @@ export default function AdminLogin() {
         // ---------------------------
         // Validate email
         // ---------------------------
-        const emailValidation = validateEmail(formData.email);
-        if (!emailValidation.isValid) {
-            return toast.error(emailValidation.message || "Invalid email address");
-        }
+        // const emailValidation = validateEmail(formData.email);
+        // if (!emailValidation.isValid) {
+        //     return toast.error(emailValidation.message || "Invalid email address");
+        // }
 
-        // ---------------------------
-        // Validate password
-        // ---------------------------
-        const passwordValidation = validatePassword(formData.password);
-        if (!passwordValidation.isValid) {
-            return toast.error(passwordValidation.message || "Invalid password");
-        }
+        // // ---------------------------
+        // // Validate password
+        // // ---------------------------
+        // const passwordValidation = validatePassword(formData.password);
+        // if (!passwordValidation.isValid) {
+        //     return toast.error(passwordValidation.message || "Invalid password");
+        // }
 
         const credentials = {
-            email: emailValidation.email,
-            password: passwordValidation.password,
+            email: formData.email,
+            password: formData.password,
         };
 
         try {

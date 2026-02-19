@@ -61,7 +61,8 @@ const LessonSchema = new Schema(
             default: false,
             index: true,
         },
-
+        isBanned: { type: Boolean, default: false },
+        bannedAt: { type: Date },
         views: {
             type: Number,
             default: 0,
@@ -76,7 +77,7 @@ const LessonSchema = new Schema(
             default: true,
         },
     },
-    { timestamps: true }
+    { timestamps: true },
 );
 
 // indexes for optimized queries

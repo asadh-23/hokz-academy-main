@@ -1,21 +1,6 @@
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 
-const notificationSchema = new mongoose.Schema({
-    message: {
-        type: String,
-        required: true,
-    },
-    read: {
-        type: Boolean,
-        default: false,
-    },
-    timestamp: {
-        type: Date,
-        default: Date.now,
-    },
-});
-
 const userSchema = mongoose.Schema(
     {
         fullName: {
@@ -86,7 +71,6 @@ const userSchema = mongoose.Schema(
         passwordResetExpiry: {
             type: Date,
         },
-        notifications: [notificationSchema],
     },
     {
         timestamps: true,

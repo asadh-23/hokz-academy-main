@@ -81,8 +81,7 @@ const courseProgressSlice = createSlice({
                 isCompleted: false,
                 lastPlayedLesson: null,
             };
-            state.certificateData = null,
-            state.isLoading = false;
+            ((state.certificateData = null), (state.isLoading = false));
             state.isUpdating = false;
             state.error = null;
         },
@@ -98,20 +97,24 @@ const courseProgressSlice = createSlice({
             .addCase(fetchCourseAccess.fulfilled, (state, action) => {
                 state.isLoading = false;
 
-                // Ensure we access .data based on your backend structure
-                const { course, lessons, progress, certificateData } = action.payload.data;
+                const responseData = action.payload?.data;
+                console.log(responseData);
+                if (!responseData) return;
+
+                const { course, lessons, progress, certificateData } = responseData;
 
                 state.learningCourse = course;
                 state.lessons = lessons || [];
-                state.progressData = progress;
-                state.certificateData = certificateData;
+                state.progressData = progress || state.progressData;
+                state.certificateData = certificateData || null;
 
-                // Auto-select lesson logic
-                if (progress?.lastPlayedLesson) {
-                    const lastLesson = lessons.find((l) => l._id === progress.lastPlayedLesson);
-                    state.activeLesson = lastLesson || lessons[0];
-                } else if (lessons && lessons.length > 0) {
-                    state.activeLesson = lessons[0];
+                if (state.lessons && state.lessons.length > 0) {
+                    const lastId = progress?.lastPlayedLesson;
+                    const lastLesson = state.lessons.find((l) => l._id === lastId);
+
+                    state.activeLesson = lastLesson || state.lessons[0];
+                } else {
+                    state.activeLesson = { title: "No Lessons", _id: "none" };
                 }
             })
             .addCase(fetchCourseAccess.rejected, (state, action) => {
@@ -130,7 +133,6 @@ const courseProgressSlice = createSlice({
             })
             .addCase(updateProgress.rejected, (state, action) => {
                 state.isUpdating = false;
-                
             });
     },
 });

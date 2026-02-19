@@ -6,6 +6,7 @@ import { MagnifyingGlassIcon } from "@heroicons/react/24/outline"; // Search Ico
 // Actions & Selectors
 import { setSelectedChat } from "../../store/features/chat/chatSlice";
 import { selectOnlineUsers } from "../../store/features/socket/socketSlice";
+import { formatText } from "../../utils/formatText";
 
 const Sidebar = () => {
   const dispatch = useDispatch();
@@ -100,7 +101,7 @@ const Sidebar = () => {
                 <div className="flex-1 min-w-0">
                   <div className="flex justify-between items-baseline mb-0.5">
                     <h3 className={`text-sm font-semibold truncate ${chat.unreadCount > 0 ? "text-gray-900" : "text-gray-700"}`}>
-                      {chat.fullName}
+                      {formatText(chat.fullName, 15)}
                     </h3>
                     
                     {/* Time */}

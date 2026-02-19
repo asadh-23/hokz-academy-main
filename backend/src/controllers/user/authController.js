@@ -5,39 +5,40 @@ import Admin from "../../models/user/Admin.js";
 import { sendOtpEmail, sendPasswordResetEmail } from "../../services/emailService.js";
 import { setAuthTokens } from "../../utils/responseHandler.js";
 import crypto from "crypto";
-import {
-    isNullOrWhitespace,
-    validatePhone,
-    validateEmail,
-    validatePassword,
-} from "../../../../frontend/src/utils/validation.js";
 
 import { OAuth2Client } from "google-auth-library";
+import { validateEmail, validatePassword, validatePhone, validateText } from "../../utils/validation.js";
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 export const registerUser = async (req, res) => {
     try {
         const { fullName, phone, email, password } = req.body;
 
-        if (isNullOrWhitespace(fullName)) {
-            return res.status(400).json({ message: "Full Name is required" });
+        const nameValidation = validateText(fullName, 2, 50, "Name");
+        if (!nameValidation.isValid) {
+            return res.status(400).json({ success: false, message: nameValidation.message || "Enter a valid Full Name" });
         }
 
         const phoneValidation = validatePhone(phone);
         if (!phoneValidation.isValid) {
-            return res.status(400).json({ message: phoneValidation.message || "Enter a valid phone number" });
+            return res
+                .status(400)
+                .json({ success: false, message: phoneValidation.message || "Enter a valid Phone Number" });
         }
 
         const emailValidation = validateEmail(email);
         if (!emailValidation.isValid) {
-            return res.status(400).json({ message: emailValidation.message || "Enter a valid email address" });
+            return res.status(400).json({ success: false, message: emailValidation.message || "Enter a valid Eamil" });
         }
 
         const passwordValidation = validatePassword(password);
         if (!passwordValidation.isValid) {
-            return res.status(400).json({ message: passwordValidation.message || "Enter a valid password" });
+            return res
+                .status(400)
+                .json({ success: false, message: passwordValidation.message || "Enter a valid Password" });
         }
-        const trimmedEmail = emailValidation.email;
+
+        const trimmedEmail = emailValidation.value;
 
         const existingUser = await User.findOne({ email: trimmedEmail }).lean();
         const existingTutor = await Tutor.findOne({ email: trimmedEmail }).lean();
@@ -80,14 +81,14 @@ export const registerUser = async (req, res) => {
 
         if (!existingUser) {
             await User.create({
-                fullName,
-                phone,
+                fullName: nameValidation.value,
+                phone: phoneValidation.value,
                 email: trimmedEmail,
-                password,
+                password: passwordValidation.value,
             });
         }
 
-        await sendOtpEmail(trimmedEmail, otpCode, fullName);
+        await sendOtpEmail(trimmedEmail, otpCode, nameValidation.value);
 
         return res.status(200).json({
             success: true,
@@ -351,6 +352,11 @@ export const resetPassword = async (req, res) => {
         const { password } = req.body;
         const passwordResetToken = req.params.token;
 
+        const passwordValidation = validatePassword(password);
+        if (!passwordValidation.isValid) {
+            return res.status(400).json({ message: passwordValidation.message || "Enter a valid password" });
+        }
+
         const hashedPasswordResetToken = crypto.createHash("sha256").update(passwordResetToken).digest("hex");
 
         const user = await User.findOne({
@@ -361,7 +367,7 @@ export const resetPassword = async (req, res) => {
         if (!user) {
             return res.status(400).json({ message: "Token is invalid or Expired" });
         }
-        user.password = password;
+        user.password = passwordValidation.value;
         user.passwordResetToken = undefined;
         user.passwordResetExpiry = undefined;
         await user.save();

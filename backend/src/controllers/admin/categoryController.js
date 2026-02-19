@@ -1,5 +1,5 @@
 import Category from "../../models/category/Category.js";
-import { isNullOrWhitespace } from "../../utils/validation.js";
+import { validateText } from "../../utils/validation.js";
 
 export const getCategories = async (req, res) => {
     try {
@@ -59,24 +59,25 @@ export const createCategory = async (req, res) => {
     try {
         const { name, description } = req.body;
 
-        // Validate BEFORE trimming because the helper already trims
-        if (isNullOrWhitespace(name)) {
+        const categoryValidation = validateText(name, 3, 30, "Category Name");
+        if (!categoryValidation.isValid) {
             return res.status(400).json({
                 success: false,
-                message: "Category name is required",
+                message: categoryValidation.message || "Category name is required",
             });
         }
 
-        if (isNullOrWhitespace(description)) {
+        const descriptionValidation = validateText(description, 2, 200, "Description");
+        if (!descriptionValidation.isValid) {
             return res.status(400).json({
                 success: false,
-                message: "Description is required",
+                message: descriptionValidation.message || "Description is required",
             });
         }
 
         // Trim for storing clean values
-        const trimmedName = name.trim();
-        const trimmedDescription = description.trim();
+        const trimmedName = categoryValidation.value;
+        const trimmedDescription = descriptionValidation.value;
 
         // Duplicate check
         const existing = await Category.findOne({ name: trimmedName });
@@ -110,22 +111,24 @@ export const updateCategory = async (req, res) => {
         const categoryId = req.params.id;
         const { name, description } = req.body;
 
-        if (isNullOrWhitespace(name)) {
+        const categoryValidation = validateText(name, 3, 30, "Category Name");
+        if (!categoryValidation.isValid) {
             return res.status(400).json({
                 success: false,
-                message: "Category name is required",
+                message: categoryValidation.message || "Category name is required",
             });
         }
 
-        if (isNullOrWhitespace(description)) {
+        const descriptionValidation = validateText(description, 2, 200, "Description");
+        if (!descriptionValidation.isValid) {
             return res.status(400).json({
                 success: false,
-                message: "Description is required",
+                message: descriptionValidation.message || "Description is required",
             });
         }
 
-        const trimmedName = name.trim();
-        const trimmedDescription = description.trim();
+        const trimmedName = categoryValidation.value;
+        const trimmedDescription = descriptionValidation.value;
 
         // Duplicate check (excluding current category)
         const existing = await Category.findOne({

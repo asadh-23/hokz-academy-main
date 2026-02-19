@@ -17,7 +17,6 @@ const EnrollmentSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: "Tutor",
         required: true,
-        // Helps in querying "Total students for Tutor X" without joining Course table
     },
     
     // Financial Reference (Audit Trail)
@@ -27,8 +26,6 @@ const EnrollmentSchema = new mongoose.Schema({
         required: true
     },
     
-    // Price at the moment of purchase (Historical Data)
-    // Course price might change later, but we need to know what THIS user paid.
     pricePaid: {
         type: Number,
         required: true,
@@ -48,9 +45,6 @@ const EnrollmentSchema = new mongoose.Schema({
     }
 }, { timestamps: true });
 
-// COMPOUND INDEX: CRITICAL
-// Oru user-kku ore course randu thavana vaangan pattaruthu.
-// Ee index athu database level-il thanne block cheyyum.
 EnrollmentSchema.index({ user: 1, course: 1 }, { unique: true });
 
 const Enrollment = mongoose.model("Enrollment", EnrollmentSchema);

@@ -20,11 +20,13 @@ import {
 import Pagination from "../../components/common/Pagination";
 import { Link } from "react-router-dom";
 import { fetchListedCategories, selectListedCategories } from "../../store/features/public/categorySlice";
+import { selectUserIsAuthenticated } from "../../store/features/auth/userAuthSlice";
 
 const Courses = () => {
     const dispatch = useDispatch();
     const filterDropdownRef = useRef(null);
 
+    const isAuthenticated = useSelector(selectUserIsAuthenticated);
     // Redux selectors
     const courses = useSelector(selectUserCourses);
     const categories = useSelector(selectListedCategories);
@@ -45,8 +47,11 @@ const Courses = () => {
     // Fetch categories and wishlist on mount
     useEffect(() => {
         dispatch(fetchListedCategories());
-        dispatch(fetchUserWishlist());
-    }, [dispatch]);
+        // Only fetch wishlist if user is authenticated
+        if (isAuthenticated) {
+            dispatch(fetchUserWishlist());
+        }
+    }, [dispatch, isAuthenticated]);
 
     // Fetch courses when filters change
     useEffect(() => {
@@ -120,6 +125,12 @@ const Courses = () => {
     };
 
     const handleToggleWishlist = async (courseId, title) => {
+        // Prevent wishlist actions if not authenticated
+        if (!isAuthenticated) {
+            toast.error("Please login to add courses to wishlist");
+            return;
+        }
+        
         try {
             const result = await dispatch(toggleUserWishlist(courseId)).unwrap();
             if (result.action === "added") {
@@ -133,13 +144,16 @@ const Courses = () => {
     };
 
     const wishlistCourseIds = useMemo(() => {
-        if (!Array.isArray(wishlist)) return new Set();
+        // Only process wishlist if authenticated
+        if (!isAuthenticated || !Array.isArray(wishlist)) return new Set();
 
         return new Set(wishlist.map((item) => item.course?._id));
-    }, [wishlist]);
+    }, [wishlist, isAuthenticated]);
 
     // Now checking is Instant
     const isInWishlist = (courseId) => {
+        // Return false if not authenticated
+        if (!isAuthenticated) return false;
         return wishlistCourseIds.has(courseId);
     };
 
@@ -348,27 +362,30 @@ const Courses = () => {
                                             </div>
                                         )}
 
-                                        <button
-                                            disabled={loadingById[course._id]}
-                                            className="absolute top-3 right-3 p-2.5 bg-white/90 backdrop-blur-sm rounded-full shadow-lg hover:bg-white transition-all group/heart"
-                                            onClick={(e) => {
-                                                e.preventDefault();
-                                                e.stopPropagation();
-                                                handleToggleWishlist(course._id, course.title);
-                                            }}
-                                        >
-                                            {loadingById[course._id] ? (
-                                                <div className="w-5 h-5 border-2 border-red-500 border-t-transparent rounded-full animate-spin"></div>
-                                            ) : (
-                                                <Heart
-                                                    className={`w-5 h-5 transition-all ${
-                                                        isInWishlist(course._id)
-                                                            ? "text-red-500 fill-red-500"
-                                                            : "text-gray-700 group-hover/heart:text-red-500 group-hover/heart:fill-red-500"
-                                                    }`}
-                                                />
-                                            )}
-                                        </button>
+                                        {/* Only show wishlist button if authenticated */}
+                                        {isAuthenticated && (
+                                            <button
+                                                disabled={loadingById[course._id]}
+                                                className="absolute top-3 right-3 p-2.5 bg-white/90 backdrop-blur-sm rounded-full shadow-lg hover:bg-white transition-all group/heart"
+                                                onClick={(e) => {
+                                                    e.preventDefault();
+                                                    e.stopPropagation();
+                                                    handleToggleWishlist(course._id, course.title);
+                                                }}
+                                            >
+                                                {loadingById[course._id] ? (
+                                                    <div className="w-5 h-5 border-2 border-red-500 border-t-transparent rounded-full animate-spin"></div>
+                                                ) : (
+                                                    <Heart
+                                                        className={`w-5 h-5 transition-all ${
+                                                            isInWishlist(course._id)
+                                                                ? "text-red-500 fill-red-500"
+                                                                : "text-gray-700 group-hover/heart:text-red-500 group-hover/heart:fill-red-500"
+                                                        }`}
+                                                    />
+                                                )}
+                                            </button>
+                                        )}
                                     </div>
 
                                     {/* Course Details */}
@@ -400,7 +417,7 @@ const Courses = () => {
                                                 <span className="text-2xl font-bold bg-gradient-to-r from-cyan-600 to-emerald-600 bg-clip-text text-transparent">
                                                     ₹
                                                     {Math.round(
-                                                        course.price - (course.price * course.offerPercentage) / 100
+                                                        course.price - (course.price * course.offerPercentage) / 100,
                                                     )}
                                                 </span>
 

@@ -144,7 +144,7 @@ const AddExam = () => {
 
             if (response.data.success) {
                 toast.success("Exam created successfully!");
-                navigate(`/tutor/courses`);
+                navigate(`/tutor/courses/${courseId}`);
             }
         } catch (error) {
             console.error("Add exam error : ",error);

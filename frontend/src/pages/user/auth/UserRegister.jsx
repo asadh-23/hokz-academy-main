@@ -6,7 +6,7 @@ import { useDispatch, useSelector } from "react-redux";
 
 import { userRegister, selectUserAuthLoading } from "../../../store/features/auth/userAuthSlice";
 
-import { validateEmail, validatePassword, validatePhone, isNullOrWhitespace } from "../../../utils/validation";
+import { validateEmail, validatePassword, validatePhone, validateText } from "../../../utils/validation";
 
 export default function UserRegister() {
     const dispatch = useDispatch();
@@ -28,23 +28,24 @@ export default function UserRegister() {
         // ----------------------------
         // VALIDATIONS
         // ----------------------------
-        if (isNullOrWhitespace(formData.fullName)) {
-            return toast.error("Full Name is required");
+        const nameValidation = validateText(formData.fullName, 2, 50, "Name");
+        if (!nameValidation.isValid) {
+            return toast.error(nameValidation.message || "Enter a valid Name");
         }
 
         const phoneValidation = validatePhone(formData.phone);
         if (!phoneValidation.isValid) {
-            return toast.error(phoneValidation.message);
+            return toast.error(phoneValidation.message || "Enter a valid phone number");
         }
 
         const emailValidation = validateEmail(formData.email);
         if (!emailValidation.isValid) {
-            return toast.error(emailValidation.message);
+            return toast.error(emailValidation.message || "Enter a valid email address");
         }
 
         const passwordValidation = validatePassword(formData.password);
         if (!passwordValidation.isValid) {
-            return toast.error(passwordValidation.message);
+            return toast.error(passwordValidation.message || "Enter a valid password");
         }
 
         if (formData.password.trim() !== formData.confirmPassword.trim()) {
@@ -53,10 +54,10 @@ export default function UserRegister() {
 
         // Clean data
         const cleanData = {
-            fullName: formData.fullName.trim(),
-            phone: phoneValidation.phone,
-            email: emailValidation.email,
-            password: passwordValidation.password,
+            fullName: nameValidation.value,
+            phone: phoneValidation.value,
+            email: emailValidation.value,
+            password: passwordValidation.value,
         };
         try {
             const result = await dispatch(userRegister(cleanData)).unwrap();

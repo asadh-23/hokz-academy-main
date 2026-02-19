@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
     getConversations,
@@ -6,15 +6,20 @@ import {
     updateConversationLastMessage,
     markMessagesAsRead,
     markMessageAsDelivered,
+    setSelectedChat,
 } from "../../store/features/chat/chatSlice";
 import Sidebar from "../../components/chat/Sidebar";
 import ChatWindow from "../../components/chat/ChatWindow";
 import { useSocket } from "../../contexts/SocketContext";
 import { selectUser } from "../../store/features/auth/userAuthSlice";
 import { selectTutor } from "../../store/features/auth/tutorAuthSlice";
+import { VideoCameraIcon } from "@heroicons/react/24/solid";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const ChatLayout = () => {
     const dispatch = useDispatch();
+    const navigate = useNavigate();
+    const location = useLocation();
 
     const { selectedChat, conversations } = useSelector((state) => state.chat);
     const user = useSelector(selectUser);
@@ -23,12 +28,53 @@ const ChatLayout = () => {
 
     const { socket } = useSocket();
 
+    const [callerId, setCallerId] = useState(null);
+    const [callerName, setCallerName] = useState(null);
+    const [showCallModal, setShowCallModal] = useState(false);
+    const [incomingRoomId, setIncomingRoomId] = useState(null);
+
     // 1. Load Sidebar Conversations on Mount
     useEffect(() => {
         dispatch(getConversations());
     }, [dispatch]);
 
-    // 2. Real-time Message & Notification Listener
+    useEffect(() => {
+        const tutorIdFromState = location.state?.tutorId;
+
+        if (tutorIdFromState && conversations.length > 0) {
+            const tutorChat = conversations.find((c) => c._id === tutorIdFromState);
+
+            if (tutorChat) {
+                dispatch(setSelectedChat(tutorChat));
+
+                navigate(location.pathname, { replace: true, state: {} });
+            }
+        }
+    }, [location.state, conversations, dispatch, navigate, location.pathname]);
+
+    const acceptCall = () => {
+        setShowCallModal(false);
+        navigate(`/${currentUser.role}/room/${incomingRoomId}`);
+    };
+
+    const rejectCall = () => {
+        setShowCallModal(false);
+
+        if (socket && callerId) {
+            socket.emit("call-rejected", { to: callerId, name: currentUser.fullName });
+        }
+
+        setIncomingRoomId(null);
+        setCallerId(null);
+    };
+
+    const handleIncomingCall = useCallback(({ from, roomId, callerName }) => {
+        setIncomingRoomId(roomId);
+        setCallerId(from);
+        setCallerName(callerName);
+        setShowCallModal(true);
+    }, []);
+
     // 2. Real-time Message & Notification Listener
     useEffect(() => {
         if (!socket) return;
@@ -89,6 +135,7 @@ const ChatLayout = () => {
         socket.on("message_seen_update", handleMessagesRead); // From mark_as_seen (Socket event)
         socket.on("messages_read", handleMessagesRead); // From getAllMessages
         socket.on("message_delivered_update", handleMessageDelivered);
+        socket.on("incoming-call", handleIncomingCall);
         // Cleanup Function
         return () => {
             socket.off("receive_message", handleReceiveMessage);
@@ -96,6 +143,7 @@ const ChatLayout = () => {
             socket.off("message_seen_update", handleMessagesRead);
             socket.off("messages_read", handleMessagesRead);
             socket.off("message_delivered_update", handleMessageDelivered);
+            socket.off("incoming-call", handleIncomingCall);
         };
     }, [socket, selectedChat, dispatch, conversations]);
 
@@ -110,6 +158,40 @@ const ChatLayout = () => {
 
             {/* Chat Window */}
             <div className={`${!selectedChat ? "hidden md:flex" : "w-full"} flex-1 bg-[#f0f2f5]`}>
+                {showCallModal && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+                        <div className="bg-white rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in duration-300">
+                            <div className="bg-cyan-600 p-8 flex flex-col items-center">
+                                <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center animate-pulse">
+                                    <VideoCameraIcon className="w-10 h-10 text-white" />
+                                </div>
+                                <h2 className="text-white font-bold text-xl mt-4">Incoming Call</h2>
+                                <p className="text-cyan-100 text-sm">Hokz Academy Session</p>
+                            </div>
+
+                            <div className="p-6 flex flex-col items-center gap-6">
+                                <p className="text-gray-600 text-center font-medium">
+                                    {callerName} is inviting you to join a live video session.
+                                </p>
+
+                                <div className="flex gap-4 w-full">
+                                    <button
+                                        onClick={rejectCall}
+                                        className="flex-1 py-3 px-4 bg-red-50 text-red-600 rounded-2xl font-bold hover:bg-red-100 transition-colors border border-red-100"
+                                    >
+                                        Decline
+                                    </button>
+                                    <button
+                                        onClick={acceptCall}
+                                        className="flex-1 py-3 px-4 bg-green-600 text-white rounded-2xl font-bold hover:bg-green-700 transition-all shadow-lg shadow-green-200"
+                                    >
+                                        Accept
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
                 {selectedChat ? (
                     <ChatWindow />
                 ) : (

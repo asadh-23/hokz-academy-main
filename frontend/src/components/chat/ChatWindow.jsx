@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import {
     PhoneIcon,
     VideoCameraIcon,
@@ -15,12 +16,23 @@ import MessageBubble from "./MessageBubble";
 import { getMessages, setSelectedChat, getSharedCourses } from "../../store/features/chat/chatSlice";
 import { selectOnlineUsers } from "../../store/features/socket/socketSlice";
 import { useSocket } from "../../contexts/SocketContext";
+import { selectUser } from "../../store/features/auth/userAuthSlice";
+import { selectTutor } from "../../store/features/auth/tutorAuthSlice";
+import { useCallback } from "react";
 
 const ChatWindow = () => {
     const dispatch = useDispatch();
     const scrollRef = useRef();
 
-    // 🔥 Local State
+    const navigate = useNavigate();
+
+    const { socket } = useSocket();
+
+    const user = useSelector(selectUser);
+    const tutor = useSelector(selectTutor);
+
+    const currentUser = user || tutor;
+
     const [showCourses, setShowCourses] = useState(false);
     const [isTyping, setIsTyping] = useState(false);
 
@@ -29,10 +41,16 @@ const ChatWindow = () => {
     const onlineUsers = useSelector(selectOnlineUsers);
 
     // Determine Receiver ID
-    const receiverId =  selectedChat?._id;
+    const receiverId = selectedChat?._id;
+
+    const handleCall = () => {
+        if (!receiverId || !socket) return;
+        const generatedRoomId = Date.now().toString();
+        socket.emit("call-user", { to: receiverId, roomId: generatedRoomId, callerName: currentUser.fullName });
+        navigate(`/${currentUser.role}/room/${generatedRoomId}`);
+    };
 
     // Socket Context
-    const { socket } = useSocket();
 
     // ------------------------------------------------
     // 🔥 SOCKET: TYPING LISTENERS
@@ -60,7 +78,7 @@ const ChatWindow = () => {
             socket.off("display_typing", handleDisplayTyping);
             socket.off("hide_typing", handleHideTyping);
         };
-    }, [socket, receiverId]);
+    }, [socket, receiverId, navigate, currentUser]);
 
     // ------------------------------------------------
     // 🔥 FETCH DATA & SCROLL
@@ -202,7 +220,10 @@ const ChatWindow = () => {
 
                     <div className="h-6 w-px bg-gray-200 mx-1"></div>
 
-                    <button className="p-2 hover:bg-gray-100 rounded-full transition text-gray-500 hover:text-cyan-600">
+                    <button
+                        onClick={handleCall}
+                        className="p-2 hover:bg-gray-100 rounded-full transition text-gray-500 hover:text-cyan-600"
+                    >
                         <VideoCameraIcon className="w-5 h-5" />
                     </button>
                     <button className="p-2 hover:bg-gray-100 rounded-full transition text-gray-500 hover:text-cyan-600">
@@ -243,7 +264,7 @@ const ChatWindow = () => {
                 ) : (
                     <>
                         {messages.map((msg) => (
-                            <MessageBubble key={msg._id} message={msg} />
+                            <MessageBubble key={msg.tempId || msg._id} message={msg} />
                         ))}
 
                         {/* 🔥 TYPING INDICATOR UI 🔥 */}

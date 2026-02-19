@@ -8,9 +8,9 @@ const tutorRouter = express.Router();
 
 tutorRouter.use(verifyToken, isTutor);
 
-tutorRouter.get("/chat/conversations", getTutorSidebar);
-tutorRouter.get("/chat/:receiverId", getAllMessages);
-tutorRouter.post("/chat/send-message", uploadMiddleware, sendMessageTutor);
-tutorRouter.get("/chat/shared-courses/:participantId", getSharedCourses);
+tutorRouter.get("/conversations", getTutorSidebar);
+tutorRouter.get("/:receiverId", getAllMessages);
+tutorRouter.post("/send-message", uploadMiddleware, sendMessageTutor);
+tutorRouter.get("/shared-courses/:participantId", getSharedCourses);
 
 export default tutorRouter;

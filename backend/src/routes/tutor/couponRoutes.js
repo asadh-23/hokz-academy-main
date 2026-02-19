@@ -7,10 +7,10 @@ const tutorRouter = express.Router();
 tutorRouter.use(verifyToken, isTutor);
 
 tutorRouter.post("/coupon",createCoupon);
-tutorRouter.get("/coupons", getTutorCoupons)
-tutorRouter.get("/coupons/stats", getCouponStats);
-tutorRouter.patch("/coupons/:couponId/toggle", toggleCouponStatus);
-tutorRouter.put("/coupons/:couponId", updateCoupon);
-tutorRouter.delete("/coupons/:couponId", deleteCoupon);
+tutorRouter.get("/", getTutorCoupons);
+tutorRouter.get("/stats", getCouponStats);
+tutorRouter.patch("/:couponId/toggle", toggleCouponStatus);
+tutorRouter.put("/:couponId", updateCoupon);
+tutorRouter.delete("/:couponId", deleteCoupon);
 
 export default tutorRouter;

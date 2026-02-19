@@ -6,6 +6,8 @@ const fileFilter = (req, file, cb) => {
     const type = req.body.type;
 
     if (!type) {
+        console.log('hii');
+        
         return cb(new Error("Missing file type"), false);
     }
 

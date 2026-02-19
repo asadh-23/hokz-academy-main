@@ -7,12 +7,7 @@ import crypto from "crypto";
 import mongoose from "mongoose";
 import { uploadToCloudinary } from "../../services/cloudinaryService.js";
 import cloudinary from "../../config/cloudinary.js";
-import {
-    isNullOrWhitespace,
-    validatePhone,
-    validateEmail,
-    validatePassword,
-} from "../../../../frontend/src/utils/validation.js";
+import { validatePhone, validateEmail, validatePassword, validateArray, validateText } from "../../utils/validation.js";
 
 export const getTutorProfile = async (req, res) => {
     try {
@@ -30,13 +25,8 @@ export const getTutorProfile = async (req, res) => {
                 email: tutor.email,
                 phone: tutor.phone || "",
                 profileImage: tutor.profileImage || null,
-                headline: tutor.headline || "",
-                expertiseArea: tutor.expertiseArea || "",
                 bio: tutor.bio || "",
-                yearsOfExperience: tutor.yearsOfExperience || "",
-                skills: tutor.skills || [],
-                languages: tutor.languages || [],
-                qualifications: tutor.qualifications || [],
+                teachingSubjects: tutor.teachingSubjects || [],
             },
         });
     } catch (error) {
@@ -53,83 +43,37 @@ export const updateTutorProfile = async (req, res) => {
             return res.status(401).json({ success: false, message: "Unauthorized: Valid Tutor ID not found in request." });
         }
 
-        const { fullName, phone, headline, expertiseArea, bio, yearsOfExperience, skills, languages, qualifications } =
-            req.body;
+        const { fullName, phone, bio, teachingSubjects } = req.body;
 
         const updateData = {};
         const errors = {};
 
-        if (fullName !== undefined) {
-            if (isNullOrWhitespace(fullName)) {
-                errors.fullName = "Invalid full name format.";
-            } else {
-                updateData.fullName = fullName.trim();
-            }
+        const nameValidation = validateText(fullName, 2, 50, "Full Name");
+        if (!nameValidation.isValid) {
+            errors.fullName = nameValidation.message || "Enter a valid name";
+        } else {
+            updateData.fullName = nameValidation.value;
         }
 
-        if (phone !== undefined) {
-            const phoneValidation = validatePhone(phone);
-            if (!phoneValidation.isValid) {
-                errors.phone = "Invalid phone number format.";
-            } else {
-                updateData.phone = phone.trim();
-            }
+        const phoneValidation = validatePhone(phone);
+        if (!phoneValidation.isValid) {
+            errors.phone = phoneValidation.message || "Enter a valid phone number";
+        } else {
+            updateData.phone = phoneValidation.value;
         }
 
-        if (headline !== undefined) {
-            if (typeof headline !== "string") {
-                errors.headline = "Invalid headline format.";
-            } else {
-                updateData.headline = headline.trim();
-            }
+        const bioValidation = validateText(bio, 20, 200, "bio");
+        if (!bioValidation.isValid) {
+            errors.bio = bioValidation.message || "Enter a valid bio";
+        } else {
+            updateData.bio = bioValidation.value;
         }
 
-        if (expertiseArea !== undefined) {
-            if (typeof expertiseArea !== "string") {
-                errors.expertiseArea = "Invalid headline format.";
-            } else {
-                updateData.expertiseArea = expertiseArea.trim();
-            }
-        }
-
-        if (bio !== undefined) {
-            if (typeof bio !== "string") {
-                errors.bio = "Invalid bio format.";
-            } else {
-                updateData.bio = bio.trim();
-            }
-        }
-
-        if (yearsOfExperience !== undefined) {
-            if (typeof yearsOfExperience !== "string") {
-                errors.yearsOfExperience = "Invalid yearsOfExperience format.";
-            } else {
-                updateData.yearsOfExperience = yearsOfExperience.trim();
-            }
-        }
-
-        if (skills !== undefined) {
-            if (!Array.isArray(skills) || !skills.every((s) => typeof s === "string")) {
-                errors.skills = "Invalid input: skills must be an array of strings.";
-            } else {
-                updateData.skills = skills.map((s) => s.trim()).filter(Boolean);
-            }
-        }
-
-        if (languages !== undefined) {
-            if (!Array.isArray(languages) || !languages.every((l) => typeof l === "string")) {
-                errors.languages = "Invalid input: languages must be an array of strings.";
-            } else {
-                updateData.languages = languages.map((l) => l.trim()).filter(Boolean);
-            }
-        }
-
-        if (qualifications !== undefined) {
-            if (!Array.isArray(qualifications) || !qualifications.every((q) => typeof q === "string")) {
-                errors.qualifications = "Invalid input: qualifications must be an array of strings.";
-            } else {
-                updateData.qualifications = qualifications.map((q) => q.trim()).filter(Boolean);
-            }
+        const subjectValidation = validateArray(teachingSubjects, "Subjects");
+        if (!subjectValidation.isValid) {
+            errors.teachingSubjects = subjectValidation.message  || "Enter a valid Subjects";
+        }else{
+            updateData.teachingSubjects = subjectValidation.value;
         }
 
         if (Object.keys(errors).length > 0) {
@@ -147,13 +91,8 @@ export const updateTutorProfile = async (req, res) => {
                 tutor: {
                     fullName: currentTutor.fullName,
                     phone: currentTutor.phone || "",
-                    headline: currentTutor.headline || "",
-                    expertiseArea: currentTutor.expertiseArea || "",
                     bio: currentTutor.bio || "",
-                    yearsOfExperience: currentTutor.yearsOfExperience || "",
-                    skills: currentTutor.skills || [],
-                    languages: currentTutor.languages || [],
-                    qualifications: currentTutor.qualifications || [],
+                    teachingSubjects: currentTutor.teachingSubjects || [],
                 },
             });
         }
@@ -161,7 +100,7 @@ export const updateTutorProfile = async (req, res) => {
         const updatedTutor = await Tutor.findByIdAndUpdate(
             tutorId,
             { $set: updateData },
-            { new: true, runValidators: true }
+            { new: true, runValidators: true },
         ).select("-password");
 
         if (!updatedTutor) {
@@ -175,13 +114,8 @@ export const updateTutorProfile = async (req, res) => {
                 fullName: updatedTutor.fullName,
                 phone: updatedTutor.phone || "",
                 profileImage: updatedTutor.profileImage,
-                headline: updatedTutor.headline || "",
-                expertiseArea: updatedTutor.expertiseArea || "",
                 bio: updatedTutor.bio || "",
-                yearsOfExperience: updatedTutor.yearsOfExperience || "",
-                skills: updatedTutor.skills || [],
-                languages: updatedTutor.languages || [],
-                qualifications: updatedTutor.qualifications || [],
+                teachingSubjects: updatedTutor.teachingSubjects || [],
             },
         });
     } catch (error) {
@@ -196,7 +130,7 @@ export const updateTutorProfileImage = async (req, res) => {
 
         if (!req.file) {
             return res.status(400).json({ success: false, message: "No image file provided." });
-        }        
+        }
 
         if (!tutorId || !mongoose.Types.ObjectId.isValid(tutorId)) {
             return res.status(401).json({ success: false, message: "Unauthorized: Tutor ID invalid." });
@@ -251,7 +185,7 @@ export const requestEmailChange = async (req, res) => {
         if (!emailValidation.isValid) {
             return res.status(400).json({ message: emailValidation.message || "Enter a valid email address" });
         }
-        const trimmedNewEmail = emailValidation.email;
+        const trimmedNewEmail = emailValidation.value;
 
         if (trimmedNewEmail === currentEmail) {
             return res.status(400).json({ success: false, message: "New email must be different from the current email." });
@@ -339,7 +273,7 @@ export const verifyEmailChangeOtp = async (req, res) => {
         }
 
         const otpDoc = await OTP.findOne({
-            email,
+            email: emailValidation.value,
             purpose: "email_change",
             role: "tutor",
         });
@@ -393,7 +327,7 @@ export const resendEmailChangeOtp = async (req, res) => {
             return res.status(400).json({ message: "Email not found Please verify your email address" });
         }
 
-        const trimmedNewEmail = emailValidation.email;
+        const trimmedNewEmail = emailValidation.value;
 
         const existingUser = await User.findOne({ email: trimmedNewEmail }).lean();
         const existingTutor = await Tutor.findOne({ email: trimmedNewEmail }).lean();
@@ -467,7 +401,7 @@ export const requestPasswordChange = async (req, res) => {
         if (!passwordValidation.isValid) {
             return res.status(400).json({ message: passwordValidation.message || "Enter a valid new password" });
         }
-        const trimmedNewPassword = passwordValidation.password;
+        const trimmedNewPassword = passwordValidation.value;
 
         const isCurrentPasswordValid = await tutor.matchTutorPassword(currentPassword);
         if (!isCurrentPasswordValid) {
@@ -551,7 +485,7 @@ export const verifyPasswordChange = async (req, res) => {
         if (!passwordValidation.isValid) {
             return res.status(400).json({ success: false, message: passwordValidation.message });
         }
-        const trimmedNewPassword = passwordValidation.password;
+        const trimmedNewPassword = passwordValidation.value;
 
         const otpDoc = await OTP.findOne({
             email: tutorEmail,

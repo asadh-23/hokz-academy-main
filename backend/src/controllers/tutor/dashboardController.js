@@ -1,6 +1,7 @@
 import Course from "../../models/course/Course.js";
 import PaymentDistribution from "../../models/finance/PaymentDistribution.js";
 import Enrollment from "../../models/course/Enrollment.js"; // Or Order model if Enrollment doesn't exist
+import Order from "../../models/finance/Order.js";
 
 export const getTutorDashboardStats = async (req, res) => {
     try {
@@ -81,5 +82,80 @@ export const getTutorDashboardStats = async (req, res) => {
     } catch (error) {
         console.error("Dashboard Error:", error);
         res.status(500).json({ success: false, message: "Failed to fetch dashboard data" });
+    }
+};
+
+export const exportTutorOrders = async (req, res) => {
+    try {
+        if (!req.user || !req.user._id) {
+            return res.status(401).json({ message: "Unauthorized" });
+        }
+
+        const tutorId = req.user._id.toString();
+
+        // 1. Get all course IDs owned by this tutor
+        const tutorCourses = await Course.find({ tutor: tutorId }).select("_id");
+        const myCourseIds = tutorCourses.map((c) => c._id.toString());
+
+        if (myCourseIds.length === 0) {
+            return res.status(200).json({ success: true, orders: [] });
+        }
+
+        // 2. Fetch ALL orders involving these courses (No pagination)
+        // We use .lean() for performance since we aren't modifying the documents
+        const orders = await Order.find({ "items.course": { $in: myCourseIds } })
+            .populate("user", "fullName email")
+            .populate({
+                path: "items.course",
+                select: "title",
+            })
+            .sort({ createdAt: -1 })
+            .lean();
+
+        // 3. Fetch all payment distribution records for these orders
+        const orderIds = orders.map((o) => o._id);
+        const payments = await PaymentDistribution.find({
+            orderId: { $in: orderIds },
+            tutor: tutorId,
+        }).lean();
+
+        // Map payments for O(1) lookup
+        const paymentMap = {};
+        payments.forEach((p) => {
+            paymentMap[p.orderId.toString()] = p;
+        });
+
+        // 4. Format the data strictly for the export report
+        const formattedOrders = orders.map((order) => {
+            const paymentData = paymentMap[order._id.toString()];
+            
+            // Filter only the items that belong to this tutor
+            const tutorItems = order.items
+                .filter(item => item.course && myCourseIds.includes(item.course._id.toString()))
+                .map(item => item.course.title);
+
+            return {
+                displayId: order.razorpayOrderId?.split("_")[1] || order._id.toString().slice(-6).toUpperCase(),
+                date: order.createdAt,
+                status: order.status,
+                studentName: order.user?.fullName || "Unknown",
+                studentEmail: order.user?.email || "N/A",
+                courses: tutorItems.join(", "),
+                totalValue: (paymentData?.totalAmount || 0) + (paymentData?.taxCollected || 0),
+                netEarnings: paymentData?.tutorShareAmount || 0,
+                tax: paymentData?.taxCollected || 0,
+                commission: paymentData?.adminShareAmount || 0
+            };
+        });
+
+        res.status(200).json({
+            success: true,
+            message: "Export data fetched successfully",
+            orders: formattedOrders
+        });
+
+    } catch (error) {
+        console.error("Export Tutor Orders Error:", error);
+        res.status(500).json({ success: false, message: "Failed to fetch export data" });
     }
 };

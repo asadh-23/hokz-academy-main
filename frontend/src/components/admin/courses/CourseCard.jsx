@@ -1,5 +1,6 @@
 import React from 'react';
 import { Users, Star, Clock, Settings } from 'lucide-react';
+import { formatText } from '../../../utils/formatText';
 
 const CourseCard = ({ course, formatCurrency, navigate }) => {
     const originalPrice = course.price;
@@ -24,6 +25,24 @@ const CourseCard = ({ course, formatCurrency, navigate }) => {
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+
+                {/* Banned Overlay */}
+                {course.isBanned && (
+                    <div className="absolute inset-0 bg-black/70 backdrop-blur-sm flex flex-col items-center justify-center">
+                        <div className="text-center px-4">
+                            <span className="block text-red-500 text-2xl font-bold mb-2">
+                                BANNED
+                            </span>
+                            <span className="block text-white text-sm">
+                                Banned on: {new Date(course.bannedAt).toLocaleDateString('en-US', {
+                                    year: 'numeric',
+                                    month: 'long',
+                                    day: 'numeric'
+                                })}
+                            </span>
+                        </div>
+                    </div>
+                )}
 
                 {/* Status Badge */}
                 <div className="absolute top-3 left-3">
@@ -53,7 +72,7 @@ const CourseCard = ({ course, formatCurrency, navigate }) => {
                         className="w-8 h-8 rounded-full border-2 border-white object-cover"
                     />
                     <div className="text-white">
-                        <p className="text-xs font-medium">{course.tutor?.fullName || "Unknown"}</p>
+                        <p className="text-xs font-medium">{formatText(course.tutor?.fullName, 15) || "Unknown"}</p>
                     </div>
                 </div>
             </div>
@@ -61,11 +80,11 @@ const CourseCard = ({ course, formatCurrency, navigate }) => {
             {/* Content */}
             <div className="p-5">
                 <h3 className="font-semibold text-gray-900 text-lg mb-2 line-clamp-2 leading-tight">
-                    {course.title}
+                    {formatText(course.title, 34)}
                 </h3>
 
                 <p className="text-sm text-gray-600 mb-4 line-clamp-2 leading-relaxed">
-                    {course.description || "No description available for this course."}
+                    {formatText(course.description, 44 )|| "No description available for this course."}
                 </p>
 
                 {/* Stats */}

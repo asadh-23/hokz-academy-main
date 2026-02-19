@@ -6,7 +6,7 @@ import { userAxios } from "../../../api/userAxios";
 // ======================================================
 
 // Fetch wishlist
-export const fetchUserWishlist = createAsyncThunk("userWishlist/fetchUserWishlist", async (_, { rejectWithValue }) => {
+export const fetchUserWishlist = createAsyncThunk("userWishlist/fetchUserWishlist", async (userId, { rejectWithValue }) => {
     try {
         const res = await userAxios.get("/wishlist");
         return res.data.wishlist;

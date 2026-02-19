@@ -29,6 +29,7 @@ import {
     selectAdminCourseError,
     toggleAdminCourseBlock,
 } from "../../store/features/admin/adminCourseSlice";
+import { formatText } from "../../utils/formatText";
 
 const ManageCourses = () => {
     const { courseId } = useParams();
@@ -182,19 +183,19 @@ const ManageCourses = () => {
                     <div className="flex items-center gap-3">
                         <button
                             onClick={() =>
-                                handleToggleCourse(course._id, course.title, course.isListed ? "Unlist" : "List")
+                                handleToggleCourse(course._id, course.title, course.isBanned ? "Unban" : "Ban")
                             }
                             className={`
                                 flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-sm transition-colors
                                 ${
-                                    course.isListed
-                                        ? "bg-red-100 text-red-700 hover:bg-red-200"
-                                        : "bg-green-100 text-green-700 hover:bg-green-200"
+                                    course.isBanned
+                                        ? "bg-green-100 text-green-700 hover:bg-green-200"
+                                        : "bg-red-100 text-red-700 hover:bg-red-200"
                                 }
                             `}
                         >
-                            {course.isListed ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                            {course.isListed ? "Unlist Course" : "List Course"}
+                            {course.isBanned ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+                            {course.isBanned ? "Unban Course" : "Ban Course"}
                         </button>
                     </div>
                 </div>
@@ -251,18 +252,30 @@ const ManageCourses = () => {
                                                 className={`
                                                 inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium
                                                 ${
-                                                    course.isListed
+                                                    course.isBanned
+                                                        ? "bg-red-100 text-red-800"
+                                                        : course.isListed
                                                         ? "bg-green-100 text-green-800"
-                                                        : "bg-red-100 text-red-800"
+                                                        : "bg-yellow-100 text-yellow-800"
                                                 }
                                             `}
                                             >
-                                                {course.isListed ? (
-                                                    <Eye className="w-3 h-3" />
+                                                {course.isBanned ? (
+                                                    <>
+                                                        <XCircle className="w-3 h-3" />
+                                                        Banned
+                                                    </>
+                                                ) : course.isListed ? (
+                                                    <>
+                                                        <Eye className="w-3 h-3" />
+                                                        Published
+                                                    </>
                                                 ) : (
-                                                    <EyeOff className="w-3 h-3" />
+                                                    <>
+                                                        <EyeOff className="w-3 h-3" />
+                                                        Unlisted
+                                                    </>
                                                 )}
-                                                {course.isListed ? "Published" : "Unlisted"}
                                             </span>
                                         </div>
                                         <div className="text-right">
@@ -487,7 +500,7 @@ const ManageCourses = () => {
                                                             </h4>
                                                             {lesson.description && (
                                                                 <p className="text-xs text-gray-500 truncate mt-1">
-                                                                    {lesson.description}
+                                                                    {formatText(lesson.description, 100)}
                                                                 </p>
                                                             )}
                                                             <div className="flex items-center gap-4 mt-2 text-xs text-gray-500">

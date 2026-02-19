@@ -12,9 +12,6 @@ const MessageBubble = ({ message }) => {
     const tutor = useSelector(selectTutor);
     const currentUser = user || tutor;
 
-    const { selectedChat } = useSelector((state) => state.chat);
-    const onlineUsers = useSelector(selectOnlineUsers);
-
     const isMe = message.senderId === currentUser?._id;
 
     // ---------------------------------------------
@@ -22,8 +19,12 @@ const MessageBubble = ({ message }) => {
     // ---------------------------------------------
     let tickStatus = "sent";
 
+    // Check if message is pending (optimistic update)
+    if (message.pending) {
+        tickStatus = "pending";
+    }
     // Priority 1: Read
-    if (message.isRead) {
+    else if (message.isRead) {
         tickStatus = "read";
     }
     // Priority 2: Delivered
@@ -39,6 +40,11 @@ const MessageBubble = ({ message }) => {
     // ---------------------------------------------
     // 🔥 REDESIGNED TICK COMPONENTS 🔥
     // ---------------------------------------------
+
+    // 0. Pending (Loading) -> Small spinner
+    const PendingTick = () => (
+        <div className="w-3 h-3 border-2 border-white/40 border-t-white/90 rounded-full animate-spin"></div>
+    );
 
     // 1. Single Tick (Sent) -> Slightly faded white
     const SingleTick = () => <CheckIcon className="w-3 h-3 text-white/60" strokeWidth={3} />;
@@ -131,7 +137,8 @@ const MessageBubble = ({ message }) => {
 
                     {/* 🔥 TICKS DISPLAY (Only for sender) 🔥 */}
                     {isMe && (
-                        <span className="flex items-center ml-1">
+                        <span className="flex items-center ml-1 transition-all duration-200">
+                            {tickStatus === "pending" && <PendingTick />}
                             {tickStatus === "read" && <DoubleTickRead />}
                             {tickStatus === "delivered" && <DoubleTickDelivered />}
                             {tickStatus === "sent" && <SingleTick />}

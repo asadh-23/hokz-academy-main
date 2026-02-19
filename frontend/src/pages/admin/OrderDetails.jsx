@@ -19,6 +19,8 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { adminAxios } from "../../api/adminAxios";
+import autoTable from "jspdf-autotable";
+import jsPDF from "jspdf";
 
 const OrderDetails = () => {
     const { orderId } = useParams();
@@ -66,6 +68,108 @@ const OrderDetails = () => {
     const copyToClipboard = (text) => {
         navigator.clipboard.writeText(text);
         toast.success("Transaction ID copied");
+    };
+    const downloadInvoice = () => {
+        try {
+            const doc = new jsPDF();
+
+            const displayId = order.orderId?.split("_")[1] || order._id.slice(-6).toUpperCase();
+
+            const cleanPrice = (amount) => `INR ${Number(amount).toLocaleString("en-IN")}`;
+
+
+            doc.setFontSize(22);
+            doc.setTextColor(79, 70, 229); // Indigo color
+            doc.setFont("helvetica", "bold");
+            doc.text("HOKZ ACADEMY", 14, 20);
+
+            doc.setFontSize(10);
+            doc.setTextColor(100);
+            doc.setFont("helvetica", "normal");
+            doc.text("Official Course Purchase Invoice", 14, 28);
+
+            doc.setTextColor(0);
+            doc.setFontSize(10);
+            doc.text(`Invoice No: INV-${displayId}`, 140, 20);
+            doc.text(`Date: ${new Date(order.createdAt).toLocaleDateString()}`, 140, 26);
+            doc.text(`Status: ${order.status.toUpperCase()}`, 140, 32);
+
+            // വര
+            doc.setDrawColor(230);
+            doc.line(14, 40, 196, 40);
+
+            doc.setFontSize(12);
+            doc.setFont("helvetica", "bold");
+            doc.text("Billed To:", 14, 50);
+
+            doc.setFontSize(10);
+            doc.setFont("helvetica", "normal");
+            doc.text(customer.fullName, 14, 56);
+            doc.text(customer.email, 14, 62);
+            if (customer.phone) doc.text(customer.phone, 14, 68);
+
+            const tableData = items.map((item, index) => [
+                index + 1,
+                item.title,
+                `By ${item.tutor?.fullName || "N/A"}`,
+                cleanPrice(item.originalPrice),
+                cleanPrice(item.pricePaid),
+            ]);
+
+            autoTable(doc, {
+                startY: 75,
+                head: [["#", "Course Description", "Instructor", "MRP", "Final Price"]],
+                body: tableData,
+                theme: "striped",
+                headStyles: { fillColor: [79, 70, 229], textColor: 255 },
+                styles: { fontSize: 9, font: "helvetica" },
+                columnStyles: {
+                    1: { cellWidth: 70 },
+                    3: { halign: "right" },
+                    4: { halign: "right" },
+                },
+            });
+
+            const finalY = doc.lastAutoTable.finalY + 10;
+
+            doc.setFontSize(10);
+            doc.setTextColor(0);
+            doc.text("Summary:", 140, finalY);
+            doc.text(`Subtotal:`, 140, finalY + 7);
+            doc.text(cleanPrice(order.totalAmount), 196, finalY + 7, { align: "right" });
+
+            if (order.discountAmount > 0) {
+                doc.setTextColor(22, 163, 74);
+                doc.text(`Total Discount:`, 140, finalY + 14);
+                doc.text(`-${cleanPrice(order.discountAmount)}`, 196, finalY + 14, { align: "right" });
+            }
+
+            doc.setTextColor(0);
+            doc.text(`Tax (GST):`, 140, finalY + 21);
+            doc.text(`+${cleanPrice(order.taxAmount)}`, 196, finalY + 21, { align: "right" });
+
+           
+            doc.setFillColor(243, 244, 246);
+            doc.rect(138, finalY + 25, 58, 12, "F");
+            doc.setFont("helvetica", "bold");
+            doc.text(`Grand Total:`, 140, finalY + 33);
+            doc.text(cleanPrice(order.finalAmount), 196, finalY + 33, { align: "right" });
+
+            
+            doc.setFontSize(8);
+            doc.setTextColor(150);
+            doc.setFont("helvetica", "normal");
+            doc.text("This is a computer-generated invoice and does not require a physical signature.", 105, 285, {
+                align: "center",
+            });
+
+           
+            doc.save(`Invoice_${displayId}.pdf`);
+            toast.success("Invoice downloaded successfully");
+        } catch (error) {
+            console.error("PDF Error:", error);
+            toast.error("Failed to generate invoice");
+        }
     };
 
     const getStatusBadge = (status) => {
@@ -126,7 +230,10 @@ const OrderDetails = () => {
                     </div>
                 </div>
 
-                <button className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition shadow-sm text-sm">
+                <button
+                    onClick={downloadInvoice}
+                    className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition shadow-sm text-sm"
+                >
                     <Download size={16} /> Download Invoice
                 </button>
             </div>

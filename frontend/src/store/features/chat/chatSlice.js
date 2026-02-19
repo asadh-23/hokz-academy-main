@@ -72,13 +72,12 @@ export const sendMessage = createAsyncThunk(
 
             const formData = new FormData();
 
+            formData.append("type", "chat");
             // 🟢 CORRECTED LOGIC:
-            // 1. Chat ID ഉണ്ടെങ്കിൽ അത് അയക്കുക (Existing Chat)
             if (chatId) {
                 formData.append("chatId", chatId);
             }
 
-            // 2. Receiver ID ഉണ്ടെങ്കിൽ അത് അയക്കുക (New Chat തുടങ്ങാൻ ഇത് നിർബന്ധമാണ്)
             if (receiverId) {
                 formData.append("receiverId", receiverId);
             }
@@ -86,9 +85,6 @@ export const sendMessage = createAsyncThunk(
             // 3. Message Content
             if (text) formData.append("text", text);
             if (file) formData.append("file", file);
-
-            // 4. Type (Optional, for backend middleware check)
-            formData.append("type", "chat");
 
             const res = await axiosInstance.post("/chat/send-message", formData, {
                 headers: { "Content-Type": "multipart/form-data" },
@@ -123,6 +119,16 @@ const chatSlice = createSlice({
         },
         addMessage: (state, action) => {
             state.messages.push(action.payload);
+        },
+        addOptimisticMessage: (state, action) => {
+            state.messages.push(action.payload);
+        },
+        updateOptimisticMessage: (state, action) => {
+            const { tempId, message } = action.payload;
+            const index = state.messages.findIndex((msg) => msg.tempId === tempId);
+            if (index !== -1) {
+                state.messages[index] = message;
+            }
         },
         // Sidebar update logic
         updateConversationLastMessage: (state, action) => {
@@ -227,9 +233,43 @@ const chatSlice = createSlice({
         });
 
         // Send Message
+        builder.addCase(sendMessage.pending, (state, action) => {
+            // Optimistic update is already added in MessageInput, just mark it as pending
+            const tempId = action.meta.arg.tempId;
+            if (tempId) {
+                const message = state.messages.find((msg) => msg.tempId === tempId);
+                if (message) {
+                    message.pending = true;
+                }
+            }
+        });
         builder.addCase(sendMessage.fulfilled, (state, action) => {
             const { message, chatId } = action.payload;
-            state.messages.push(message);
+            const tempId = action.meta.arg.tempId;
+
+            // Update optimistic message in place to prevent flickering
+            if (tempId) {
+                const index = state.messages.findIndex((msg) => msg.tempId === tempId);
+                if (index !== -1) {
+                    // Update properties in place instead of replacing the entire object
+                    const existingMsg = state.messages[index];
+                    existingMsg._id = message._id;
+                    existingMsg.chatId = message.chatId;
+                    existingMsg.senderId = message.senderId;
+                    existingMsg.receiverId = message.receiverId;
+                    existingMsg.text = message.text;
+                    existingMsg.fileType = message.fileType;
+                    existingMsg.fileUrl = message.fileUrl;
+                    existingMsg.fileName = message.fileName;
+                    existingMsg.isRead = message.isRead;
+                    existingMsg.isDelivered = message.isDelivered;
+                    existingMsg.createdAt = message.createdAt;
+                    existingMsg.updatedAt = message.updatedAt;
+                    existingMsg.pending = false; // Remove pending flag
+                }
+            } else {
+                state.messages.push(message);
+            }
 
             if (state.selectedChat && !state.selectedChat.chatId && chatId) {
                 state.selectedChat.chatId = chatId;
@@ -250,11 +290,28 @@ const chatSlice = createSlice({
                 }
             }
         });
+        builder.addCase(sendMessage.rejected, (state, action) => {
+            const tempId = action.meta.arg.tempId;
+            if (tempId) {
+                // Remove failed optimistic message
+                const index = state.messages.findIndex((msg) => msg.tempId === tempId);
+                if (index !== -1) {
+                    state.messages.splice(index, 1);
+                }
+            }
+        });
     },
 });
 
-export const { setSelectedChat, addMessage, updateConversationLastMessage, markMessagesAsRead, markMessageAsDelivered } =
-    chatSlice.actions;
+export const {
+    setSelectedChat,
+    addMessage,
+    addOptimisticMessage,
+    updateOptimisticMessage,
+    updateConversationLastMessage,
+    markMessagesAsRead,
+    markMessageAsDelivered,
+} = chatSlice.actions;
 export const selectSelectedChat = (state) => state.chat.selectedChat;
 export const selectConversations = (state) => state.chat.conversations;
 

@@ -51,7 +51,7 @@ const ChangeEmailModal = ({ isOpen, onClose, currentEmail, role }) => {
             setErrors({ email: emailValidation.message || "Please enter a valid email address" });
             return;
         }
-        const trimmedNewEmail = emailValidation.email;
+        const trimmedNewEmail = emailValidation.value;
 
         if (trimmedNewEmail === currentEmail) {
             setErrors({ email: "New email must be different from current email" });

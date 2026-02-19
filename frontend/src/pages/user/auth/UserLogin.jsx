@@ -28,8 +28,8 @@ export default function UserLogin() {
             return toast.error(passwordValidation.message || "Enter a valid Password");
         }
         const payload = {
-            email: emailValidation.email,
-            password: passwordValidation.password,
+            email: emailValidation.value,
+            password: passwordValidation.value,
         };
         try {
             const result = await dispatch(userLogin(payload)).unwrap();

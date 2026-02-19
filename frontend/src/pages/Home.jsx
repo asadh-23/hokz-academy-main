@@ -5,18 +5,14 @@ import PublicFooter from "../components/common/PublicFooter";
 
 // Landing Page-Only Sections
 import HeroSection from "./home/HeroSection";
-import AboutSection from "./home/AboutSection";
-import JoinUsSection from "./home/JoinUsSection";
 import StatsSection from "./home/StatsSection";
-import TestimonialsSection from "./home/TestimonialsSection";
 
-// Reusable Shared Components
-import CategoryList from "../components/course/CategoryList";
-import CourseList from "../components/course/CourseList";
 
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
+import { TutorLoginSection } from "./home/TutorLoginSection";
+import HokzInfo from "./home/HokzInfo";
 
 export default function Home() {
     const userAuth = useSelector((state) => state.userAuth);
@@ -38,12 +34,9 @@ export default function Home() {
             <PublicHeader />
             <main>
                 <HeroSection />
+                <TutorLoginSection/>
                 <StatsSection />
-                <CategoryList />
-                <CourseList />
-                <TestimonialsSection />
-                <AboutSection />
-                <JoinUsSection />
+                <HokzInfo />
             </main>
             <PublicFooter />
         </>

@@ -7,11 +7,11 @@ const tutorRouter = express.Router();
 
 tutorRouter.use(verifyToken, isTutor);
 
-tutorRouter.post("/lessons/upload/lesson-file",uploadMiddleware, uploadLessonFile)
+tutorRouter.post("/upload/lesson-file",uploadMiddleware, uploadLessonFile)
 tutorRouter.post("/courses/:courseId/lesson", createLesson);
 tutorRouter.get("/courses/:courseId/lessons", getCourseLessons);
-tutorRouter.put("/lessons/:lessonId", updateLesson);
-tutorRouter.delete("/lessons/:lessonId", deleteLesson);
+tutorRouter.put("/:lessonId", updateLesson);
+tutorRouter.delete("/:lessonId", deleteLesson);
 
 
 

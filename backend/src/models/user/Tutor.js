@@ -1,25 +1,6 @@
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 
-const notificationSchema = new mongoose.Schema({
-    title: {
-        type: String,
-        required: true,
-    },
-    body: {
-        type: String,
-        required: true,
-    },
-    read: {
-        type: Boolean,
-        default: false,
-    },
-    createdAt: {
-        type: Date,
-        default: Date.now,
-    },
-});
-
 // ------------------ TUTOR SCHEMA ------------------
 
 const tutorSchema = new mongoose.Schema(
@@ -61,34 +42,12 @@ const tutorSchema = new mongoose.Schema(
             type: String,
             default: null,
         },
-        headline: {
-            type: String,
-            default: "",
-            trim: true,
-        },
-        expertiseArea: {
-            type: String,
-            default: "",
-            trim: true,
-        },
         bio: {
             type: String,
             default: "",
             trim: true,
         },
-        yearsOfExperience: {
-            type: String,
-            default: "",
-        },
-        skills: {
-            type: [String],
-            default: [],
-        },
-        languages: {
-            type: [String],
-            default: [],
-        },
-        qualifications: {
+        teachingSubjects: {
             type: [String],
             default: [],
         },
@@ -108,9 +67,6 @@ const tutorSchema = new mongoose.Schema(
         },
         lastActive: { type: Date },
         lastLogin: { type: Date },
-
-        notifications: [notificationSchema],
-
         // ---------------- TOKENS ----------------
         passwordResetToken: {
             type: String,

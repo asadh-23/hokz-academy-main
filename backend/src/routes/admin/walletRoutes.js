@@ -7,6 +7,6 @@ const adminRouter = express.Router();
 
 adminRouter.use(verifyToken, isAdmin);
 
-adminRouter.get("/wallet", getAdminWallet);
+adminRouter.get("/", getAdminWallet);
 
 export default adminRouter;

@@ -15,12 +15,7 @@ const adminRouter = express.Router();
 adminRouter.use(verifyToken, isAdmin);
 
 // Profile management
-adminRouter.get("/profile", getAdminProfile);
-adminRouter.post("/profile/image", imageUpload.single("profileImageFile"), updateAdminProfileImage);
-
-// Password change
-adminRouter.post("/request-password-change", requestPasswordChange);
-adminRouter.post("/verify-password-change", verifyPasswordChange);
-adminRouter.post("/resend-password-change-otp", resendPasswordChangeOtp);
+adminRouter.get("/", getAdminProfile);
+adminRouter.post("/image", imageUpload.single("profileImageFile"), updateAdminProfileImage);
 
 export default adminRouter;

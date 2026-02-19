@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate, Link } from "react-router-dom";
-import { Search, ShoppingCart, User, LogOut, BookOpen, Heart, Menu, X } from "lucide-react";
+import { Search, ShoppingCart, User, LogOut, BookOpen, Heart, Menu, X, Users } from "lucide-react";
 import defaultProfileImage from "../../assets/images/default-profile-image.webp";
 import { logoutUser, selectUser } from "../../store/features/auth/userAuthSlice";
 import NotificationDropdown from "../common/NotificationDropdown";
@@ -84,6 +84,12 @@ const UserHeader = ({ onMenuClick }) => {
                                 className="text-gray-600 hover:text-teal-600 font-medium transition-colors hover:bg-gray-50 px-3 py-1.5 rounded-lg"
                             >
                                 Courses
+                            </Link>
+                            <Link
+                                to="/user/tutors"
+                                className="text-gray-600 hover:text-teal-600 font-medium transition-colors hover:bg-gray-50 px-3 py-1.5 rounded-lg"
+                            >
+                                Tutors
                             </Link>
                         </nav>
 
@@ -196,6 +202,15 @@ const UserHeader = ({ onMenuClick }) => {
                         >
                             <BookOpen className="w-5 h-5" />
                             Courses
+                        </Link>
+
+                        <Link
+                            to="/user/tutors"
+                            className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-teal-50 hover:text-teal-700 rounded-xl font-medium transition-colors"
+                            onClick={() => setIsMobileMenuOpen(false)}
+                        >
+                            <Users className="w-5 h-5" />
+                            Tutors
                         </Link>
 
                         <Link

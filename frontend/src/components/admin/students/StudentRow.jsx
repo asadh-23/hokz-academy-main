@@ -1,4 +1,5 @@
 import React from 'react';
+import { formatText } from '../../../utils/formatText';
 
 const StudentRow = ({ student, onToggleBlock }) => {
   // 🧠 Function to get initials if no profile image
@@ -45,7 +46,7 @@ const StudentRow = ({ student, onToggleBlock }) => {
           {/* Name + ID */}
           <div>
             <div className="font-medium text-gray-800">
-              {student.fullName || "_"}
+              {formatText(student.fullName, 16) || "_"}
             </div>
             <div className="text-xs text-gray-500">
               ID: {student._id?.slice(-6).toUpperCase()}

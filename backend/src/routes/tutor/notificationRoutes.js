@@ -6,8 +6,8 @@ const tutorRouter = express.Router();
 
 tutorRouter.use(verifyToken, isTutor);
 
-tutorRouter.get("/notifications", getNotifications);
-tutorRouter.delete("/notifications", clearNotifications);
+tutorRouter.get("/", getNotifications);
+tutorRouter.delete("/", clearNotifications);
 
 
 export default tutorRouter;

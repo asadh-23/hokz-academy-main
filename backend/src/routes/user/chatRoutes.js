@@ -8,9 +8,9 @@ const userRouter = express.Router();
 
 userRouter.use(verifyToken, isUser);
 
-userRouter.get("/chat/conversations", getUserSidebar);
-userRouter.get("/chat/:receiverId", getAllMessages);
-userRouter.post("/chat/send-message", uploadMiddleware, sendMessageUser);
-userRouter.get("/chat/shared-courses/:participantId", getSharedCourses);
+userRouter.get("/conversations", getUserSidebar);
+userRouter.get("/:receiverId", getAllMessages);
+userRouter.post("/send-message", uploadMiddleware, sendMessageUser);
+userRouter.get("/shared-courses/:participantId", getSharedCourses);
 
 export default userRouter;

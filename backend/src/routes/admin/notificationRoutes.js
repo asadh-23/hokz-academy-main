@@ -6,8 +6,8 @@ const adminRouter = express.Router();
 
 adminRouter.use(verifyToken, isAdmin);
 
-adminRouter.get("/notifications", getNotifications);
-adminRouter.delete("/notifications", clearNotifications);
+adminRouter.get("/", getNotifications);
+adminRouter.delete("/", clearNotifications);
 
 
 export default adminRouter;

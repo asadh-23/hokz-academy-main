@@ -14,7 +14,8 @@ const CourseSidebar = ({
     isAddingToCart,
     isTogglingWishlist,
     onContinueLearning,
-    isEnrolled, // ✅ 1. Accept this prop directly
+    isEnrolled,
+    isAuthenticated,
 }) => {
     
     // Safety check
@@ -27,7 +28,16 @@ const CourseSidebar = ({
     const isUserEnrolled = isEnrolled || courseData.isEnrolled || false;
 
     const handleEnrollNow = () => {
+        // Redirect to login if not authenticated
+        if (!isAuthenticated) {
+            navigate("/user/login");
+            return;
+        }
         navigate("/user/checkout", { state: { courseData } });
+    };
+
+    const handleLoginToPurchase = () => {
+        navigate("/user/login");
     };
 
     const handleCartAction = () => {
@@ -126,30 +136,33 @@ const CourseSidebar = ({
                                     {isAddingToCart ? "Adding..." : isInCart ? "Go to Cart" : "Add to Cart"}
                                 </button>
 
-                                <button
-                                    onClick={onToggleWishlist}
-                                    disabled={isTogglingWishlist}
-                                    className={`p-3 border-2 rounded-xl transition-all group disabled:opacity-50 disabled:cursor-not-allowed ${
-                                        isInWishlist
-                                            ? "bg-red-50 border-red-400"
-                                            : "bg-white border-gray-200 hover:border-red-400 hover:bg-red-50"
-                                    }`}
-                                    title={isInWishlist ? "Remove from Wishlist" : "Add to Wishlist"}
-                                >
-                                    <Heart
-                                        className={`w-6 h-6 transition-all ${
+                                {/* Only show wishlist button if authenticated */}
+                                {isAuthenticated && (
+                                    <button
+                                        onClick={onToggleWishlist}
+                                        disabled={isTogglingWishlist}
+                                        className={`p-3 border-2 rounded-xl transition-all group disabled:opacity-50 disabled:cursor-not-allowed ${
                                             isInWishlist
-                                                ? "text-red-500 fill-red-500"
-                                                : "text-gray-600 group-hover:text-red-500 group-hover:fill-red-500"
-                                        } ${isTogglingWishlist ? "animate-pulse" : ""}`}
-                                    />
-                                </button>
+                                                ? "bg-red-50 border-red-400"
+                                                : "bg-white border-gray-200 hover:border-red-400 hover:bg-red-50"
+                                        }`}
+                                        title={isInWishlist ? "Remove from Wishlist" : "Add to Wishlist"}
+                                    >
+                                        <Heart
+                                            className={`w-6 h-6 transition-all ${
+                                                isInWishlist
+                                                    ? "text-red-500 fill-red-500"
+                                                    : "text-gray-600 group-hover:text-red-500 group-hover:fill-red-500"
+                                            } ${isTogglingWishlist ? "animate-pulse" : ""}`}
+                                        />
+                                    </button>
+                                )}
                             </div>
 
                             {/* Buy Now / Enroll Now Button */}
                             <button
                                 onClick={handleEnrollNow}
-                                className="relative w-full py-3.5 px-6 bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 hover:from-emerald-600 hover:via-teal-600 hover:to-cyan-600 text-white font-bold rounded-xl transition-all mb-6 shadow-lg hover:shadow-xl hover:shadow-emerald-200 active:scale-[0.98] group overflow-hidden"
+                                className="relative w-full py-3.5 px-6 bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 hover:from-emerald-600 hover:via-teal-600 hover:to-cyan-600 text-white font-bold rounded-xl transition-all mb-3 shadow-lg hover:shadow-xl hover:shadow-emerald-200 active:scale-[0.98] group overflow-hidden"
                             >
                                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
                                 <span className="relative flex items-center justify-center gap-2">
@@ -159,7 +172,19 @@ const CourseSidebar = ({
                                 </span>
                             </button>
 
-                            <p className="text-center text-xs text-gray-500 mb-6">30-Day Money-Back Guarantee</p>
+                            {/* Login to Purchase Button - Only show if not authenticated */}
+                            {!isAuthenticated && (
+                                <button
+                                    onClick={handleLoginToPurchase}
+                                    className="w-full py-3 px-6 bg-gray-600 hover:bg-gray-700 text-white font-bold rounded-xl transition-all mb-6 shadow-lg hover:shadow-gray-200 active:scale-[0.98] flex items-center justify-center gap-2"
+                                >
+                                    <span>Login to Purchase</span>
+                                </button>
+                            )}
+
+                            {isAuthenticated && (
+                                <p className="text-center text-xs text-gray-500 mb-6">30-Day Money-Back Guarantee</p>
+                            )}
                         </>
                     )}
 

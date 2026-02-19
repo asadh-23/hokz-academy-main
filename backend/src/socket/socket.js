@@ -150,6 +150,25 @@ io.on("connection", (socket) => {
         }
     });
 
+    socket.on("call-user", ({ to, roomId, callerName }) => {
+        const receiverSocketIds = getReceiverSocketId(to);
+
+        if (receiverSocketIds && receiverSocketIds.length > 0) {
+            io.to(receiverSocketIds).emit("incoming-call", {
+                from: userId,
+                roomId: roomId,
+                callerName: callerName,
+            });
+        }
+    });
+
+    socket.on("call-rejected", ({ to, name }) => {
+    const receiverSocketIds = getReceiverSocketId(to);
+    if (receiverSocketIds && receiverSocketIds.length > 0) {
+        io.to(receiverSocketIds).emit("call-rejected", { name: name});
+    }
+});
+
     // Disconnect Logic (Updated)
     socket.on("disconnect", () => {
         if (userId && userSocketMap[userId]) {

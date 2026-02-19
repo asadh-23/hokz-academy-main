@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 
-import { isNullOrWhitespace, validateEmail, validatePassword, validatePhone } from "../../../utils/validation";
+import { validateEmail, validatePassword, validatePhone, validateText } from "../../../utils/validation";
 
 import { tutorRegister, selectTutorAuthLoading } from "../../../store/features/auth/tutorAuthSlice";
 
@@ -26,8 +26,9 @@ export default function TutorRegister() {
 
         // --- VALIDATION ---
 
-        if (isNullOrWhitespace(formData.fullName)) {
-            return toast.error("Full Name is required");
+        const nameValidation = validateText(formData.fullName, 2, 50, "Name")
+        if (!nameValidation.isValid) {
+            return toast.error(nameValidation.message || "Enter a valid Name");
         }
 
         const phoneValidation = validatePhone(formData.phone);
@@ -50,10 +51,10 @@ export default function TutorRegister() {
         }
 
         const cleanData = {
-            fullName: formData.fullName.trim(),
-            phone: phoneValidation.phone,
-            email: emailValidation.email,
-            password: passwordValidation.password,
+            fullName: nameValidation.value,
+            phone: phoneValidation.value,
+            email: emailValidation.value,
+            password: passwordValidation.value,
         };
         try {
             const result = await dispatch(tutorRegister(cleanData)).unwrap();

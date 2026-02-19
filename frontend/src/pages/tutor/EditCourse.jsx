@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { LayoutDashboard, Image as ImageIcon, DollarSign, UploadCloud } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
-import { isNullOrWhitespace } from "../../utils/validation";
+import { validateText } from "../../utils/validation";
 import { useDispatch, useSelector } from "react-redux";
 // Redux thunks and selectors
 import {
@@ -15,7 +15,6 @@ import {
     selectTutorSelectedCourse,
 } from "../../store/features/tutor/tutorCoursesSlice";
 import { fetchListedCategories, selectListedCategories } from "../../store/features/public/categorySlice";
-
 
 const EditCourse = () => {
     const dispatch = useDispatch();
@@ -139,21 +138,26 @@ const EditCourse = () => {
         e.preventDefault();
         const { title, category, price, offerPercentage, description, thumbnailUrl, thumbnailKey } = formData;
 
-        // VALIDATION
-        if (isNullOrWhitespace(title)) return toast.error("Course title is required");
-        if (isNullOrWhitespace(category)) return toast.error("Please select a category");
-        if (isNullOrWhitespace(description)) return toast.error("Course description is required");
+        const titleValidation = validateText(title, 5, 80, "Course title");
+        if (!titleValidation.isValid) return toast.error(titleValidation.message || "Course title is required");
+
+        if (!category) return toast.error("Please select a category");
+
+        const descriptionValidation = validateText(description, 10, 2000, "Course Description");
+        if (!descriptionValidation.isValid)
+            return toast.error(descriptionValidation.message || "Course description is required");
+
         if (!thumbnailUrl) return toast.error("Please upload a course thumbnail");
 
         const priceNum = Number(price);
-        if (isNaN(priceNum) || priceNum <= 0) {
-            return toast.error("Please enter a valid price");
+        if (isNaN(priceNum) || priceNum <= 0 || priceNum > 1000000) {
+            return toast.error("Please enter a valid price (1 - 1,000,000)");
         }
 
-        const offerNum = isNullOrWhitespace(offerPercentage) ? 0 : Number(offerPercentage);
-
-        if (isNaN(offerNum) || offerNum < 0 || offerNum > 100) {
-            return toast.error("Please enter a valid discount percentage (0–100)");
+        // 6. OFFER PERCENTAGE VALIDATION
+        const offerNum = Number(offerPercentage) || 0;
+        if (isNaN(offerNum) || offerNum >= 100 || offerNum < 0) {
+            return toast.error("Offer percentage must be between 0 and 99");
         }
 
         const payload = {
@@ -172,7 +176,7 @@ const EditCourse = () => {
                 updateTutorCourse({
                     courseId,
                     payload,
-                })
+                }),
             ).unwrap();
 
             toast.success("Course updated successfully");

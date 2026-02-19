@@ -19,9 +19,9 @@ const userRouter = express.Router();
 userRouter.use(verifyToken, isUser);
 
 // Profile management
-userRouter.get("/profile", getUserProfile);
-userRouter.put("/profile", updateUserProfile);
-userRouter.post("/profile/image", imageUpload.single("profileImageFile"), updateUserProfileImage);
+userRouter.get("/", getUserProfile);
+userRouter.put("/", updateUserProfile);
+userRouter.post("/image", imageUpload.single("profileImageFile"), updateUserProfileImage);
 
 // Email change
 userRouter.post("/request-email-change", requestEmailChange);

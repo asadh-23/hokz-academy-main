@@ -206,14 +206,6 @@ const MyOrders = () => {
                                     </div>
 
                                     <div className="flex items-center gap-3 ml-auto sm:ml-0">
-                                        {order.status === "paid" && (
-                                            <button
-                                                className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
-                                                title="Download Invoice"
-                                            >
-                                                <Download className="w-5 h-5" />
-                                            </button>
-                                        )}
                                         <button
                                             onClick={() => handleViewDetails(order)}
                                             className="inline-flex items-center bg-white border border-gray-300 text-gray-700 px-4 py-2

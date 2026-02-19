@@ -6,9 +6,9 @@ const userRouter = express.Router();
 
 userRouter.use(verifyToken, isUser)
 
-userRouter.post("/cart", addToUserCart);
-userRouter.get("/cart", getUserCart);
-userRouter.delete("/cart/:itemId", removeFromCart);
-userRouter.delete("/cart", clearCart)
+userRouter.post("/", addToUserCart);
+userRouter.get("/", getUserCart);
+userRouter.delete("/:itemId", removeFromCart);
+userRouter.delete("/", clearCart)
 
 export default userRouter;

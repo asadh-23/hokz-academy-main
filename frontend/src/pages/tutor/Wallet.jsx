@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { tutorAxios } from "../../api/tutorAxios";
+import { formatText } from "../../utils/formatText";
 
 const TutorWallet = () => {
     const [walletData, setWalletData] = useState(null);
@@ -208,7 +209,7 @@ const TutorWallet = () => {
                                                 )}
                                                 <div className="max-w-[150px]">
                                                     <p className="text-sm font-medium text-gray-900 truncate">
-                                                        {txn.student.name}
+                                                        {formatText(txn.student.name, 15)}
                                                     </p>
                                                     <p className="text-xs text-gray-500 truncate">{txn.student.email}</p>
                                                 </div>
@@ -231,7 +232,7 @@ const TutorWallet = () => {
                                                             className="text-xs font-medium text-gray-700 truncate max-w-[200px]"
                                                             title={item.title}
                                                         >
-                                                            {item.title}
+                                                            {formatText(item.title, 18)}
                                                         </span>
                                                     </div>
                                                 ))}

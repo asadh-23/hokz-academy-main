@@ -12,6 +12,7 @@ export const getAllCourses = async (req, res) => {
             isListed: true,
             isActive: true,
             isDeleted: false,
+            isBanned: false,
         };
 
         // SEARCH
@@ -124,6 +125,7 @@ export const getCourseDetails = async (req, res) => {
             isListed: true,
             isActive: true,
             isDeleted: false,
+            isBanned: false,
         })
             .populate("tutor", "fullName email profileImage")
             .populate("category", "name")
@@ -180,7 +182,7 @@ export const getCourseDetails = async (req, res) => {
                 subTotal,
                 taxAmount,
                 totalAmount,
-                isEnrolled: isEnrolled, // ✅ Correct Status
+                isEnrolled: isEnrolled,
             },
         });
     } catch (err) {
@@ -203,7 +205,8 @@ export const getMyCourses = async (req, res) => {
         })
             .populate({
                 path: "course",
-                select: "title thumbnailUrl category description totalDurationSeconds lessonsCount tutor",
+                match: { isBanned: false, isDeleted: false },
+                select: "title thumbnailUrl category description totalDurationSeconds lessonsCount tutor isBanned",
                 populate: [
                     {
                         path: "tutor",

@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { userAxios } from "../../../api/userAxios";
+import { publicAxios } from "../../../api/publicAxios";
 
 // ======================================================
 // ASYNC THUNKS
@@ -18,7 +19,7 @@ export const fetchUserCourses = createAsyncThunk(
                 return acc;
             }, {});
 
-            const res = await userAxios.get("/courses", { params: cleanFilters });
+            const res = await publicAxios.get("/user/courses", { params: cleanFilters });
             return res.data;
         } catch (err) {
             return rejectWithValue(err.response?.data?.message || "Failed to fetch courses");
@@ -31,7 +32,7 @@ export const fetchUserCourseDetails = createAsyncThunk(
     "userCourses/fetchUserCourseDetails",
     async (courseId, { rejectWithValue }) => {
         try {
-            const res = await userAxios.get(`/courses/${courseId}`);
+            const res = await publicAxios.get(`/user/courses/${courseId}/details`);
             return res.data.courseData;
         } catch (err) {
             return rejectWithValue(err.response?.data?.message || "Failed to fetch course details");

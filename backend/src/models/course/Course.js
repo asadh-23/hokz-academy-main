@@ -80,7 +80,7 @@ const CourseSchema = new Schema(
         totalDurationSeconds: { type: Number, default: 0, min: 0 },
 
         notificationSent: { type: Boolean, default: false },
-        isDeleted: { type: Boolean, default: false, index: true }, // soft delete
+        isDeleted: { type: Boolean, default: false, index: true },
     },
     { timestamps: true },
 );

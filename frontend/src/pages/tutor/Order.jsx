@@ -15,6 +15,7 @@ import {
 import { toast } from "sonner";
 import { tutorAxios } from "../../api/tutorAxios";
 import Pagination from "../../components/common/Pagination";
+import { formatText } from "../../utils/formatText";
 
 const TutorOrders = () => {
     const navigate = useNavigate();
@@ -278,7 +279,7 @@ const TutorOrders = () => {
                                                 )}
                                                 <div>
                                                     <p className="text-sm font-medium text-gray-900 line-clamp-1">
-                                                        {order.student?.name}
+                                                        {formatText(order.student?.name, 15)}
                                                     </p>
                                                     <p className="text-xs text-gray-500 line-clamp-1">
                                                         {order.student?.email}

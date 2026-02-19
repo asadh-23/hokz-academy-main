@@ -4,7 +4,7 @@ import { tutorAxios } from "../../api/tutorAxios";
 import { toast } from "sonner";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { AiFillFilePdf } from "react-icons/ai";
-import { isNullOrWhitespace } from "../../utils/validation";
+import { validateText } from "../../utils/validation";
 import LessonsList from "../../components/tutor/LessonsList";
 
 const AddLesson = () => {
@@ -44,7 +44,7 @@ const AddLesson = () => {
     useEffect(() => {
         const fetchLessons = async () => {
             try {
-                const response = await tutorAxios.get(`/courses/${courseId}/lessons`);
+                const response = await tutorAxios.get(`/lessons/courses/${courseId}/lessons`);
 
                 if (!response.data?.success) {
                     toast.error("Failed to load lessons");
@@ -135,8 +135,14 @@ const AddLesson = () => {
     };
 
     const handleAddLesson = async () => {
-        if (isNullOrWhitespace(lessonForm.title)) return toast.error("Lesson title is required");
-        if (isNullOrWhitespace(lessonForm.description)) return toast.error("Lesson description is required");
+        const titleValidation = validateText(lessonForm.title, 5, 80, "Lesson Title");
+        if(!titleValidation.isValid){
+            return toast.error(titleValidation.message || "Enter a valid lesson title")
+        }
+        const descriptionValidation = validateText(lessonForm.description, 5, 1000, "Lesson description");
+        if(!descriptionValidation.isValid){
+            return toast.error(descriptionValidation.message || "Enter a valid Lesson Description")
+        }
         if (!lessonForm.videoUrl) return toast.error("Please upload a lesson video");
         if (!lessonForm.thumbnailUrl) return toast.error("Please upload a lesson thumbnail");
 
@@ -145,11 +151,11 @@ const AddLesson = () => {
         try {
             const payload = {
                 ...lessonForm,
-                title: lessonForm.title.trim(),
-                description: lessonForm.description.trim(),
+                title: titleValidation.value,
+                description: descriptionValidation.value,
             };
 
-            const response = await tutorAxios.post(`/courses/${courseId}/lesson`, payload);
+            const response = await tutorAxios.post(`/lessons/courses/${courseId}/lesson`, payload);
 
             if (!response.data?.success) {
                 throw new Error(response.data?.message || "Failed to save lesson");
@@ -207,14 +213,17 @@ const AddLesson = () => {
     };
 
     const handleUpdateLesson = async () => {
-        if (isNullOrWhitespace(lessonForm.title)) return toast.error("Lesson title is required");
-        if (isNullOrWhitespace(lessonForm.description)) return toast.error("Lesson description is required");
+        const titleValidation = validateText(lessonForm.title, 5, 70, "Lesson title");
+        if (!titleValidation.isValid) return toast.error(titleValidation.message || "Lesson title is required");
+
+        const lessonDescriptionValidation = validateText(lessonForm.description, 10, 1000, "Lesson description");
+        if (!lessonDescriptionValidation.isValid) return toast.error(lessonDescriptionValidation.message || "Lesson description is required");
 
         try {
             const payload = {
                 ...lessonForm,
-                title: lessonForm.title.trim(),
-                description: lessonForm.description.trim(),
+                title: titleValidation.value,
+                description: lessonDescriptionValidation.value,
             };
 
             const response = await tutorAxios.put(`/lessons/${editingLessonId}`, payload);

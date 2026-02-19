@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { adminAxios } from "../../api/adminAxios";
+import { formatText } from "../../utils/formatText";
 
 const Orders = () => {
   const navigate = useNavigate();
@@ -246,7 +247,7 @@ const Orders = () => {
                            </div>
                         )}
                         <div>
-                          <p className="text-sm font-medium text-gray-900">{order.user?.fullName || "Unknown"}</p>
+                          <p className="text-sm font-medium text-gray-900">{formatText(order.user?.fullName, 17) || "Unknown"}</p>
                           <p className="text-xs text-gray-500">{order.user?.email}</p>
                         </div>
                       </div>
@@ -264,7 +265,7 @@ const Orders = () => {
                                 />
                                 <div className="max-w-[150px]">
                                    <p className="text-xs font-medium text-gray-900 truncate" title={item.course?.title}>
-                                      {item.course?.title}
+                                      {formatText(item.course?.title, 18)}
                                    </p>
                                 </div>
                              </div>

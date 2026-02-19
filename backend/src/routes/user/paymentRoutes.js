@@ -6,10 +6,10 @@ const userRouter = express.Router();
 
 userRouter.use(verifyToken, isUser);
 
-userRouter.get("/payment/tutor-coupons/:tutorId", getTutorCoupons);
-userRouter.post("/payment/apply-coupon", applyCoupon);
-userRouter.post("/payment/create-order", createOrder);
-userRouter.post("/payment/verify-payment", verifyPayment);
-userRouter.get("/payment/orders/my-orders", getMyOrders);
+userRouter.get("/tutor-coupons/:tutorId", getTutorCoupons);
+userRouter.post("/apply-coupon", applyCoupon);
+userRouter.post("/create-order", createOrder);
+userRouter.post("/verify-payment", verifyPayment);
+userRouter.get("/orders/my-orders", getMyOrders);
 
 export default userRouter;

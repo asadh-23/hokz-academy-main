@@ -1,5 +1,6 @@
 import React from 'react';
 import { TrendingUp, BookOpen, Star, Users, Award } from 'lucide-react';
+import { formatText } from '../../../utils/formatText';
 
 const TopPerformingCourse = ({ courses, formatCurrency }) => {
   // Safe check if course exists
@@ -74,13 +75,13 @@ const TopPerformingCourse = ({ courses, formatCurrency }) => {
               {/* Title */}
               <div>
                 <h4 className="font-bold text-base text-gray-900 line-clamp-1 leading-tight mb-1" title={course.title}>
-                  {course.title}
+                  {formatText(course.title, 30)}
                 </h4>
                 
                 {/* Description */}
                 {course.description && (
                   <p className="text-xs text-gray-600 line-clamp-2 leading-relaxed">
-                    {course.description}
+                    {formatText(course.description, 40)}
                   </p>
                 )}
               </div>

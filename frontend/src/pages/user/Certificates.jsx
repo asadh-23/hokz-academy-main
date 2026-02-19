@@ -137,7 +137,11 @@ const Certificates = () => {
                                             </h4>
                                             <div className="flex items-center gap-1 mt-1 text-gray-500 text-xs">
                                                 <Calendar size={14} />
-                                                <span>Issued on {cert.completedDate}</span>
+                                                <span>Issued on {new Date(cert.completedDate).toLocaleDateString("en-US", {
+                                                    month: "short",
+                                                    day: "numeric",
+                                                    year: "numeric",
+                                                })}</span>
                                             </div>
                                         </div>
                                         <div className="bg-emerald-50 px-2 py-1 rounded text-emerald-700 text-xs font-bold border border-emerald-100">

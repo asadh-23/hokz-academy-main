@@ -10,9 +10,11 @@ import {
     ShieldCheck,
     RefreshCw,
     DollarSign,
+    ArrowDownLeft,
 } from "lucide-react";
 import { toast } from "sonner";
 import { adminAxios } from "../../api/adminAxios";
+import { formatText } from "../../utils/formatText";
 
 const AdminWallet = () => {
     const [data, setData] = useState(null);
@@ -36,6 +38,10 @@ const AdminWallet = () => {
         fetchWalletData();
     }, []);
 
+    // --- Non-functional withdraw handler ---
+    const handleWithdraw = () => {
+        toast.info("Withdraw functionality is currently disabled");
+    };
     // --- Formatters ---
     const formatCurrency = (amount) =>
         new Intl.NumberFormat("en-IN", {
@@ -76,13 +82,23 @@ const AdminWallet = () => {
                         Track revenue streams, tax liabilities, and commission profits.
                     </p>
                 </div>
-                <button
-                    onClick={() => window.location.reload()}
-                    className="p-2 text-gray-500 hover:text-indigo-600 hover:bg-white bg-gray-100 rounded-lg transition"
-                    title="Refresh Data"
-                >
-                    <RefreshCw size={18} />
-                </button>
+                <div className="flex items-center gap-3">
+                    <button
+                        onClick={handleWithdraw}
+                        className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-emerald-50 to-green-50 text-emerald-600 rounded-xl text-sm font-semibold hover:from-emerald-100 hover:to-green-100 transition-all border-2 border-emerald-200 hover:border-emerald-300 shadow-sm"
+                        title="Withdraw funds (Currently disabled)"
+                    >
+                        <ArrowDownLeft className="w-4 h-4" />
+                        <span>Withdraw</span>
+                    </button>
+                    <button
+                        onClick={() => window.location.reload()}
+                        className="p-2 text-gray-500 hover:text-indigo-600 hover:bg-white bg-gray-100 rounded-lg transition"
+                        title="Refresh Data"
+                    >
+                        <RefreshCw size={18} />
+                    </button>
+                </div>
             </div>
 
             {/* --- STATS GRID --- */}
@@ -205,7 +221,7 @@ const AdminWallet = () => {
                                                 )}
                                                 <div>
                                                     <p className="font-medium text-gray-900 line-clamp-1">
-                                                        {txn.orderId?.user?.fullName || "Unknown"}
+                                                        {formatText(txn.orderId?.user?.fullName, 17) || "Unknown"}
                                                     </p>
                                                     <p className="text-xs text-gray-500 line-clamp-1">
                                                         {txn.orderId?.user?.email}
@@ -219,7 +235,7 @@ const AdminWallet = () => {
                                             <div className="flex items-center gap-2">
                                                 <ShieldCheck size={16} className="text-gray-400" />
                                                 <span className="text-gray-700 font-medium">
-                                                    {txn.tutor?.fullName || "Tutor"}
+                                                    {formatText(txn.tutor?.fullName, 17) || "Tutor"}
                                                 </span>
                                             </div>
                                         </td>

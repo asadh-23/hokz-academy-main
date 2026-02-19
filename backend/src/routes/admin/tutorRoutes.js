@@ -7,9 +7,9 @@ const adminRouter = express.Router();
 
 adminRouter.use(verifyToken, isAdmin);
 
-adminRouter.get("/tutors", getAllTutors);
-adminRouter.patch("/tutors/:tutorId/toggle-block", toggleBlockTutor);
-adminRouter.get("/tutors/:tutorId", getTutorDetails);
+adminRouter.get("/", getAllTutors);
+adminRouter.patch("/:tutorId/toggle-block", toggleBlockTutor);
+adminRouter.get("/:tutorId", getTutorDetails);
 
 
 export default adminRouter;

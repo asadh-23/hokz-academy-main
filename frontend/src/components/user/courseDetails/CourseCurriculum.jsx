@@ -15,14 +15,11 @@ const CourseCurriculum = ({ courseData, totalLessons, hours, minutes, seconds })
     // 👇 Click Handler Logic
     const handleLessonClick = (lesson) => {
         if (lesson.isFreePreview) {
-            // Free Preview Logic (For now just a success message)
             toast.success("Playing Free Preview...");
-            // Here you can open a Video Modal if you have one
         } else {
             // Locked Logic (Tell them to buy)
-            toast.error("🔒 This content is locked! Please Enroll to watch.");
-            
-            // Optional: Scroll to the Enroll button (UX Improvement)
+            toast.info("🔒 This content is locked! Please Enroll to watch.");
+        
             window.scrollTo({ top: 0, behavior: "smooth" });
         }
     };

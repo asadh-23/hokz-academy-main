@@ -1,5 +1,6 @@
 import React from 'react';
 import { Star, Users, ArrowRight, Tag } from 'lucide-react';
+import { formatText } from '../../../utils/formatText';
 
 const CourseCard = ({ course, index, formatCurrency }) => {
   
@@ -28,7 +29,7 @@ const CourseCard = ({ course, index, formatCurrency }) => {
       <div className="relative h-44 overflow-hidden bg-gray-100">
         <img 
           src={course.thumbnail || course.thumbnailUrl || "https://via.placeholder.com/400x200?text=Course"} 
-          alt={course.title} 
+          alt={formatText(course.title, 20)} 
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
         />
         
@@ -63,13 +64,13 @@ const CourseCard = ({ course, index, formatCurrency }) => {
 
         {/* Title */}
         <h4 className="font-bold text-gray-800 text-sm line-clamp-2 mb-1 leading-tight group-hover:text-indigo-600 transition-colors">
-          {course.title}
+          {formatText(course.title, 40)}
         </h4>
 
         {/* Description (Optional) */}
         {course.description && (
             <p className="text-xs text-gray-500 line-clamp-1 mb-3">
-                {course.description}
+                {formatText(course.description, 40)}
             </p>
         )}
 

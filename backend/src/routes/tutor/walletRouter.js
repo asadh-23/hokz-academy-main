@@ -6,6 +6,6 @@ const tutorRouter = express.Router();
 
 tutorRouter.use(verifyToken, isTutor);
 
-tutorRouter.get("/wallet", getTutorWallet);
+tutorRouter.get("/", getTutorWallet);
 
 export default tutorRouter;

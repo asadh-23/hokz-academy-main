@@ -5,8 +5,9 @@ import SecurityCard from "../../components/common/SecurityCard";
 import { toast } from "sonner";
 import { PageLoader } from "../../components/common/LoadingSpinner";
 import defaultProfileImage from "../../assets/images/default-profile-image.webp";
-import { isNullOrWhitespace, validatePhone } from "../../utils/validation";
+import { validateArray, validatePhone, validateText } from "../../utils/validation";
 import { useDispatch } from "react-redux";
+import { X } from "lucide-react";
 
 // Thunks from tutorProfile slice
 import {
@@ -17,7 +18,7 @@ import {
 import { patchTutor } from "../../store/features/auth/tutorAuthSlice";
 
 // ============================================================
-// INLINE COMPONENTS (previously in components/tutor/tutorProfile)
+// INLINE COMPONENTS
 // ============================================================
 
 function Field({ label, icon, value, isEditing, onChange, placeholder }) {
@@ -61,8 +62,10 @@ function ReadOnlyField({ label, icon, value }) {
                 {icon && <span>{icon}</span>}
                 {label}
             </label>
-            <div className="bg-gray-100 py-3 px-4 rounded-lg text-gray-500 border-2 border-gray-200 
-            cursor-not-allowed min-h-[48px] flex items-center">
+            <div
+                className="bg-gray-100 py-3 px-4 rounded-lg text-gray-500 border-2 border-gray-200 
+            cursor-not-allowed min-h-[48px] flex items-center"
+            >
                 {value || <span className="text-gray-400 italic">Not set</span>}
             </div>
         </div>
@@ -96,33 +99,33 @@ function TextAreaField({ label, value, isEditing, onChange, rows = 4 }) {
     );
 }
 
-function TagField({ label, value, isEditing, onChange, placeholder, color = "emerald" }) {
-    const valueArray = Array.isArray(value) ? value : [];
-    const joined = valueArray.join(", ");
+function SubjectsField({ label, subjects, isEditing, onAdd, onRemove }) {
+    const [inputValue, setInputValue] = useState("");
 
-    const colorMap = {
-        emerald: "bg-emerald-100 text-emerald-700",
-        cyan: "bg-cyan-100 text-cyan-700",
-        gray: "bg-gray-200 text-gray-700",
+    const handleKeyDown = (e) => {
+        if (e.key === "Enter" && inputValue.trim()) {
+            e.preventDefault();
+            onAdd(inputValue.trim());
+            setInputValue("");
+        }
     };
 
     if (!isEditing) {
         return (
             <div>
-                <label className="block text-gray-700 font-medium mb-1">{label}</label>
-                <div className="bg-gray-50 py-2.5 px-4 rounded-lg text-gray-700 border border-gray-200 
-                min-h-[44px] flex flex-wrap gap-2">
-                    {valueArray.length > 0 ? (
-                        valueArray.map((item, index) => (
+                <label className="block text-gray-700 font-medium mb-2">{label}</label>
+                <div className="bg-gray-50 py-3 px-4 rounded-lg border-2 border-gray-200 min-h-[60px] flex flex-wrap gap-2">
+                    {subjects && subjects.length > 0 ? (
+                        subjects.map((subject, index) => (
                             <span
                                 key={index}
-                                className={`${colorMap[color]} text-xs font-medium px-2.5 py-1 rounded-full`}
+                                className="bg-gradient-to-r from-cyan-100 to-emerald-100 text-cyan-800 text-sm font-medium px-3 py-1.5 rounded-full border border-cyan-200"
                             >
-                                {item}
+                                {subject}
                             </span>
                         ))
                     ) : (
-                        <span className="text-gray-400 italic">No items listed</span>
+                        <span className="text-gray-400 italic">No subjects added</span>
                     )}
                 </div>
             </div>
@@ -131,16 +134,40 @@ function TagField({ label, value, isEditing, onChange, placeholder, color = "eme
 
     return (
         <div>
-            <label className="block text-gray-700 font-medium mb-1">{label}</label>
-            <input
-                type="text"
-                value={joined}
-                onChange={(e) => onChange(e.target.value)}
-                placeholder={placeholder}
-                className="w-full py-2.5 px-4 bg-white rounded-lg border border-gray-300 
-                focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none 
-                text-gray-800 transition duration-150 ease-in-out"
-            />
+            <label className="block text-gray-700 font-medium mb-2">{label}</label>
+            <div className="space-y-3">
+                <input
+                    type="text"
+                    value={inputValue}
+                    onChange={(e) => setInputValue(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    placeholder="Type a subject and press Enter to add"
+                    className="w-full py-2.5 px-4 bg-white rounded-lg border border-gray-300 
+                    focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none 
+                    text-gray-800 transition duration-150 ease-in-out"
+                />
+                <div className="bg-gray-50 py-3 px-4 rounded-lg border border-gray-200 min-h-[60px] flex flex-wrap gap-2">
+                    {subjects && subjects.length > 0 ? (
+                        subjects.map((subject, index) => (
+                            <span
+                                key={index}
+                                className="bg-gradient-to-r from-cyan-100 to-emerald-100 text-cyan-800 text-sm font-medium px-3 py-1.5 rounded-full border border-cyan-200 flex items-center gap-2 group hover:from-cyan-200 hover:to-emerald-200 transition-all"
+                            >
+                                {subject}
+                                <button
+                                    onClick={() => onRemove(index)}
+                                    className="hover:bg-red-100 rounded-full p-0.5 transition-colors"
+                                >
+                                    <X className="w-3.5 h-3.5 text-red-600" />
+                                </button>
+                            </span>
+                        ))
+                    ) : (
+                        <span className="text-gray-400 italic">No subjects added yet</span>
+                    )}
+                </div>
+                <p className="text-xs text-gray-500 italic">Press Enter after typing each subject to add it</p>
+            </div>
         </div>
     );
 }
@@ -164,9 +191,10 @@ function ProfileButtons({ isEditing, isSaving, onEdit, onSave, onCancel }) {
                         disabled={isSaving}
                         className={`w-full sm:w-auto bg-gradient-to-r from-cyan-500 to-emerald-600 
                         text-white py-2.5 px-8 rounded-full font-semibold transition-all 
-                        ${isSaving
-                            ? "opacity-50 cursor-not-allowed"
-                            : "hover:from-cyan-600 hover:to-emerald-700 hover:scale-105 hover:shadow-lg"
+                        ${
+                            isSaving
+                                ? "opacity-50 cursor-not-allowed"
+                                : "hover:from-cyan-600 hover:to-emerald-700 hover:scale-105 hover:shadow-lg"
                         }`}
                     >
                         {isSaving ? "Saving..." : "Save Changes"}
@@ -197,13 +225,8 @@ const TutorProfile = () => {
         email: "",
         phone: "",
         profileImage: null,
-        headline: "",
-        expertiseArea: "",
+        teachingSubjects: [],
         bio: "",
-        yearsOfExperience: "",
-        skills: [],
-        languages: [],
-        qualifications: [],
     });
 
     const [originalData, setOriginalData] = useState(null);
@@ -215,37 +238,24 @@ const TutorProfile = () => {
     const fileInputRef = useRef(null);
 
     // ============================================================
-    // FETCH PROFILE (using thunk)
+    // FETCH PROFILE
     // ============================================================
     useEffect(() => {
         const loadTutorProfile = async () => {
             setIsLoading(true);
             try {
-                // dispatch thunk which returns the user object (per your slice)
                 const user = await dispatch(fetchTutorProfile()).unwrap();
                 const data = {
                     fullName: user.fullName || "",
                     email: user.email || "",
                     phone: user.phone || "",
                     profileImage: user.profileImage || null,
-                    headline: user.headline || "",
-                    expertiseArea: user.expertiseArea || "",
+                    teachingSubjects: user.teachingSubjects || [],
                     bio: user.bio || "",
-                    yearsOfExperience: user.yearsOfExperience || "",
-                    skills: user.skills || [],
-                    languages: user.languages || [],
-                    qualifications: user.qualifications || [],
                 };
-                setProfileData((prev) => ({
-                    ...prev,
-                    ...data,
-                }));
-                setOriginalData((prev) => ({
-                    ...prev,
-                    ...data,
-                }));
-                
-                // Update Redux state so Header/Sidebar can access the profile data
+                setProfileData(data);
+                setOriginalData(data);
+
                 dispatch(patchTutor(data));
             } catch (error) {
                 console.error("Failed to load tutor profile:", error);
@@ -256,30 +266,44 @@ const TutorProfile = () => {
         };
 
         loadTutorProfile();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [dispatch]);
 
     // ============================================================
-    // INPUT HANDLER
+    // INPUT HANDLERS
     // ============================================================
     const handleInputChange = (field, value) => {
-        const isArrayField = ["skills", "languages", "qualifications"].includes(field);
-
         setProfileData((prev) => ({
             ...prev,
-            [field]: isArrayField ? value.split(",").map((v) => v.trim()) : value,
+            [field]: value,
+        }));
+    };
+
+    const handleAddSubject = (subject) => {
+        if (!profileData.teachingSubjects.includes(subject)) {
+            setProfileData((prev) => ({
+                ...prev,
+                teachingSubjects: [...prev.teachingSubjects, subject],
+            }));
+        } else {
+            toast.info("Subject already added");
+        }
+    };
+
+    const handleRemoveSubject = (index) => {
+        setProfileData((prev) => ({
+            ...prev,
+            teachingSubjects: prev.teachingSubjects.filter((_, i) => i !== index),
         }));
     };
 
     // ============================================================
-    // IMAGE PREVIEW + UPLOAD (using thunk)
+    // IMAGE UPLOAD
     // ============================================================
     const handleImageChange = (e) => {
         const file = e.target.files?.[0];
         if (!file) return;
 
         const previewUrl = URL.createObjectURL(file);
-
         setProfileData((prev) => ({ ...prev, profileImage: previewUrl }));
 
         handleImageUpload(file);
@@ -295,7 +319,6 @@ const TutorProfile = () => {
             const fd = new FormData();
             fd.append("profileImageFile", file);
 
-            // dispatch thunk that uploads and returns new imageUrl
             const imageUrl = await dispatch(uploadTutorProfileImage(fd)).unwrap();
 
             setProfileData((prev) => ({ ...prev, profileImage: imageUrl }));
@@ -307,7 +330,6 @@ const TutorProfile = () => {
             console.error("Image upload failed:", error);
             toast.error(error || "Image upload failed.");
 
-            // revert preview if we had original data
             if (originalData) {
                 setProfileData((prev) => ({ ...prev, profileImage: originalData.profileImage }));
             }
@@ -319,11 +341,12 @@ const TutorProfile = () => {
     const triggerFileInput = () => fileInputRef.current && fileInputRef.current.click();
 
     // ============================================================
-    // SAVE PROFILE DETAILS (using thunk)
+    // SAVE PROFILE
     // ============================================================
     const handleSaveChanges = async () => {
-        if (isNullOrWhitespace(profileData.fullName)) {
-            return toast.error("Full name is required");
+        const nameValidation = validateText(profileData.fullName, 2, 50, "Full Name");
+        if (!nameValidation.isValid) {
+            return toast.error(nameValidation.message || "Enter a valid Full Name");
         }
 
         const phoneValidation = validatePhone(profileData.phone);
@@ -331,32 +354,36 @@ const TutorProfile = () => {
             return toast.error(phoneValidation.message || "Enter a valid phone number");
         }
 
+        const bioValidation = validateText(profileData.bio, 20, 200, "Bio");
+        if (!bioValidation.isValid) {
+            return toast.error(bioValidation.message || "Enter a valid Bio");
+        }
+
+        const subjectValidation = validateArray(profileData.teachingSubjects, "Subjects");
+
+        if (!subjectValidation.isValid) {
+            return toast.error(subjectValidation.message || "Enter a valid array");
+        }
+
         setIsSaving(true);
         try {
             const { email, profileImage, ...editable } = profileData;
 
-            // clean arrays
-            editable.skills = (editable.skills || []).filter(Boolean);
-            editable.languages = (editable.languages || []).filter(Boolean);
-            editable.qualifications = (editable.qualifications || []).filter(Boolean);
+            // Clean subjects array
+            editable.teachingSubjects = (editable.teachingSubjects || []).filter(Boolean);
 
-            // dispatch update thunk
             const updatedTutor = await dispatch(updateTutorProfile(editable)).unwrap();
 
             const updatedState = {
                 fullName: updatedTutor.fullName || "",
+                email,
                 phone: updatedTutor.phone || "",
-                headline: updatedTutor.headline || "",
-                expertiseArea: updatedTutor.expertiseArea || "",
+                profileImage,
+                teachingSubjects: updatedTutor.teachingSubjects || [],
                 bio: updatedTutor.bio || "",
-                yearsOfExperience: updatedTutor.yearsOfExperience || "",
-                skills: updatedTutor.skills || [],
-                languages: updatedTutor.languages || [],
-                qualifications: updatedTutor.qualifications || [],
             };
 
             setProfileData(updatedState);
-            // Update Redux state with all updated fields
             dispatch(patchTutor(updatedState));
             setOriginalData(updatedState);
 
@@ -432,6 +459,8 @@ const TutorProfile = () => {
                         value={profileData.fullName}
                         isEditing={isEditing}
                         onChange={(v) => handleInputChange("fullName", v)}
+                        placeholder="Enter your full name"
+                        icon="👤"
                     />
 
                     <ReadOnlyField label="Email" value={profileData.email} icon="📧" />
@@ -444,26 +473,12 @@ const TutorProfile = () => {
                         icon="📱"
                     />
 
-                    <Field
-                        label="Professional Headline"
-                        value={profileData.headline}
+                    <SubjectsField
+                        label="Teaching Subjects"
+                        subjects={profileData.teachingSubjects}
                         isEditing={isEditing}
-                        onChange={(v) => handleInputChange("headline", v)}
-                        icon="✨"
-                    />
-
-                    <Field
-                        label="Expertise Area"
-                        value={profileData.expertiseArea}
-                        isEditing={isEditing}
-                        onChange={(v) => handleInputChange("expertiseArea", v)}
-                    />
-
-                    <Field
-                        label="Years of Experience"
-                        value={profileData.yearsOfExperience}
-                        isEditing={isEditing}
-                        onChange={(v) => handleInputChange("yearsOfExperience", v)}
+                        onAdd={handleAddSubject}
+                        onRemove={handleRemoveSubject}
                     />
 
                     <TextAreaField
@@ -471,30 +486,6 @@ const TutorProfile = () => {
                         value={profileData.bio}
                         isEditing={isEditing}
                         onChange={(v) => handleInputChange("bio", v)}
-                    />
-
-                    <TagField
-                        label="Skills"
-                        value={profileData.skills}
-                        isEditing={isEditing}
-                        onChange={(v) => handleInputChange("skills", v)}
-                        color="emerald"
-                    />
-
-                    <TagField
-                        label="Languages"
-                        value={profileData.languages}
-                        isEditing={isEditing}
-                        onChange={(v) => handleInputChange("languages", v)}
-                        color="cyan"
-                    />
-
-                    <TagField
-                        label="Qualifications"
-                        value={profileData.qualifications}
-                        isEditing={isEditing}
-                        onChange={(v) => handleInputChange("qualifications", v)}
-                        color="gray"
                     />
                 </div>
 

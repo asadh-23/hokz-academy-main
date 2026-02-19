@@ -11,9 +11,9 @@ const adminRouter = express.Router();
 
 adminRouter.use(verifyToken, isAdmin);
 
-adminRouter.get("/categories", getCategories);
-adminRouter.post("/categories", createCategory);
-adminRouter.put("/categories/:id", updateCategory);
-adminRouter.patch("/categories/:id/toggle-list", toggleListCategory);
+adminRouter.get("/", getCategories);
+adminRouter.post("/", createCategory);
+adminRouter.put("/:id", updateCategory);
+adminRouter.patch("/:id/toggle-list", toggleListCategory);
 
 export default adminRouter;

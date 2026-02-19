@@ -10,7 +10,6 @@ import AdminProfile from "../pages/admin/AdminProfile";
 import VerifyPasswordChangeOtp from "../pages/common/VerifyPasswordChangeOtp";
 import ManageUsers from "../pages/admin/ManageUsers";
 import ManageCategory from "../pages/admin/ManageCategory";
-import CategoryView from "../pages/admin/CategoryView";
 import ManageTutors from "../pages/admin/ManageTutors";
 import TutorDetails from "../pages/admin/TutorDetails";
 import Courses from "../pages/admin/Courses";
@@ -33,15 +32,14 @@ export default function AdminRoutes() {
                     <Route path="/profile" element={<AdminProfile />} />
                     <Route path="/users" element={<ManageUsers />} />
                     <Route path="/categories" element={<ManageCategory />} />
-                    <Route path="/category/:categoryId" element={<CategoryView />} />
                     <Route path="/tutors/" element={<ManageTutors />} />
                     <Route path="/tutors/:tutorId/details" element={<TutorDetails />} />
                     <Route path="/courses" element={<Courses />} />
                     <Route path="/courses/:courseId/manage" element={<ManageCourses />} />
                     <Route path="/courses/:courseId/lessons/:lessonId" element={<ManageLesson />} />
                     <Route path="/orders" element={<Orders />} />
-                    <Route path="/orders/:orderId" element={<OrderDetails/> } />
-                    <Route path="/wallet" element={<Wallet/> } />
+                    <Route path="/orders/:orderId" element={<OrderDetails />} />
+                    <Route path="/wallet" element={<Wallet />} />
                 </Route>
 
                 <Route path="/verify-password-change" element={<VerifyPasswordChangeOtp />} />

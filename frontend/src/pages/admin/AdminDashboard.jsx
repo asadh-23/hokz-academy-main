@@ -3,6 +3,7 @@ import { Users, GraduationCap, BookOpen, DollarSign, TrendingUp, ArrowRight, Act
 import { toast } from "sonner";
 import { adminAxios } from "../../api/adminAxios";
 import AnimatedChart from "../../components/common/AnimatedChart";
+import AdminDashboardHeader from "../../components/admin/dashboard/DashboardHeader";
 
 const AdminDashboard = () => {
     const [dashboardData, setDashboardData] = useState(null);
@@ -52,10 +53,7 @@ const AdminDashboard = () => {
     return (
         <div className="min-h-screen bg-gray-50 p-6 md:p-8 font-sans">
             {/* Header */}
-            <div className="mb-8">
-                <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
-                <p className="text-gray-500 mt-1">Overview of platform performance and statistics.</p>
-            </div>
+            <AdminDashboardHeader />
 
             {/* 2. Stats Cards (All 5 Important Metrics) */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 mb-8">

@@ -20,7 +20,7 @@ export const createTutorCoupon = createAsyncThunk(
     "tutorCoupon/createTutorCoupon",
     async (couponData, { rejectWithValue }) => {
         try {
-            const res = await tutorAxios.post("/coupon", couponData);
+            const res = await tutorAxios.post("/coupons/coupon", couponData);
             return res.data.coupon;
         } catch (err) {
             return rejectWithValue(err.response?.data?.message || "Failed to create coupon");

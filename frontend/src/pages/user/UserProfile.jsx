@@ -5,7 +5,7 @@ import SecurityCard from "../../components/common/SecurityCard";
 import { toast } from "sonner";
 import { PageLoader, ButtonLoader } from "../../components/common/LoadingSpinner";
 import defaultProfileImage from "../../assets/images/default-profile-image.webp";
-import { isNullOrWhitespace, validatePhone } from "../../utils/validation";
+import { validatePhone, validateText } from "../../utils/validation";
 import { useDispatch, useSelector } from "react-redux";
 // Redux thunks and selectors
 import {
@@ -17,6 +17,7 @@ import {
     selectUserImageUploadLoading,
 } from "../../store/features/user/userProfileSlice";
 import { patchUser } from "../../store/features/auth/userAuthSlice";
+import { formatText } from "../../utils/formatText";
 
 const UserProfile = () => {
     const [isEditing, setIsEditing] = useState(false);
@@ -75,12 +76,11 @@ const UserProfile = () => {
         const file = event.target.files[0];
         if (!file) return;
 
-
         setProfileData((prev) => ({ ...prev, profileImage: URL.createObjectURL(file) }));
 
         handleImageUpload(file);
 
-       event.target.value = "";
+        event.target.value = "";
     };
 
     // ✅ Function to upload the image file using Redux thunk
@@ -130,13 +130,14 @@ const UserProfile = () => {
     // --- Save Text Changes Handler using Redux thunk ---
     const handleSaveChanges = async () => {
         // Check Full Name
-        if (isNullOrWhitespace(profileData.fullName)) {
-            return toast.error("Full name is required");
+        const nameValidation = validateText(profileData.fullName, 2, 50, "Full Name");
+        if (!nameValidation.isValid) {
+            return toast.error(nameValidation.message || "Enter a Valid Name");
         }
 
-        const phonValidation = validatePhone(profileData.phone);
-        if (!phonValidation.isValid) {
-            return toast.error(phonValidation.message || "Enter a valid phone number");
+        const phoneValidation = validatePhone(profileData.phone);
+        if (!phoneValidation.isValid) {
+            return toast.error(phoneValidation.message || "Enter a valid phone number");
         }
 
         try {

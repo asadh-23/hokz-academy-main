@@ -23,9 +23,7 @@ const MyCourses = () => {
     }, [dispatch]);
 
     // 3. Filter Logic (Real Data)
-    let filteredCourses = courses?.filter((course) => 
-        course.title.toLowerCase().includes(searchQuery.toLowerCase())
-    ) || [];
+    let filteredCourses = courses?.filter((course) => course.title.toLowerCase().includes(searchQuery.toLowerCase())) || [];
 
     // Apply filter by status
     if (filterBy === "progress") {
@@ -33,7 +31,6 @@ const MyCourses = () => {
     } else if (filterBy === "completed") {
         filteredCourses = filteredCourses.filter((c) => (c.progress || 0) === 100);
     }
-    
 
     const enrolled = filteredCourses.filter((c) => (c.progress || 0) < 100);
     const completed = filteredCourses.filter((c) => (c.progress || 0) === 100);
@@ -44,9 +41,8 @@ const MyCourses = () => {
     const allInProgress = courses?.filter((c) => (c.progress || 0) < 100) || [];
     const completedCount = allCompleted.length;
     const inProgressCount = allInProgress.length;
-    const averageProgress = totalCourses > 0 
-        ? Math.round(courses.reduce((acc, course) => acc + (course.progress || 0), 0) / totalCourses)
-        : 0;
+    const averageProgress =
+        totalCourses > 0 ? Math.round(courses.reduce((acc, course) => acc + (course.progress || 0), 0) / totalCourses) : 0;
 
     if (isLoading) {
         return <PageLoader text="Loading your courses..." />;
@@ -58,7 +54,7 @@ const MyCourses = () => {
             <div className="relative overflow-hidden bg-gradient-to-r from-indigo-600 via-purple-600 to-blue-600">
                 <div className="absolute inset-0 bg-black/10"></div>
                 <div className="absolute inset-0 bg-gradient-to-r from-indigo-600/90 to-purple-600/90"></div>
-                
+
                 {/* Decorative Elements */}
                 <div className="absolute top-0 left-0 w-full h-full overflow-hidden">
                     <div className="absolute -top-24 -right-24 w-96 h-96 bg-white/10 rounded-full blur-3xl"></div>
@@ -85,7 +81,7 @@ const MyCourses = () => {
                                 <div className="text-2xl font-bold text-white mb-1">{totalCourses}</div>
                                 <div className="text-indigo-100 text-sm">Total Courses</div>
                             </div>
-                            
+
                             <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 text-center border border-white/20">
                                 <div className="bg-white/20 w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-3">
                                     <TrendingUp className="text-white" size={24} />
@@ -93,7 +89,7 @@ const MyCourses = () => {
                                 <div className="text-2xl font-bold text-white mb-1">{inProgressCount}</div>
                                 <div className="text-indigo-100 text-sm">In Progress</div>
                             </div>
-                            
+
                             <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 text-center border border-white/20">
                                 <div className="bg-white/20 w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-3">
                                     <Award className="text-white" size={24} />
@@ -101,7 +97,7 @@ const MyCourses = () => {
                                 <div className="text-2xl font-bold text-white mb-1">{completedCount}</div>
                                 <div className="text-indigo-100 text-sm">Completed</div>
                             </div>
-                            
+
                             <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 text-center border border-white/20">
                                 <div className="bg-white/20 w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-3">
                                     <Star className="text-white" size={24} />
@@ -136,7 +132,7 @@ const MyCourses = () => {
 
                         {/* Filter and View Controls */}
                         <div className="flex items-center gap-3">
-                            <select 
+                            <select
                                 value={filterBy}
                                 onChange={(e) => setFilterBy(e.target.value)}
                                 className="px-4 py-3 bg-gray-50 border-0 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-gray-700"
@@ -150,8 +146,8 @@ const MyCourses = () => {
                                 <button
                                     onClick={() => setViewMode("grid")}
                                     className={`p-2 rounded-lg transition-all ${
-                                        viewMode === "grid" 
-                                            ? "bg-white shadow-sm text-indigo-600" 
+                                        viewMode === "grid"
+                                            ? "bg-white shadow-sm text-indigo-600"
                                             : "text-gray-500 hover:text-gray-700"
                                     }`}
                                 >
@@ -160,8 +156,8 @@ const MyCourses = () => {
                                 <button
                                     onClick={() => setViewMode("list")}
                                     className={`p-2 rounded-lg transition-all ${
-                                        viewMode === "list" 
-                                            ? "bg-white shadow-sm text-indigo-600" 
+                                        viewMode === "list"
+                                            ? "bg-white shadow-sm text-indigo-600"
                                             : "text-gray-500 hover:text-gray-700"
                                     }`}
                                 >
@@ -206,11 +202,13 @@ const MyCourses = () => {
                                             </div>
                                         </div>
 
-                                        <div className={`grid gap-6 ${
-                                            viewMode === "grid" 
-                                                ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" 
-                                                : "grid-cols-1"
-                                        }`}>
+                                        <div
+                                            className={`grid gap-6 ${
+                                                viewMode === "grid"
+                                                    ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+                                                    : "grid-cols-1"
+                                            }`}
+                                        >
                                             {enrolled.map((course) => (
                                                 <CourseCard key={course._id} course={course} viewMode={viewMode} />
                                             ))}
@@ -231,11 +229,13 @@ const MyCourses = () => {
                                             </div>
                                         </div>
 
-                                        <div className={`grid gap-6 ${
-                                            viewMode === "grid" 
-                                                ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" 
-                                                : "grid-cols-1"
-                                        }`}>
+                                        <div
+                                            className={`grid gap-6 ${
+                                                viewMode === "grid"
+                                                    ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+                                                    : "grid-cols-1"
+                                            }`}
+                                        >
                                             {completed.map((course) => (
                                                 <CourseCard key={course._id} course={course} viewMode={viewMode} />
                                             ))}
@@ -247,11 +247,13 @@ const MyCourses = () => {
                             /* Single section for filtered results */
                             <section>
                                 <div className="flex items-center gap-3 mb-8">
-                                    <div className={`p-3 text-white rounded-2xl shadow-lg ${
-                                        filterBy === "progress" 
-                                            ? "bg-gradient-to-br from-indigo-500 to-purple-600" 
-                                            : "bg-gradient-to-br from-emerald-500 to-teal-600"
-                                    }`}>
+                                    <div
+                                        className={`p-3 text-white rounded-2xl shadow-lg ${
+                                            filterBy === "progress"
+                                                ? "bg-gradient-to-br from-indigo-500 to-purple-600"
+                                                : "bg-gradient-to-br from-emerald-500 to-teal-600"
+                                        }`}
+                                    >
                                         {filterBy === "progress" ? <TrendingUp size={24} /> : <Award size={24} />}
                                     </div>
                                     <div>
@@ -259,17 +261,20 @@ const MyCourses = () => {
                                             {filterBy === "progress" ? "In Progress Courses" : "Completed Courses"}
                                         </h2>
                                         <p className="text-gray-500">
-                                            {filteredCourses.length} {filterBy === "progress" ? "courses in progress" : "certificates earned"}
+                                            {filteredCourses.length}{" "}
+                                            {filterBy === "progress" ? "courses in progress" : "certificates earned"}
                                         </p>
                                     </div>
                                 </div>
 
                                 {filteredCourses.length > 0 ? (
-                                    <div className={`grid gap-6 ${
-                                        viewMode === "grid" 
-                                            ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" 
-                                            : "grid-cols-1"
-                                    }`}>
+                                    <div
+                                        className={`grid gap-6 ${
+                                            viewMode === "grid"
+                                                ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+                                                : "grid-cols-1"
+                                        }`}
+                                    >
                                         {filteredCourses.map((course) => (
                                             <CourseCard key={course._id} course={course} viewMode={viewMode} />
                                         ))}
@@ -280,7 +285,8 @@ const MyCourses = () => {
                                             <Search className="text-gray-400" size={24} />
                                         </div>
                                         <p className="text-gray-500 text-lg">
-                                            No {filterBy === "progress" ? "in progress" : "completed"} courses match your search
+                                            No {filterBy === "progress" ? "in progress" : "completed"} courses match your
+                                            search
                                         </p>
                                     </div>
                                 )}

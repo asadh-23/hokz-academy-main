@@ -1,6 +1,9 @@
 import Category from "../../models/category/Category.js";
 import Course from "../../models/course/Course.js";
+import Enrollment from "../../models/course/Enrollment.js";
+import Lesson from "../../models/course/Lesson.js";
 import { uploadToS3 } from "../../services/s3UploadService.js";
+import mongoose from "mongoose";
 
 export const getTutorCategories = async (req, res) => {
     try {
@@ -149,7 +152,7 @@ export const getTutorCourses = async (req, res) => {
         // PAGINATION QUERY
         // ----------------------------
         const courses = await Course.find(filter)
-            .select("title shortSummary description price offerPercentage thumbnailUrl isListed enrolledCount exam createdAt")
+            .select("title shortSummary description price offerPercentage thumbnailUrl isListed isBanned bannedAt enrolledCount exam createdAt")
             .sort({ createdAt: -1 })
             .skip(skip)
             .limit(limit)
@@ -199,7 +202,7 @@ export const getCourseById = async (req, res) => {
             _id: courseId,
             tutor: tutorId,
             isDeleted: false,
-        }).select("-_id title category description price offerPercentage thumbnailUrl thumbnailKey");
+        }).select("-_id title category description price offerPercentage thumbnailUrl thumbnailKey isBanned bannedAt");
 
         if (!course) {
             return res.status(404).json({
@@ -340,5 +343,74 @@ export const getCourseList = async (req, res) => {
             success: false, 
             message: "Failed to fetch course list" 
         });
+    }
+};
+
+export const getCourseFullDetails = async (req, res) => {
+    try {
+        const { courseId } = req.params;
+        const tutorId = req.user?._id;
+
+        // 1. Basic ID Validation
+        if (!mongoose.Types.ObjectId.isValid(courseId)) {
+            return res.status(400).json({ success: false, message: "Invalid Course ID" });
+        }
+
+        // 2. Fetch all data in parallel for high performance 🔥
+        const [course, lessons, enrollments] = await Promise.all([
+            // A. Course Details (with category info)
+            Course.findOne({ _id: courseId, tutor: tutorId })
+                .populate("category", "name")
+                .populate("exam", "title")
+                .lean(),
+
+            // B. Lessons Details (sorted by order)
+            Lesson.find({ course: courseId, tutor: tutorId })
+                .sort({ order: 1 })
+                .lean(),
+
+            // C. Enrolled Students Info (populating user data)
+            Enrollment.find({ course: courseId, status: "active" })
+                .populate("user", "fullName email profileImage phone")
+                .select("user enrolledAt pricePaid")
+                .sort({ enrolledAt: -1 })
+                .lean()
+        ]);
+
+        // 3. Security Check: Tutor-ude swantham course aano ennu urappu varuthuka
+        if (!course) {
+            return res.status(404).json({ 
+                success: false, 
+                message: "Course not found or you don't have permission to manage this course." 
+            });
+        }
+
+        // 4. Data Formatting (UX-inu vendi simple aakkunnu)
+        const responseData = {
+            courseDetails: {
+                ...course,
+                lessonsCount: lessons.length,
+                totalEnrollments: enrollments.length
+            },
+            lessons: lessons,
+            enrolledStudents: enrollments.map(enroll => ({
+                studentId: enroll.user?._id,
+                fullName: enroll.user?.fullName,
+                email: enroll.user?.email,
+                profileImage: enroll.user?.profileImage,
+                phone: enroll.user?.phone,
+                enrolledAt: enroll.enrolledAt,
+                pricePaid: enroll.pricePaid
+            }))
+        };
+
+        return res.status(200).json({
+            success: true,
+            data: responseData
+        });
+
+    } catch (error) {
+        console.error("❌ Error fetching course full details:", error);
+        res.status(500).json({ success: false, message: "Internal Server Error" });
     }
 };

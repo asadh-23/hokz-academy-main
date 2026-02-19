@@ -24,6 +24,8 @@ import WalletPage from "../pages/tutor/Wallet";
 import Order from "../pages/tutor/Order";
 import OrderDetails from "../pages/tutor/OrderDetails";
 import ChatLayout from "../pages/chat/ChatLayout";
+import VideoRoom from "../components/chat/VideoRoom";
+import CourseDetails from "../pages/tutor/CourseDetails";
 
 export default function TutorRoutes() {
     return (
@@ -46,19 +48,19 @@ export default function TutorRoutes() {
                     <Route path="/verify-password-change" element={<VerifyPasswordChangeOtp />} />
                     <Route path="/courses/add-course" element={<AddCourse />} />
                     <Route path="/courses/:courseId/add-lesson" element={<AddLesson />} />
-                    <Route path="/courses" element={<ManageCourses/> } />
-                    <Route path="/courses/:courseId/edit" element={<EditCourse/> } />
-                    <Route path="/coupons" element={<Coupon/> } />
-                    <Route path="/course/:courseId/add-exam" element={<AddExam/> } />
-                    <Route path="/course/:courseId/manage-exam" element={<ExamManagement /> } />
-                    <Route path="/course/:courseId/edit-exam" element={<EditExam /> } />
-                    <Route path="/wallet" element={<WalletPage/> } />
-                    <Route path="/orders" element={<Order/> } />
-                    <Route path="/orders/:orderId" element={<OrderDetails/> } />
-                    
-                    
+                    <Route path="/courses" element={<ManageCourses />} />
+                    <Route path="/courses/:courseId/edit" element={<EditCourse />} />
+                    <Route path="/coupons" element={<Coupon />} />
+                    <Route path="/course/:courseId/add-exam" element={<AddExam />} />
+                    <Route path="/course/:courseId/manage-exam" element={<ExamManagement />} />
+                    <Route path="/course/:courseId/edit-exam" element={<EditExam />} />
+                    <Route path="/wallet" element={<WalletPage />} />
+                    <Route path="/orders" element={<Order />} />
+                    <Route path="/orders/:orderId" element={<OrderDetails />} />
+                      <Route path="/courses/:courseId" element={<CourseDetails />} />
                 </Route>
-                <Route path="/chat" element={<ChatLayout/> } />
+                <Route path="/chat" element={<ChatLayout />} />
+                <Route path="/room/:roomId" element={<VideoRoom />} />
             </Route>
 
             <Route path="*" element={<NotFound />} />

@@ -20,6 +20,10 @@ import {
     Ban,
     CheckCircle,
     ExternalLink,
+    Instagram,
+    Youtube,
+    Twitter,
+    Linkedin,
 } from "lucide-react";
 import { toast } from "sonner";
 import { fetchAdminTutorDetails, toggleAdminTutorBlock } from "../../store/features/admin/adminTutorSlice";
@@ -73,6 +77,16 @@ const TutorDetails = () => {
 
     const handleManageCourse = (courseId) => {
         navigate(`/admin/courses/${courseId}/manage`);
+    };
+
+    // Helper to get dynamic font size based on name length
+    const getNameFontSize = (name) => {
+        const length = name?.length || 0;
+        if (length <= 20) return "text-3xl";
+        if (length <= 40) return "text-2xl";
+        if (length <= 60) return "text-xl";
+        if (length <= 80) return "text-lg";
+        return "text-base";
     };
 
     // Formatting Helper
@@ -150,125 +164,162 @@ const TutorDetails = () => {
                     
                     <div className="relative bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl shadow-blue-500/20 border border-white/30">
                         <div className="p-8">
-                            <div className="flex flex-col lg:flex-row gap-8">
-                                {/* Profile Section */}
-                                <div className="flex flex-col lg:flex-row items-center lg:items-start gap-6 flex-1">
-                                    {/* Avatar with Enhanced Design */}
-                                    <div className="relative group">
-                                        <div className="absolute -inset-1 bg-gradient-to-r from-blue-500 via-purple-500 to-indigo-500 rounded-full blur opacity-75 group-hover:opacity-100 transition duration-300"></div>
-                                        <div className="relative">
-                                            <img
-                                                src={tutor.profileImage || "https://via.placeholder.com/120"}
-                                                alt={tutor.fullName}
-                                                className="w-32 h-32 rounded-full object-cover border-4 border-white shadow-xl"
-                                            />
-                                            {tutor.isVerified && (
-                                                <div className="absolute -bottom-2 -right-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-white p-3 rounded-full border-4 border-white shadow-lg">
-                                                    <ShieldCheck className="w-6 h-6" />
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-
-                                    {/* Profile Info */}
-                                    <div className="text-center lg:text-left flex-1">
-                                        <div className="flex flex-col lg:flex-row lg:items-center gap-4 mb-4">
-                                            <h2 className="text-3xl font-bold text-slate-800">{tutor.fullName}</h2>
-                                            <div className="flex items-center gap-3">
-                                                <span className={`
-                                                    inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold
-                                                    ${tutor.isBlocked 
-                                                        ? 'bg-red-100 text-red-700 border-2 border-red-200' 
-                                                        : 'bg-emerald-100 text-emerald-700 border-2 border-emerald-200'
-                                                    }
-                                                `}>
-                                                    {tutor.isBlocked ? (
-                                                        <>
-                                                            <Ban className="w-4 h-4" />
-                                                            Blocked
-                                                        </>
-                                                    ) : (
-                                                        <>
-                                                            <CheckCircle className="w-4 h-4" />
-                                                            Active
-                                                        </>
-                                                    )}
-                                                </span>
-                                                {tutor.isVerified && (
-                                                    <span className="inline-flex items-center gap-2 px-4 py-2 bg-blue-100 text-blue-700 rounded-full text-sm font-semibold border-2 border-blue-200">
-                                                        <Award className="w-4 h-4" />
-                                                        Verified
-                                                    </span>
-                                                )}
+                            {/* Profile Section */}
+                            <div className="flex flex-col lg:flex-row items-center lg:items-start gap-6 mb-6">
+                                {/* Avatar with Enhanced Design */}
+                                <div className="relative group flex-shrink-0">
+                                    <div className="absolute -inset-1 bg-gradient-to-r from-blue-500 via-purple-500 to-indigo-500 rounded-full blur opacity-75 group-hover:opacity-100 transition duration-300"></div>
+                                    <div className="relative">
+                                        <img
+                                            src={tutor.profileImage || "https://via.placeholder.com/120"}
+                                            alt={tutor.fullName}
+                                            className="w-32 h-32 rounded-full object-cover border-4 border-white shadow-xl"
+                                        />
+                                        {tutor.isVerified && (
+                                            <div className="absolute -bottom-2 -right-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-white p-3 rounded-full border-4 border-white shadow-lg">
+                                                <ShieldCheck className="w-6 h-6" />
                                             </div>
-                                        </div>
-                                        
-                                        <p className="text-slate-600 text-lg mb-6">Professional Course Instructor</p>
-                                        
-                                        {/* Contact Info Grid */}
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                                            <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl">
-                                                <div className="p-2 bg-blue-100 rounded-lg">
-                                                    <Mail className="w-5 h-5 text-blue-600" />
-                                                </div>
-                                                <div>
-                                                    <p className="text-xs text-slate-500 font-medium uppercase tracking-wide">Email</p>
-                                                    <p className="text-slate-800 font-medium">{tutor.email}</p>
-                                                </div>
-                                            </div>
-                                            
-                                            {tutor.phone && (
-                                                <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl">
-                                                    <div className="p-2 bg-emerald-100 rounded-lg">
-                                                        <Phone className="w-5 h-5 text-emerald-600" />
-                                                    </div>
-                                                    <div>
-                                                        <p className="text-xs text-slate-500 font-medium uppercase tracking-wide">Phone</p>
-                                                        <p className="text-slate-800 font-medium">{tutor.phone}</p>
-                                                    </div>
-                                                </div>
-                                            )}
-                                            
-                                            <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl">
-                                                <div className="p-2 bg-purple-100 rounded-lg">
-                                                    <Calendar className="w-5 h-5 text-purple-600" />
-                                                </div>
-                                                <div>
-                                                    <p className="text-xs text-slate-500 font-medium uppercase tracking-wide">Joined</p>
-                                                    <p className="text-slate-800 font-medium">{formatDate(tutor.createdAt)}</p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Action Buttons */}
-                                <div className="flex flex-col gap-3 lg:w-64">
-                                    
-                                    
-                                    <button
-                                        onClick={() => handleToggleBlockTutor(tutor._id, tutor.fullName, tutor.isBlocked)}
-                                        className={`
-                                            group flex items-center justify-center gap-3 px-6 py-3 rounded-xl font-semibold transition-all duration-300 hover:scale-105
-                                            ${tutor.isBlocked 
-                                                ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white hover:shadow-lg hover:shadow-emerald-500/25' 
-                                                : 'bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white hover:shadow-lg hover:shadow-red-500/25'
-                                            }
-                                        `}
-                                    >
-                                        {tutor.isBlocked ? (
-                                            <>
-                                                <CheckCircle className="w-5 h-5 group-hover:rotate-12 transition-transform" />
-                                                Unblock Tutor
-                                            </>
-                                        ) : (
-                                            <>
-                                                <Ban className="w-5 h-5 group-hover:rotate-12 transition-transform" />
-                                                Block Tutor
-                                            </>
                                         )}
-                                    </button>
+                                    </div>
                                 </div>
+
+                                {/* Profile Info */}
+                                <div className="text-center lg:text-left flex-1 min-w-0">
+                                    <div className="flex flex-col lg:flex-row lg:items-start gap-3 mb-4">
+                                        <h2 className={`${getNameFontSize(tutor.fullName)} font-bold text-slate-800 break-words leading-tight`}>
+                                            {tutor.fullName}
+                                        </h2>
+                                        <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2 flex-shrink-0">
+                                            <span className={`
+                                                inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap
+                                                ${tutor.isBlocked 
+                                                    ? 'bg-red-100 text-red-700 border-2 border-red-200' 
+                                                    : 'bg-emerald-100 text-emerald-700 border-2 border-emerald-200'
+                                                }
+                                            `}>
+                                                {tutor.isBlocked ? (
+                                                    <>
+                                                        <Ban className="w-3.5 h-3.5" />
+                                                        Blocked
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <CheckCircle className="w-3.5 h-3.5" />
+                                                        Active
+                                                    </>
+                                                )}
+                                            </span>
+                                            {tutor.isVerified && (
+                                                <span className="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-100 text-blue-700 rounded-full text-xs font-semibold border-2 border-blue-200 whitespace-nowrap">
+                                                    <Award className="w-3.5 h-3.5" />
+                                                    Verified
+                                                </span>
+                                            )}
+                                        </div>
+                                    </div>
+                                    
+                                    <p className="text-slate-600 text-base mb-6">Professional Course Instructor</p>
+                                    
+                                    {/* Contact Info Grid */}
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl min-w-0">
+                                            <div className="p-2 bg-blue-100 rounded-lg flex-shrink-0">
+                                                <Mail className="w-5 h-5 text-blue-600" />
+                                            </div>
+                                            <div className="min-w-0 flex-1">
+                                                <p className="text-xs text-slate-500 font-medium uppercase tracking-wide">Email</p>
+                                                <p className="text-slate-800 font-medium truncate" title={tutor.email}>
+                                                    {tutor.email}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        
+                                        {tutor.phone && (
+                                            <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl min-w-0">
+                                                <div className="p-2 bg-emerald-100 rounded-lg flex-shrink-0">
+                                                    <Phone className="w-5 h-5 text-emerald-600" />
+                                                </div>
+                                                <div className="min-w-0 flex-1">
+                                                    <p className="text-xs text-slate-500 font-medium uppercase tracking-wide">Phone</p>
+                                                    <p className="text-slate-800 font-medium truncate" title={tutor.phone}>
+                                                        {tutor.phone}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        )}
+                                        
+                                        <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl min-w-0">
+                                            <div className="p-2 bg-purple-100 rounded-lg flex-shrink-0">
+                                                <Calendar className="w-5 h-5 text-purple-600" />
+                                            </div>
+                                            <div className="min-w-0 flex-1">
+                                                <p className="text-xs text-slate-500 font-medium uppercase tracking-wide">Joined</p>
+                                                <p className="text-slate-800 font-medium">{formatDate(tutor.createdAt)}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Social Media Links */}
+                                    <div className="mt-6 pt-6 border-t border-slate-200">
+                                        <p className="text-xs text-slate-500 font-medium uppercase tracking-wide mb-3">Connect</p>
+                                        <div className="flex items-center gap-3">
+                                            <button
+                                                onClick={(e) => e.preventDefault()}
+                                                className="p-3 bg-gradient-to-br from-pink-500 to-rose-500 text-white rounded-xl hover:from-pink-600 hover:to-rose-600 transition-all shadow-md hover:shadow-lg hover:scale-110"
+                                                title="Instagram"
+                                            >
+                                                <Instagram className="w-5 h-5" />
+                                            </button>
+                                            <button
+                                                onClick={(e) => e.preventDefault()}
+                                                className="p-3 bg-gradient-to-br from-red-500 to-red-600 text-white rounded-xl hover:from-red-600 hover:to-red-700 transition-all shadow-md hover:shadow-lg hover:scale-110"
+                                                title="YouTube"
+                                            >
+                                                <Youtube className="w-5 h-5" />
+                                            </button>
+                                            <button
+                                                onClick={(e) => e.preventDefault()}
+                                                className="p-3 bg-gradient-to-br from-sky-400 to-blue-500 text-white rounded-xl hover:from-sky-500 hover:to-blue-600 transition-all shadow-md hover:shadow-lg hover:scale-110"
+                                                title="Twitter"
+                                            >
+                                                <Twitter className="w-5 h-5" />
+                                            </button>
+                                            <button
+                                                onClick={(e) => e.preventDefault()}
+                                                className="p-3 bg-gradient-to-br from-blue-600 to-blue-700 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all shadow-md hover:shadow-lg hover:scale-110"
+                                                title="LinkedIn"
+                                            >
+                                                <Linkedin className="w-5 h-5" />
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Action Button - Moved Below */}
+                            <div className="flex justify-center lg:justify-end pt-4 border-t border-slate-200">
+                                <button
+                                    onClick={() => handleToggleBlockTutor(tutor._id, tutor.fullName, tutor.isBlocked)}
+                                    className={`
+                                        group flex items-center justify-center gap-3 px-8 py-3 rounded-xl font-semibold transition-all duration-300 hover:scale-105 shadow-md
+                                        ${tutor.isBlocked 
+                                            ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white hover:shadow-lg hover:shadow-emerald-500/25' 
+                                            : 'bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white hover:shadow-lg hover:shadow-red-500/25'
+                                        }
+                                    `}
+                                >
+                                    {tutor.isBlocked ? (
+                                        <>
+                                            <CheckCircle className="w-5 h-5 group-hover:rotate-12 transition-transform" />
+                                            Unblock Tutor
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Ban className="w-5 h-5 group-hover:rotate-12 transition-transform" />
+                                            Block Tutor
+                                        </>
+                                    )}
+                                </button>
                             </div>
                         </div>
                     </div>

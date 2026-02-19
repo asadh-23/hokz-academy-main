@@ -7,12 +7,7 @@ import crypto from "crypto";
 import mongoose from "mongoose";
 import { uploadToCloudinary } from "../../services/cloudinaryService.js";
 import cloudinary from "../../config/cloudinary.js";
-import {
-    isNullOrWhitespace,
-    validatePhone,
-    validateEmail,
-    validatePassword,
-} from "../../../../frontend/src/utils/validation.js";
+import { validateText, validatePhone, validateEmail, validatePassword } from "../../utils/validation.js";
 
 export const getUserProfile = async (req, res) => {
     try {
@@ -47,8 +42,9 @@ export const updateUserProfile = async (req, res) => {
 
         const { fullName, phone } = req.body;
 
-        if (isNullOrWhitespace(fullName)) {
-            return res.status(400).json({ message: "Full name is required" });
+        const nameValidation = validateText(fullName, 2, 50, "Full Name");
+        if (!nameValidation.isValid) {
+            return res.status(400).json({ message: nameValidation.message || "Enter valid phone number" });
         }
 
         const phoneValidation = validatePhone(phone);
@@ -56,14 +52,14 @@ export const updateUserProfile = async (req, res) => {
             return res.status(400).json({ message: phoneValidation.message || "Enter valid phone number" });
         }
         const updateData = {
-            fullName: fullName.trim(),
-            phone: phone.trim(),
+            fullName: nameValidation.value,
+            phone: phoneValidation.value,
         };
 
         const updatedUser = await User.findByIdAndUpdate(
             userId,
             { $set: updateData },
-            { new: true, runValidators: true }
+            { new: true, runValidators: true },
         ).select("-password");
 
         if (!updatedUser) {
@@ -157,7 +153,7 @@ export const requestEmailChange = async (req, res) => {
         if (!emailValidation.isValid) {
             return res.status(400).json({ message: emailValidation.message || "Enter a valid email address" });
         }
-        const trimmedNewEmail = emailValidation.email;
+        const trimmedNewEmail = emailValidation.value;
 
         if (trimmedNewEmail === currentEmail) {
             return res.status(400).json({ success: false, message: "New email must be different from the current email." });
@@ -223,7 +219,7 @@ export const verifyEmailChangeOtp = async (req, res) => {
         }
         const emailValidation = validateEmail(email);
         if (!emailValidation.isValid) {
-            return res.status(400).json({ success: false, message: "New email address is required for verification." });
+            return res.status(400).json({ success: false, message: emailValidation.message || "New email address is required for verification." });
         }
 
         const otpDoc = await OTP.findOne({
@@ -281,7 +277,7 @@ export const resendEmailChangeOtp = async (req, res) => {
             return res.status(400).json({ message: "Email not found Please verify your email address" });
         }
 
-        const trimmedNewEmail = emailValidation.email;
+        const trimmedNewEmail = emailValidation.value;
 
         const existingUser = await User.findOne({ email: trimmedNewEmail }).lean();
         const existingTutor = await Tutor.findOne({ email: trimmedNewEmail }).lean();
@@ -355,7 +351,7 @@ export const requestPasswordChange = async (req, res) => {
         if (!passwordValidation.isValid) {
             return res.status(400).json({ message: passwordValidation.message || "Enter a valid new password" });
         }
-        const trimmedNewPassword = passwordValidation.password;
+        const trimmedNewPassword = passwordValidation.value;
 
         const isCurrentPasswordValid = await user.matchUserPassword(currentPassword);
         if (!isCurrentPasswordValid) {
@@ -441,7 +437,7 @@ export const verifyPasswordChange = async (req, res) => {
                 .status(400)
                 .json({ success: false, message: passwordValidation.message || "Enter a valid new password" });
         }
-        const trimmedNewPassword = passwordValidation.password;
+        const trimmedNewPassword = passwordValidation.value;
 
         const otpDoc = await OTP.findOne({
             email: userEmail,

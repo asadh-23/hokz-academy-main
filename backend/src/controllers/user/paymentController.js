@@ -508,7 +508,7 @@ export const verifyPayment = async (req, res) => {
             const tutorShare = realSalesAmount - adminShare;
 
             totalAdminCommission += adminShare;
-            const unlockDate = new Date(Date.now() + 2 * 60 * 1000);
+            const unlockDate = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
             await PaymentDistribution.create(
                 [
@@ -565,11 +565,9 @@ export const verifyPayment = async (req, res) => {
         }
 
         if (totalAdminCommission > 0) {
-          
             const admin = await Admin.findOne().session(session);
 
             if (admin) {
-             
                 let adminWallet = await Wallet.findOne({ owner: admin._id }).session(session);
                 if (!adminWallet) {
                     const [newAdminWallet] = await Wallet.create([{ owner: admin._id, ownerType: "Admin" }], {
@@ -578,7 +576,6 @@ export const verifyPayment = async (req, res) => {
                     adminWallet = newAdminWallet;
                 }
 
-              
                 await Wallet.findByIdAndUpdate(
                     adminWallet._id,
                     { $inc: { balance: totalAdminCommission, totalEarnings: totalAdminCommission } },

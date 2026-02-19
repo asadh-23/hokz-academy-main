@@ -1,14 +1,12 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { FiSearch, FiPlus, FiEdit2, FiSettings } from "react-icons/fi";
-import { MdOutlineSchool } from "react-icons/md";
+import { FiSearch, FiPlus } from "react-icons/fi";
 import sampleImage from "../../assets/images/CourseImage1.jpg";
 import { toast } from "sonner";
 import { useDispatch, useSelector } from "react-redux";
 // Redux thunks and selectors
 import {
     fetchTutorCourses,
-    toggleTutorCourseStatus,
     selectTutorCourses,
     selectTutorCourseStats,
     selectTutorCourseFilters,
@@ -74,44 +72,6 @@ const ManageCourses = () => {
         dispatch(setTutorCourseFilters({ page }));
     };
 
-    const handleToggleListCourse = (courseId, courseTitle, isListed) => {
-        const actionText = isListed ? "unlist" : "list";
-
-        toast.warning(`Are you sure you want to ${actionText} "${courseTitle}"?`, {
-            action: {
-                label: isListed ? "Unlist" : "List",
-                onClick: async () => {
-                    try {
-                        await dispatch(
-                            toggleTutorCourseStatus({
-                                courseId,
-                            }),
-                        ).unwrap();
-
-                        toast.success(`${courseTitle} ${actionText}ed successfully`);
-                        loadCourses();
-                    } catch (err) {
-                        console.log("Failed to update course listing:", err);
-                        toast.error(err || "Failed to update listing");
-                    }
-                },
-            },
-            cancel: { label: "Cancel" },
-        });
-    };
-
-    const handleExam = (course) => {
-        if (course.exam) {
-            navigate(`/tutor/course/${course._id}/manage-exam`);
-        } else {
-            navigate(`/tutor/course/${course._id}/add-exam`);
-        }
-    };
-
-    const handleSettings = (courseId) => {
-        console.log("Course settings:", courseId);
-    };
-
     if (firstLoad) {
         return <PageLoader />;
     }
@@ -172,26 +132,54 @@ const ManageCourses = () => {
                             key={course._id}
                             className="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-100 hover:border-teal-200 hover:-translate-y-1"
                         >
-                            {/* Course Thumbnail */}
-                            <div className="relative h-[240px] w-full overflow-hidden">
+                            {/* Course Thumbnail - Clickable */}
+                            <div 
+                                className="relative h-[240px] w-full overflow-hidden cursor-pointer"
+                                onClick={() => navigate(`/tutor/courses/${course._id}`)}
+                            >
                                 <img
                                     src={course.thumbnailUrl || sampleImage}
                                     alt={course.title}
                                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                                 />
 
+                                {/* Banned Overlay */}
+                                {course.isBanned && (
+                                    <div className="absolute inset-0 bg-black/70 backdrop-blur-sm flex flex-col items-center justify-center">
+                                        <div className="text-center px-4">
+                                            <span className="block text-red-500 text-2xl font-bold mb-2">
+                                                COURSE BANNED
+                                            </span>
+                                            <span className="block text-white text-sm">
+                                                Banned on:{" "}
+                                                {new Date(course.bannedAt).toLocaleDateString("en-US", {
+                                                    year: "numeric",
+                                                    month: "long",
+                                                    day: "numeric",
+                                                })}
+                                            </span>
+                                        </div>
+                                    </div>
+                                )}
+
                                 {/* Status Badge */}
-                                <span
-                                    className={`absolute top-4 right-4 px-4 py-1.5 rounded-full text-xs font-bold shadow-lg backdrop-blur-sm ${
-                                        course.isListed ? "bg-green-500/90 text-white" : "bg-red-500/90 text-white"
-                                    }`}
-                                >
-                                    {course.isListed ? "Listed" : "Unlisted"}
-                                </span>
+                                {!course.isBanned && (
+                                    <span
+                                        className={`absolute top-4 right-4 px-4 py-1.5 rounded-full text-xs font-bold shadow-lg backdrop-blur-sm ${
+                                            course.isListed ? "bg-green-500/90 text-white" : "bg-red-500/90 text-white"
+                                        }`}
+                                    >
+                                        {course.isListed ? "Listed" : "Unlisted"}
+                                    </span>
+                                )}
                             </div>
 
                             <div className="p-7">
-                                <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-teal-600 transition-colors">
+                                {/* Course Title - Clickable */}
+                                <h3 
+                                    className="text-xl font-bold text-gray-900 mb-2 group-hover:text-teal-600 transition-colors cursor-pointer"
+                                    onClick={() => navigate(`/tutor/courses/${course._id}`)}
+                                >
                                     {course.title}
                                 </h3>
 
@@ -219,66 +207,25 @@ const ManageCourses = () => {
                                     )}
                                 </div>
 
-                                {/* Enrollment */}
-                                <div className="flex items-center gap-2 text-sm text-gray-600 mb-6 pb-6 border-b-2 border-gray-100">
-                                    <MdOutlineSchool className="text-lg text-teal-600" />
-                                    <span className="font-semibold">{course.enrolledCount} students enrolled</span>
-                                </div>
-
-                                {/* Buttons */}
-                                <div className="space-y-3">
-                                    {/* Edit + List */}
-                                    <div className="grid grid-cols-2 gap-3">
-                                        <button
-                                            onClick={() => navigate(`/tutor/courses/${course._id}/edit`)}
-                                            className="px-4 py-3 bg-gradient-to-r from-pink-50 to-rose-50 text-pink-600 rounded-xl text-sm font-bold hover:from-pink-100 hover:to-rose-100 transition-all flex items-center justify-center gap-2 border-2 border-pink-200 hover:border-pink-300 shadow-sm"
-                                        >
-                                            <FiEdit2 className="text-base" />
-                                            Edit
-                                        </button>
-
-                                        <button
-                                            onClick={() =>
-                                                handleToggleListCourse(course._id, course.title, course.isListed)
-                                            }
-                                            className="px-4 py-3 bg-gradient-to-r from-teal-50 to-cyan-50 text-teal-600 rounded-xl text-sm font-bold hover:from-teal-100 hover:to-cyan-100 transition-all border-2 border-teal-200 hover:border-teal-300 shadow-sm"
-                                        >
-                                            {course.isListed ? "Unlist" : "List"}
-                                        </button>
+                                {/* Course Stats */}
+                                <div className="space-y-2 mb-6 pb-6 border-b-2 border-gray-100">
+                                    <div className="flex items-center justify-between text-sm">
+                                        <span className="text-gray-600">Enrolled Students:</span>
+                                        <span className="font-semibold text-gray-900">{course.enrolledCount}</span>
                                     </div>
-
-                                    {/* Manage Lessons */}
-                                    <button
-                                        onClick={() =>
-                                            navigate(`/tutor/courses/${course._id}/add-lesson`, {
-                                                state: { courseTitle: course.title },
-                                            })
-                                        }
-                                        className="w-full px-4 py-3.5 bg-gradient-to-r from-teal-600 to-cyan-600 text-white rounded-xl text-sm font-bold hover:from-teal-700 hover:to-cyan-700 transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2"
-                                    >
-                                        <FiPlus className="text-lg" />
-                                        MANAGE LESSONS
-                                    </button>
-
-                                    {/* Exam + Settings */}
-                                    <div className="grid grid-cols-2 gap-3">
-                                        <button
-                                            onClick={() => handleExam(course)}
-                                            className="px-4 py-3 bg-gradient-to-r from-purple-50 to-violet-50 text-purple-600 rounded-xl text-sm font-bold hover:from-purple-100 hover:to-violet-100 transition-all flex items-center justify-center gap-2 border-2 border-purple-200 hover:border-purple-300 shadow-sm"
-                                        >
-                                            <MdOutlineSchool className="text-lg" />
-                                            {course.exam ? "Manage Exam" : "Create Exam"}
-                                        </button>
-
-                                        <button
-                                            onClick={() => handleSettings(course._id)}
-                                            className="px-4 py-3 bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-600 rounded-xl text-sm font-bold hover:from-blue-100 hover:to-indigo-100 transition-all flex items-center justify-center gap-2 border-2 border-blue-200 hover:border-blue-300 shadow-sm"
-                                        >
-                                            <FiSettings className="text-base" />
-                                            Settings
-                                        </button>
+                                    <div className="flex items-center justify-between text-sm">
+                                        <span className="text-gray-600">Total Lessons:</span>
+                                        <span className="font-semibold text-gray-900">{course.lessonsCount || 0}</span>
                                     </div>
                                 </div>
+
+                                {/* Manage Course Button */}
+                                <button
+                                    onClick={() => navigate(`/tutor/courses/${course._id}`)}
+                                    className="w-full px-4 py-3.5 bg-gradient-to-r from-teal-600 to-cyan-600 text-white rounded-xl text-sm font-bold hover:from-teal-700 hover:to-cyan-700 transition-all shadow-md hover:shadow-lg"
+                                >
+                                    MANAGE COURSE
+                                </button>
                             </div>
                         </div>
                     ))}

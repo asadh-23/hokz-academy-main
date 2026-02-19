@@ -12,15 +12,15 @@ const releasePendingFunds = async () => {
             status: "pending",
             unlockDate: { $lte: now },
         })
-        .populate("walletId")
-        .populate({
-            path: "orderId",
-            select: "razorpayOrderId user",
-            populate: { 
-                path: "user", 
-                select: "fullName"
-            } 
-        });
+            .populate("walletId")
+            .populate({
+                path: "orderId",
+                select: "razorpayOrderId user",
+                populate: {
+                    path: "user",
+                    select: "fullName",
+                },
+            });
 
         if (pendingTransactions.length === 0) {
             return;
@@ -45,16 +45,16 @@ const releasePendingFunds = async () => {
 
             await PaymentDistribution.findOneAndUpdate(
                 { orderId: transaction.orderId._id, tutor: wallet.owner },
-                { isReleasedToWallet: true }
+                { isReleasedToWallet: true },
             );
 
-       
             const studentName = transaction.orderId?.user?.fullName || "a student";
-            const transactionId = transaction.orderId?.razorpayOrderId || transaction._id.toString().slice(-8).toUpperCase();
+            const transactionId =
+                transaction.orderId?.razorpayOrderId || transaction._id.toString().slice(-8).toUpperCase();
 
             await sendNotification({
-                recipientId: wallet.owner, 
-                senderId: null, 
+                recipientId: wallet.owner,
+                senderId: null,
                 type: "wallet_credit",
                 message: `₹${transaction.amount} has been credited to your wallet for the purchase by ${studentName}. (Ref: ${transactionId})`,
             });
@@ -67,7 +67,7 @@ const releasePendingFunds = async () => {
 };
 
 export const startWalletCron = () => {
-    cron.schedule("* * * * *", () => {
+    cron.schedule("0 * * * *", () => {
         console.log("Running Pending Funds Release Cron Job...");
         releasePendingFunds();
     });
