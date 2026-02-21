@@ -2,28 +2,28 @@ import React from 'react';
 import { BookOpen, TrendingUp } from 'lucide-react';
 
 const CourseStatsCards = ({ totalCourses, publishedCourses }) => {
-    return (
-        <div className="flex gap-4">
-            <div className="bg-white rounded-lg p-4 shadow-sm border">
-                <div className="flex items-center gap-3">
-                    <div className="p-2 bg-blue-100 rounded-lg">
-                        <BookOpen className="w-5 h-5 text-blue-600" />
+   return (
+        <div className="flex flex-wrap sm:flex-nowrap gap-4 w-full lg:w-auto">
+            <div className="bg-white rounded-[1.5rem] p-6 shadow-xl shadow-blue-900/5 border border-gray-100 flex-1 min-w-[160px]">
+                <div className="flex items-center gap-4">
+                    <div className="p-3 bg-[#1E2EDE]/5 rounded-xl text-[#1E2EDE]">
+                        <BookOpen className="w-6 h-6" />
                     </div>
                     <div>
-                        <p className="text-2xl font-bold text-gray-900">{totalCourses}</p>
-                        <p className="text-sm text-gray-500">Total Courses</p>
+                        <p className="text-2xl font-black text-[#1E2EDE] leading-none">{totalCourses}</p>
+                        <p className="text-[10px] font-black text-gray-400 uppercase mt-1">Total Assets</p>
                     </div>
                 </div>
             </div>
             
-            <div className="bg-white rounded-lg p-4 shadow-sm border">
-                <div className="flex items-center gap-3">
-                    <div className="p-2 bg-green-100 rounded-lg">
-                        <TrendingUp className="w-5 h-5 text-green-600" />
+            <div className="bg-white rounded-[1.5rem] p-6 shadow-xl shadow-blue-900/5 border border-gray-100 flex-1 min-w-[160px]">
+                <div className="flex items-center gap-4">
+                    <div className="p-3 bg-[#14C4E7]/10 rounded-xl text-[#14C4E7]">
+                        <TrendingUp className="w-6 h-6" />
                     </div>
                     <div>
-                        <p className="text-2xl font-bold text-gray-900">{publishedCourses}</p>
-                        <p className="text-sm text-gray-500">Published</p>
+                        <p className="text-2xl font-black text-[#14C4E7] leading-none">{publishedCourses}</p>
+                        <p className="text-[10px] font-black text-gray-400 uppercase mt-1">Live Now</p>
                     </div>
                 </div>
             </div>

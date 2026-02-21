@@ -1,6 +1,7 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import GoogleAuth from "./GoogleAuth";
+import { GraduationCap } from "lucide-react";
 
 export default function AuthLayout({ subtitle, role, children }) {
     const location = useLocation();
@@ -8,60 +9,88 @@ export default function AuthLayout({ subtitle, role, children }) {
     const isLogin = location.pathname.includes("login");
 
     return (
-        <div className="min-h-screen flex flex-col items-center bg-gradient-to-tr from-teal-100 via-teal-50 to-teal-100 px-4">
-            <div className="w-full max-w-lg rounded-3xl shadow-2xl bg-white px-10 py-8 flex flex-col items-center mt-20 transition-transform duration-300 hover:scale-105">
-                {/* Top: Logo + Tabs + Subtitle */}
-                <div className="w-full flex flex-col items-center mb-4">
-                    {/* Logo */}
-                    <div className="flex items-center mb-3">
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-teal-600 to-teal-400 flex items-center justify-center mr-2 shadow-lg">
-                            <svg width="20" height="20" viewBox="0 0 24 24">
-                                <circle cx="12" cy="12" r="12" fill="url(#grad1)" />
-                                <defs>
-                                    <linearGradient id="grad1" x1="0" y1="0" x2="1" y2="1">
-                                        <stop offset="0%" stopColor="#14b8a6" />
-                                        <stop offset="100%" stopColor="#2dd4bf" />
-                                    </linearGradient>
-                                </defs>
-                            </svg>
-                        </div>
-                        <span className="font-bold text-lg text-gray-700">{import.meta.env.VITE_APP_NAME}</span>
-                    </div>
+        <div className="min-h-screen flex flex-col items-center justify-center bg-[#FDFDFD] px-4 py-12 relative overflow-hidden">
+            {/* --- BRAND DECORATION --- */}
+            <div className="absolute top-0 right-0 w-96 h-96 bg-[#14C4E7] opacity-5 rounded-full -translate-y-20 translate-x-20"></div>
+            <div className="absolute bottom-0 left-0 w-64 h-64 bg-[#E6D929] opacity-5 rounded-full translate-y-10 -translate-x-10"></div>
 
-                    {/* Tabs: Show only if role is NOT admin */}
+            <div className="w-full max-w-xl relative z-10">
+                {/* --- LOGO SECTION --- */}
+                <div className="flex flex-col items-center mb-10">
+                    <Link to="/" className="flex items-center gap-3 group">
+                        <div className="w-12 h-12 bg-[#1E2EDE] rounded-2xl flex items-center justify-center transition-transform group-hover:rotate-12 shadow-xl shadow-blue-900/20">
+                            <GraduationCap className="text-[#E6D929] w-7 h-7" />
+                        </div>
+                        <span className="text-3xl font-black tracking-tighter text-[#1E2EDE]">
+                            HOKZ<span className="text-[#14C4E7]">ACADEMY</span>
+                        </span>
+                    </Link>
+                </div>
+
+                {/* --- MAIN CARD --- */}
+                <div className="bg-white rounded-[3rem] shadow-[0_40px_100px_rgba(30,46,222,0.1)] border border-slate-50 overflow-hidden">
+                    {/* --- TABS SECTION --- */}
                     {role !== "admin" && (
-                        <div className="flex bg-gray-200 rounded-full p-1 mb-4 w-full max-w-xs mx-auto sticky top-0 z-20 shadow-inner">
+                        <div className="flex p-2 bg-slate-50 border-b border-slate-100">
                             <Link
                                 to={`/${role}/register`}
-                                className={`flex-1 py-1.5 text-center rounded-full font-semibold text-sm transition-colors ${
-                                    isRegister ? "bg-teal-400 text-white shadow" : "text-gray-600 hover:text-gray-800"
+                                className={`flex-1 py-4 text-center rounded-[2rem] font-black text-xs uppercase tracking-[0.2em] transition-all ${
+                                    isRegister
+                                        ? "bg-[#1E2EDE] text-[#E6D929] shadow-lg shadow-blue-200"
+                                        : "text-slate-400 hover:text-[#1E2EDE]"
                                 }`}
                             >
-                                Register
+                                Create Account
                             </Link>
                             <Link
                                 to={`/${role}/login`}
-                                className={`flex-1 py-1.5 text-center rounded-full font-semibold text-sm transition-colors ${
-                                    isLogin ? "bg-teal-400 text-white shadow" : "text-gray-600 hover:text-gray-800"
+                                className={`flex-1 py-4 text-center rounded-[2rem] font-black text-xs uppercase tracking-[0.2em] transition-all ${
+                                    isLogin
+                                        ? "bg-[#1E2EDE] text-[#E6D929] shadow-lg shadow-blue-200"
+                                        : "text-slate-400 hover:text-[#1E2EDE]"
                                 }`}
                             >
-                                Login
+                                Sign In
                             </Link>
                         </div>
                     )}
 
-                    {/* Subtitle */}
-                    <p className="text-gray-500 text-sm mb-8 text-center px-8">
-                        Fill in the information below to {subtitle}
-                    </p>
+                    <div className="px-8 py-12 md:px-12">
+                        {/* Subtitle */}
+                        <div className="mb-10 text-center">
+                            <p className="text-[10px] font-black text-[#14C4E7] uppercase tracking-[0.4em] mb-2">
+                                {isLogin? "Welcome Back" : "" }
+                            </p>
+                            <h2 className="text-2xl font-black text-[#1E2EDE] uppercase tracking-tight">
+                                {subtitle} to Profile
+                            </h2>
+                        </div>
+
+                        {/* Form area */}
+                        <div className="w-full">
+                            {children}
+
+                            {role !== "admin" && (
+                                <div className="mt-8">
+                                    <div className="relative flex items-center justify-center mb-8">
+                                        <div className="absolute inset-0 flex items-center">
+                                            <div className="w-full border-t border-slate-100"></div>
+                                        </div>
+                                        <span className="relative px-4 bg-white text-[10px] font-black text-slate-300 uppercase tracking-widest">
+                                            Secure Connect
+                                        </span>
+                                    </div>
+                                    <GoogleAuth role={role} />
+                                </div>
+                            )}
+                        </div>
+                    </div>
                 </div>
 
-                {/* Children form area */}
-                {/* Children form area */}
-                <div className="w-full px-10 pb-8 flex-1 flex flex-col justify-start">
-                    {children}
-                    {role !== "admin" && <GoogleAuth role={role} />}
-                </div>
+                {/* Footer Link */}
+                <p className="mt-8 text-center text-slate-400 font-bold text-xs uppercase tracking-widest">
+                    Protecting your future since {new Date().getFullYear()}
+                </p>
             </div>
         </div>
     );

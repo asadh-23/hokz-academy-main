@@ -127,13 +127,15 @@ const TutorOrders = () => {
     return (
         <div className="min-h-screen bg-gray-50 p-6 font-sans">
             {/* --- PAGE HEADER --- */}
-            <div className="mb-8 flex flex-col md:flex-row justify-between md:items-end gap-4">
-                <div>
-                    <h1 className="text-2xl font-bold text-gray-900">My Orders & Earnings</h1>
-                    <p className="text-sm text-gray-500 mt-1">
-                        Manage your sales, track revenue, and view transaction details.
-                    </p>
-                </div>
+
+            <div className="mb-10 text-center md:text-left">
+                <h2 className="text-3xl font-black text-[#1E2EDE] tracking-tighter uppercase">
+                    Order <span className="text-[#14C4E7]">Details</span>
+                </h2>
+                <p className="text-slate-400 text-[10px] font-black uppercase tracking-[0.25em] mt-1">
+                    Manage your sales, track revenue, and view transaction details.
+                </p>
+                <div className="h-1 w-20 bg-[#E6D929] mt-4 rounded-full mx-auto md:mx-0"></div>
             </div>
 
             {/* --- STATS CARDS --- */}
@@ -168,7 +170,9 @@ const TutorOrders = () => {
                             <p className="text-gray-500 text-xs font-bold uppercase tracking-wider mb-1">
                                 Total Gross Sales
                             </p>
-                            <h2 className="text-2xl font-bold text-gray-900">{formatCurrency(stats?.totalGrossRevenue || 0)}</h2>
+                            <h2 className="text-2xl font-bold text-gray-900">
+                                {formatCurrency(stats?.totalGrossRevenue || 0)}
+                            </h2>
                         </div>
                         <div className="p-2 bg-green-50 rounded-lg">
                             <DollarSign size={24} className="text-green-600" />

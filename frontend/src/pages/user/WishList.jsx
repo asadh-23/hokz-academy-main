@@ -42,7 +42,7 @@ const WishList = () => {
     const [searchQuery, setSearchQuery] = useState("");
     const [isFilterOpen, setIsFilterOpen] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
-    const [itemsPerPage] = useState(3);
+    const [itemsPerPage] = useState(9);
 
     // Filter states
     const [filters, setFilters] = useState({
@@ -248,11 +248,14 @@ const WishList = () => {
 
     const hasActiveFilters = filters.minPrice || filters.maxPrice || filters.sort;
 
-    return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-            {/* Header Section */}
-            <div className="bg-white shadow-sm border-b border-gray-200">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+       return (
+        <div className="min-h-screen bg-[#FDFDFD]">
+            {/* --- BRANDED HERO & NAVIGATION --- */}
+            <div className="bg-[#1E2EDE] relative overflow-hidden pb-20 pt-10 md:pt-16">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-[#14C4E7] opacity-10 rounded-full -translate-y-20 translate-x-20"></div>
+                <div className="absolute bottom-0 left-0 w-40 h-40 bg-[#E6D929] opacity-10 rounded-full translate-y-10 -translate-x-10"></div>
+                
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
                     <WishlistHeader
                         itemCount={wishlist.length}
                         totalValue={calculateTotalValue()}
@@ -261,7 +264,12 @@ const WishList = () => {
                         loading={loading}
                         clearLoading={clearWishlistLoading}
                     />
+                </div>
+            </div>
 
+            {/* --- SEARCH & CONTENT SECTION --- */}
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-10 relative z-20 pb-20">
+                <div className="bg-white rounded-[2.5rem] shadow-2xl shadow-blue-900/5 p-4 md:p-6 border border-slate-50 mb-10">
                     <WishlistSearchBar
                         searchQuery={searchQuery}
                         onSearchChange={(e) => setSearchQuery(e.target.value)}
@@ -276,22 +284,18 @@ const WishList = () => {
                         sortOptions={sortOptions}
                     />
                 </div>
-            </div>
 
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                {/* Wishlist Grid */}
                 {loading ? (
-                    <div className="flex justify-center items-center py-20">
+                    <div className="flex flex-col justify-center items-center py-32 bg-white rounded-[3rem] shadow-xl border border-slate-50">
                         <div className="relative">
-                            <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-cyan-600"></div>
-                            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-                                <div className="h-8 w-8 bg-gradient-to-r from-cyan-500 to-emerald-500 rounded-full"></div>
-                            </div>
+                            <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-[#1E2EDE]"></div>
+                            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 bg-[#E6D929] rounded-lg rotate-45"></div>
                         </div>
+                        <p className="mt-6 text-[10px] font-black uppercase tracking-widest text-slate-400 animate-pulse">Syncing Wishlist...</p>
                     </div>
                 ) : filteredWishlist.length > 0 ? (
                     <>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                        <div className="grid grid-cols-1 sm:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8">
                             {currentItems.map((item) => (
                                 <WishlistCard
                                     key={item._id}
@@ -306,15 +310,16 @@ const WishList = () => {
                             ))}
                         </div>
 
-                        {/* Pagination */}
-                        <Pagination
-                            currentPage={currentPage}
-                            totalPages={totalPages}
-                            totalItems={filteredWishlist.length}
-                            itemsPerPage={itemsPerPage}
-                            onPageChange={handlePageChange}
-                            label="Courses"
-                        />
+                        <div className="mt-16">
+                            <Pagination
+                                currentPage={currentPage}
+                                totalPages={totalPages}
+                                totalItems={filteredWishlist.length}
+                                itemsPerPage={itemsPerPage}
+                                onPageChange={handlePageChange}
+                                label="Courses"
+                            />
+                        </div>
                     </>
                 ) : (
                     <WishlistEmptyState searchQuery={searchQuery} onClearSearch={() => setSearchQuery("")} />

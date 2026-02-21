@@ -90,8 +90,8 @@ export const getAllCourses = async (req, res) => {
 export const getListedCategories = async (req, res) => {
     try {
         const categories = await Category.find({ isListed: true }).select("_id name").sort({ name: 1 });
-        if(!categories){
-            return res.status(400).json({success: false, message: "Failed to fetch categories"});
+        if (!categories) {
+            return res.status(400).json({ success: false, message: "Failed to fetch categories" });
         }
 
         return res.status(200).json({
@@ -110,7 +110,7 @@ export const getListedCategories = async (req, res) => {
 export const getCourseDetails = async (req, res) => {
     try {
         const { courseId } = req.params;
-        const userId = req.user?._id;
+        const { userId } = req.query;
 
         if (!courseId) {
             return res.status(400).json({
@@ -144,15 +144,13 @@ export const getCourseDetails = async (req, res) => {
 
         // 2. CHECK ENROLLMENT (Corrected Logic)
         let isEnrolled = false;
-
-        if (userId) {
-            // Check Enrollment Table (Financial Record)
+       
+        if (userId && userId !== "undefined" && userId !== "null") {
             const enrollment = await Enrollment.exists({
                 user: userId,
                 course: courseId,
                 status: "active",
             });
-
             isEnrolled = !!enrollment;
         }
 
@@ -197,7 +195,6 @@ export const getCourseDetails = async (req, res) => {
 export const getMyCourses = async (req, res) => {
     try {
         const userId = req.user._id;
-
         // 1. Find all active enrollments for this user
         const enrollments = await Enrollment.find({
             user: userId,
@@ -206,7 +203,7 @@ export const getMyCourses = async (req, res) => {
             .populate({
                 path: "course",
                 match: { isBanned: false, isDeleted: false },
-                select: "title thumbnailUrl category description totalDurationSeconds lessonsCount tutor isBanned",
+                select: "title thumbnailUrl category description totalDurationSeconds lessonsCount tutor exam isBanned",
                 populate: [
                     {
                         path: "tutor",
@@ -230,10 +227,34 @@ export const getMyCourses = async (req, res) => {
                     course: enrollment.course._id,
                 });
 
+                let examStatus = {
+                    isAttempted: false,
+                    isPassed: false,
+                    score: 0,
+                    earnedPoints: 0,
+                };
+                if (enrollment.course?.exam) {
+                    const lastAttempt = await ExamAttempt.findOne({
+                        user: userId,
+                        exam: enrollment.course.exam,
+                        course: enrollment.course._id,
+                    }).sort({ createdAt: -1 });
+
+                    if (lastAttempt) {
+                        examStatus = {
+                            isAttempted: true,
+                            isPassed: lastAttempt.isPassed,
+                            score: lastAttempt.score,
+                            earnedPoints: lastAttempt.earnedPoints,
+                        };
+                    }
+                }
+
                 return {
                     ...enrollment.course.toObject(),
                     progress: progressDoc ? progressDoc.completionPercentage : 0,
                     enrollmentId: enrollment._id,
+                    examStatus: examStatus,
                 };
             }),
         );
@@ -256,49 +277,50 @@ export const getMyCourses = async (req, res) => {
 
 export const getMyCertificates = async (req, res) => {
     try {
-        const userId = req.user._id;        
+        const userId = req.user._id;
 
         const passedAttempts = await ExamAttempt.find({
             user: userId,
-            isPassed: true 
+            isPassed: true,
         })
-        .populate({
-            path: "course",
-            select: "title thumbnailUrl",
-            populate: {
-                path: "tutor",
-                select: "fullName profileImage"
-            }
-        })
-        .sort({ completedAt: -1 });
+            .populate({
+                path: "course",
+                select: "title thumbnailUrl",
+                populate: {
+                    path: "tutor",
+                    select: "fullName profileImage",
+                },
+            })
+            .sort({ completedAt: -1 });
 
-        const certificates = passedAttempts.map(attempt => {
-            if(!attempt.course) return null;
+        const certificates = passedAttempts
+            .map((attempt) => {
+                if (!attempt.course) return null;
 
-            return {
-                certificateId: `CRT-${attempt._id.toString().slice(-8).toUpperCase()}`,
-                courseName: attempt.course.title,
-                courseThumbnail: attempt.course.thumbnailUrl,
-                tutorName: attempt.course.tutor?.fullName || "Hokz Academy Instructor",
-                tutorProfileImage: attempt.course.tutor?.profileImage || null,
-                score: attempt.score, 
-                totalPoints: attempt.totalPoints,
-                completedDate: attempt.completedAt, 
-                studentName: req.user.fullName
-            };
-        }).filter(item => item !== null);        
+                return {
+                    certificateId: `CRT-${attempt._id.toString().slice(-8).toUpperCase()}`,
+                    courseName: attempt.course.title,
+                    courseThumbnail: attempt.course.thumbnailUrl,
+                    tutorName: attempt.course.tutor?.fullName || "Hokz Academy Instructor",
+                    tutorProfileImage: attempt.course.tutor?.profileImage || null,
+                    score: attempt.score,
+                    totalPoints: attempt.totalPoints,
+                    completedDate: attempt.completedAt,
+                    studentName: req.user.fullName,
+                };
+            })
+            .filter((item) => item !== null);
 
         res.status(200).json({
             success: true,
-            data: certificates
+            data: certificates,
         });
-
     } catch (error) {
         console.error("Certificate Error:", error);
-        res.status(500).json({ 
-            success: false, 
+        res.status(500).json({
+            success: false,
             message: "Failed to fetch certificates",
-            error: error.message 
+            error: error.message,
         });
     }
 };

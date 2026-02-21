@@ -119,12 +119,15 @@ const CourseDetails = () => {
 
     if (!courseData) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 flex items-center justify-center p-6">
-                <div className="text-center">
-                    <h2 className="text-2xl font-bold text-gray-900 mb-4">Course Not Found</h2>
+            <div className="min-h-screen bg-[#FDFDFD] flex items-center justify-center p-6">
+                <div className="text-center animate-fade-in">
+                    <div className="w-20 h-20 bg-[#14C4E7]/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <BookOpen className="w-10 h-10 text-[#1E2EDE]" />
+                    </div>
+                    <h2 className="text-3xl font-extrabold text-[#1E2EDE] mb-4">Course Not Found</h2>
                     <button
                         onClick={() => navigate("/tutor/courses")}
-                        className="px-6 py-3 bg-gradient-to-r from-indigo-600 to-violet-600 text-white rounded-xl font-semibold hover:from-indigo-700 hover:to-violet-700 transition-all"
+                        className="px-8 py-3 bg-[#1E2EDE] text-[#FDFDFD] rounded-2xl font-bold hover:shadow-[0_10px_20px_rgba(30,46,222,0.3)] transition-all active:scale-95"
                     >
                         Back to Courses
                     </button>
@@ -137,33 +140,35 @@ const CourseDetails = () => {
     const salePrice = calculateSalePrice(courseDetails.price, courseDetails.offerPercentage);
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-6">
+        <div className="min-h-screen bg-[#FDFDFD] bg-gradient-to-br from-[#FDFDFD] via-[#14C4E7]/5 to-[#1E2EDE]/5 p-4 md:p-8">
             <div className="max-w-7xl mx-auto">
-                {/* Header with Back Button and Edit Button */}
-                <div className="flex items-center justify-between mb-6">
+                {/* Top Navigation Bar */}
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-8">
                     <button
                         onClick={() => navigate("/tutor/courses")}
-                        className="flex items-center gap-2 text-gray-600 hover:text-indigo-600 transition-colors font-medium"
+                        className="flex items-center gap-2 text-[#1E2EDE] hover:text-[#14C4E7] transition-colors font-bold group"
                     >
-                        <ArrowLeft className="w-5 h-5" />
-                        Back to Courses
+                        <div className="p-2 bg-white rounded-xl shadow-sm group-hover:shadow-md transition-all">
+                            <ArrowLeft className="w-5 h-5" />
+                        </div>
+                        Back to Portfolio
                     </button>
-                    
+
                     <button
                         onClick={() => navigate(`/tutor/courses/${courseDetails._id}/edit`)}
-                        className="px-5 py-2.5 bg-gradient-to-r from-pink-50 to-rose-50 text-pink-600 rounded-xl text-sm font-bold hover:from-pink-100 hover:to-rose-100 transition-all flex items-center gap-2 border-2 border-pink-200 hover:border-pink-300 shadow-sm"
+                        className="w-full sm:w-auto px-6 py-3 bg-white text-[#1E2EDE] rounded-2xl text-sm font-bold hover:bg-[#1E2EDE] hover:text-white transition-all flex items-center justify-center gap-2 border-2 border-[#1E2EDE] shadow-sm"
                     >
                         <FiEdit2 className="text-base" />
-                        Edit Course
+                        Edit Course Details
                     </button>
                 </div>
 
-                {/* Course Header Card */}
-                <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/50 p-8 mb-6">
-                    <div className="flex flex-col lg:flex-row gap-8">
-                        {/* Thumbnail */}
-                        <div className="flex-shrink-0">
-                            <div className="w-full lg:w-80 h-48 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-xl overflow-hidden shadow-md">
+                {/* Hero Section Card */}
+                <div className="bg-white rounded-[2.5rem] shadow-[0_20px_50px_rgba(30,46,222,0.08)] border border-white p-6 md:p-10 mb-8">
+                    <div className="flex flex-col lg:flex-row gap-10">
+                        {/* Visual Preview */}
+                        <div className="flex-shrink-0 mx-auto lg:mx-0">
+                            <div className="w-full sm:w-[320px] h-[200px] bg-gray-100 rounded-[2rem] overflow-hidden shadow-inner border-4 border-[#FDFDFD] relative">
                                 {courseDetails.thumbnailUrl ? (
                                     <img
                                         src={courseDetails.thumbnailUrl}
@@ -171,317 +176,320 @@ const CourseDetails = () => {
                                         className="w-full h-full object-cover"
                                     />
                                 ) : (
-                                    <div className="w-full h-full flex items-center justify-center">
-                                        <BookOpen className="w-16 h-16 text-indigo-300" />
+                                    <div className="w-full h-full flex items-center justify-center bg-[#14C4E7]/10">
+                                        <BookOpen className="w-16 h-16 text-[#14C4E7]" />
                                     </div>
                                 )}
+                                <div className="absolute top-4 left-4">
+                                    <span className="px-4 py-1.5 bg-[#E6D929] text-[#1E2EDE] rounded-full text-xs font-black uppercase tracking-wider shadow-lg">
+                                        {courseDetails.category?.name || "General"}
+                                    </span>
+                                </div>
                             </div>
                         </div>
 
-                        {/* Course Info */}
-                        <div className="flex-1">
-                            <div className="flex items-start justify-between mb-4">
-                                <div>
-                                    <h1 className="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent mb-2">
-                                        {courseDetails.title}
-                                    </h1>
-                                    {courseDetails.category && (
-                                        <span className="inline-block px-4 py-1.5 bg-indigo-100 text-indigo-700 rounded-full text-sm font-medium">
-                                            {courseDetails.category.name}
-                                        </span>
-                                    )}
-                                </div>
-                                {/* List/Unlist Button */}
+                        {/* Essential Info */}
+                        <div className="flex-1 text-center lg:text-left">
+                            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
+                                <h1 className="text-3xl md:text-4xl font-black text-[#1E2EDE] leading-tight">
+                                    {courseDetails.title}
+                                </h1>
                                 <button
                                     onClick={() => {
                                         if (courseDetails.isBanned) {
                                             toast.error("This course is banned and cannot be listed/unlisted");
                                             return;
                                         }
-                                        handleToggleListCourse(courseDetails._id, courseDetails.title, courseDetails.isListed);
+                                        handleToggleListCourse(
+                                            courseDetails._id,
+                                            courseDetails.title,
+                                            courseDetails.isListed,
+                                        );
                                     }}
-                                    className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all border-2 shadow-md ${
+                                    className={`min-w-[140px] px-6 py-3 rounded-2xl text-xs font-black uppercase tracking-widest transition-all border-2 ${
                                         courseDetails.isBanned
                                             ? "bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed"
                                             : courseDetails.isListed
-                                            ? "bg-gradient-to-r from-red-50 to-rose-50 text-red-600 hover:from-red-100 hover:to-rose-100 border-red-200 hover:border-red-300"
-                                            : "bg-gradient-to-r from-green-50 to-emerald-50 text-green-600 hover:from-green-100 hover:to-emerald-100 border-green-200 hover:border-green-300"
+                                              ? "bg-white text-red-500 border-red-100 hover:bg-red-50"
+                                              : "bg-[#14C4E7] text-white border-[#14C4E7] hover:bg-[#1E2EDE] hover:border-[#1E2EDE] shadow-lg shadow-[#14C4E7]/20"
                                     }`}
                                     disabled={courseDetails.isBanned}
-                                    title={courseDetails.isBanned ? "This course is banned" : ""}
                                 >
-                                    {courseDetails.isBanned ? "BANNED" : courseDetails.isListed ? "Unlist Course" : "List Course"}
+                                    {courseDetails.isBanned ? "Banned" : courseDetails.isListed ? "Unlist" : "Go Live"}
                                 </button>
                             </div>
 
-                            <p className="text-gray-700 leading-relaxed mb-6">{courseDetails.description}</p>
+                            <p className="text-gray-500 font-medium leading-relaxed mb-8 max-w-3xl">
+                                {courseDetails.description}
+                            </p>
 
-                            {/* Stats Grid */}
+                            {/* Responsive Stats Grid */}
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-4 rounded-xl border border-blue-100">
-                                    <div className="flex items-center gap-2 text-blue-600 mb-1">
-                                        <BookOpen className="w-5 h-5" />
-                                        <span className="text-sm font-medium">Lessons</span>
-                                    </div>
-                                    <p className="text-2xl font-bold text-gray-900">{courseDetails.lessonsCount}</p>
-                                </div>
+                                {[
+                                    { icon: BookOpen, label: "Lessons", val: courseDetails.lessonsCount, color: "#14C4E7" },
+                                    {
+                                        icon: Users,
+                                        label: "Students",
+                                        val: courseDetails.totalEnrollments,
+                                        color: "#1E2EDE",
+                                    },
+                                    {
+                                        icon: DollarSign,
+                                        label: "Revenue",
+                                        val: formatCurrency(salePrice),
+                                        color: "#1E2EDE",
+                                    },
+                                    {
+                                        icon: Tag,
+                                        label: "Discount",
+                                        val: `${courseDetails.offerPercentage}%`,
+                                        color: "#E6D929",
+                                        show: courseDetails.offerPercentage > 0,
+                                    },
+                                ].map(
+                                    (stat, i) =>
+                                        stat.show !== false && (
+                                            <div
+                                                key={i}
+                                                className="bg-gray-50/50 p-4 rounded-2xl border border-gray-100 group hover:border-[#14C4E7]/30 transition-colors"
+                                            >
+                                                <div className="flex items-center gap-2 mb-2 justify-center lg:justify-start">
+                                                    <stat.icon size={16} style={{ color: stat.color }} />
+                                                    <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400">
+                                                        {stat.label}
+                                                    </span>
+                                                </div>
+                                                <p className="text-xl font-black text-gray-800">{stat.val}</p>
+                                            </div>
+                                        ),
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-                                <div className="bg-gradient-to-br from-green-50 to-emerald-50 p-4 rounded-xl border border-green-100">
-                                    <div className="flex items-center gap-2 text-green-600 mb-1">
-                                        <Users className="w-5 h-5" />
-                                        <span className="text-sm font-medium">Students</span>
-                                    </div>
-                                    <p className="text-2xl font-bold text-gray-900">{courseDetails.totalEnrollments}</p>
-                                </div>
+                {/* Quick Actions Bar */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+                    <button
+                        onClick={() =>
+                            navigate(`/tutor/courses/${courseDetails._id}/add-lesson`, {
+                                state: { courseTitle: courseDetails.title },
+                            })
+                        }
+                        className="p-5 bg-gradient-to-r from-[#1E2EDE] to-[#14C4E7] text-white rounded-[1.5rem] font-bold hover:shadow-xl hover:-translate-y-1 transition-all flex items-center justify-center gap-3 group"
+                    >
+                        <div className="bg-white/20 p-2 rounded-lg group-hover:scale-110 transition-transform">
+                            <FiPlus size={20} />
+                        </div>
+                        Manage Course Content
+                    </button>
+                    <button
+                        onClick={() => handleExam(courseDetails)}
+                        className="p-5 bg-white text-[#1E2EDE] border-2 border-[#1E2EDE]/10 rounded-[1.5rem] font-bold hover:border-[#E6D929] hover:bg-[#E6D929]/5 transition-all flex items-center justify-center gap-3 group"
+                    >
+                        <div className="bg-[#1E2EDE]/5 p-2 rounded-lg group-hover:bg-[#E6D929]/20 transition-colors">
+                            <MdOutlineSchool size={20} />
+                        </div>
+                        {courseDetails.exam ? "Curriculum Exam Settings" : "Initialize Course Exam"}
+                    </button>
+                </div>
 
-                                <div className="bg-gradient-to-br from-purple-50 to-violet-50 p-4 rounded-xl border border-purple-100">
-                                    <div className="flex items-center gap-2 text-purple-600 mb-1">
-                                        <DollarSign className="w-5 h-5" />
-                                        <span className="text-sm font-medium">Price</span>
-                                    </div>
-                                    <p className="text-2xl font-bold text-gray-900">{formatCurrency(salePrice)}</p>
-                                    {courseDetails.offerPercentage > 0 && (
-                                        <p className="text-xs text-gray-500 line-through">{formatCurrency(courseDetails.price)}</p>
-                                    )}
-                                </div>
-
-                                {courseDetails.offerPercentage > 0 && (
-                                    <div className="bg-gradient-to-br from-red-50 to-pink-50 p-4 rounded-xl border border-red-100">
-                                        <div className="flex items-center gap-2 text-red-600 mb-1">
-                                            <Tag className="w-5 h-5" />
-                                            <span className="text-sm font-medium">Discount</span>
+                {/* Content Explorer Section */}
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                    {/* Content Player - 8 Columns */}
+                    <div className="lg:col-span-8 space-y-6">
+                        {selectedLesson ? (
+                            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                                {/* Video Player */}
+                                {selectedLesson.videoUrl && (
+                                    <div className="bg-white rounded-[2rem] shadow-xl border border-gray-100 overflow-hidden mb-6">
+                                        <div className="bg-[#1E2EDE] p-5 flex items-center justify-between">
+                                            <h3 className="text-white font-bold flex items-center gap-3">
+                                                <div className="w-2 h-2 bg-[#E6D929] rounded-full animate-pulse" />
+                                                {selectedLesson.title}
+                                            </h3>
+                                            {selectedLesson.isBanned && (
+                                                <span className="bg-red-500 text-white px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter">
+                                                    Banned
+                                                </span>
+                                            )}
                                         </div>
-                                        <p className="text-2xl font-bold text-gray-900">{courseDetails.offerPercentage}%</p>
+                                        <div className="aspect-video bg-black shadow-inner">
+                                            <video
+                                                key={selectedLesson.videoUrl}
+                                                controls
+                                                className="w-full h-full"
+                                                controlsList="nodownload"
+                                            >
+                                                <source src={selectedLesson.videoUrl} type="video/mp4" />
+                                            </video>
+                                        </div>
+                                        <div className="p-6">
+                                            <div className="flex items-center gap-4 mb-3 text-xs font-bold text-[#14C4E7] uppercase tracking-widest">
+                                                <span className="flex items-center gap-1.5">
+                                                    <Clock size={14} /> {selectedLesson.duration} Seconds
+                                                </span>
+                                                <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
+                                                <span className="text-gray-400">Lesson Description</span>
+                                            </div>
+                                            <p className="text-gray-600 leading-relaxed font-medium">
+                                                {selectedLesson.description}
+                                            </p>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* PDF Section */}
+                                {selectedLesson.pdfUrl && (
+                                    <div className="bg-white rounded-[2rem] shadow-xl border border-gray-100 overflow-hidden">
+                                        <div className="p-5 border-b border-gray-50 flex items-center justify-between bg-gray-50/50">
+                                            <div className="flex items-center gap-3">
+                                                <div className="p-2 bg-red-50 rounded-xl text-red-500">
+                                                    <FileText size={20} />
+                                                </div>
+                                                <span className="font-black text-[#1E2EDE] uppercase text-xs tracking-widest">
+                                                    Resource Documents
+                                                </span>
+                                            </div>
+                                            <a
+                                                href={selectedLesson.pdfUrl}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="px-4 py-2 bg-[#14C4E7] text-white rounded-xl text-xs font-bold hover:bg-[#1E2EDE] transition-all flex items-center gap-2"
+                                            >
+                                                <Download size={14} /> Download
+                                            </a>
+                                        </div>
+                                        <div className="h-[500px] md:h-[650px] bg-gray-100">
+                                            <iframe
+                                                src={selectedLesson.pdfUrl}
+                                                className="w-full h-full"
+                                                title="PDF Viewer"
+                                            />
+                                        </div>
                                     </div>
                                 )}
                             </div>
-
-                            {/* Exam Info */}
-                            {courseDetails.exam && (
-                                <div className="mt-4 flex items-center gap-2 text-indigo-600">
-                                    <Award className="w-5 h-5" />
-                                    <span className="font-medium">Exam: {courseDetails.exam.title}</span>
+                        ) : (
+                            <div className="bg-white rounded-[2.5rem] border-2 border-dashed border-gray-200 p-20 text-center flex flex-col items-center justify-center min-h-[400px]">
+                                <div className="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center mb-6">
+                                    <PlayCircle className="w-12 h-12 text-[#14C4E7]" />
                                 </div>
-                            )}
-                        </div>
-                    </div>
-                </div>
-
-                {/* Action Buttons */}
-                <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/50 p-6 mb-6">
-                    <h2 className="text-xl font-bold text-gray-900 mb-4">Quick Actions</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        <button
-                            onClick={() =>
-                                navigate(`/tutor/courses/${courseDetails._id}/add-lesson`, {
-                                    state: { courseTitle: courseDetails.title },
-                                })
-                            }
-                            className="px-4 py-3 bg-gradient-to-r from-teal-600 to-cyan-600 text-white rounded-xl text-sm font-bold hover:from-teal-700 hover:to-cyan-700 transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2"
-                        >
-                            <FiPlus className="text-base" />
-                            Manage Lessons
-                        </button>
-
-                        <button
-                            onClick={() => handleExam(courseDetails)}
-                            className="px-4 py-3 bg-gradient-to-r from-purple-50 to-violet-50 text-purple-600 rounded-xl text-sm font-bold hover:from-purple-100 hover:to-violet-100 transition-all flex items-center justify-center gap-2 border-2 border-purple-200 hover:border-purple-300 shadow-sm"
-                        >
-                            <MdOutlineSchool className="text-base" />
-                            {courseDetails.exam ? "Manage Exam" : "Add Exam"}
-                        </button>
-                    </div>
-                </div>
-
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    {/* Video Player & PDF Viewer Section - Takes 2 columns */}
-                    <div className="lg:col-span-2 space-y-6">
-                        {/* Video Player */}
-                        {selectedLesson && selectedLesson.videoUrl && (
-                            <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/50 overflow-hidden">
-                                <div className="bg-gradient-to-r from-indigo-600 to-violet-600 p-4">
-                                    <h3 className="text-white font-bold text-lg flex items-center gap-2">
-                                        <PlayCircle className="w-5 h-5" />
-                                        {selectedLesson.title}
-                                    </h3>
-                                    {selectedLesson.isBanned && (
-                                        <div className="mt-2 flex items-center gap-2 bg-red-500/20 text-white px-3 py-1.5 rounded-lg text-sm">
-                                            <AlertCircle className="w-4 h-4" />
-                                            This lesson is banned
-                                        </div>
-                                    )}
-                                </div>
-                                <div className="aspect-video bg-black">
-                                    <video
-                                        key={selectedLesson.videoUrl}
-                                        controls
-                                        className="w-full h-full"
-                                        controlsList="nodownload"
-                                    >
-                                        <source src={selectedLesson.videoUrl} type="video/mp4" />
-                                        Your browser does not support the video tag.
-                                    </video>
-                                </div>
-                                <div className="p-4">
-                                    <p className="text-gray-700 text-sm">{selectedLesson.description}</p>
-                                    <div className="flex items-center gap-4 mt-3 text-sm text-gray-500">
-                                        <span className="flex items-center gap-1">
-                                            <Clock className="w-4 h-4" />
-                                            {selectedLesson.duration}s
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-
-                        {/* PDF Viewer */}
-                        {selectedLesson && selectedLesson.pdfUrl && (
-                            <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/50 overflow-hidden">
-                                <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-4 flex items-center justify-between">
-                                    <h3 className="text-white font-bold text-lg flex items-center gap-2">
-                                        <FileText className="w-5 h-5" />
-                                        Lesson PDF
-                                    </h3>
-                                    <a
-                                        href={selectedLesson.pdfUrl}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="flex items-center gap-2 bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all"
-                                    >
-                                        <Download className="w-4 h-4" />
-                                        Download
-                                    </a>
-                                </div>
-                                <div className="h-[600px]">
-                                    <iframe
-                                        src={selectedLesson.pdfUrl}
-                                        className="w-full h-full"
-                                        title="Lesson PDF"
-                                    />
-                                </div>
-                            </div>
-                        )}
-
-                        {/* No Lesson Selected */}
-                        {!selectedLesson && (
-                            <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/50 p-12 text-center">
-                                <PlayCircle className="w-20 h-20 text-gray-300 mx-auto mb-4" />
-                                <h3 className="text-xl font-bold text-gray-900 mb-2">No Lesson Selected</h3>
-                                <p className="text-gray-600">Click on a lesson to view its content</p>
+                                <h3 className="text-2xl font-black text-[#1E2EDE] mb-2">Select a Lesson</h3>
+                                <p className="text-gray-400 font-medium">
+                                    Choose a topic from the curriculum to preview the content
+                                </p>
                             </div>
                         )}
                     </div>
 
-                    {/* Lessons List - Takes 1 column */}
-                    <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/50 p-6">
-                        <div className="flex items-center justify-between mb-4">
-                            <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-                                <BookOpen className="w-5 h-5 text-indigo-600" />
-                                Lessons ({lessons.length})
-                            </h2>
-                            <button
-                                onClick={() =>
-                                    navigate(`/tutor/courses/${courseDetails._id}/add-lesson`, {
-                                        state: { courseTitle: courseDetails.title },
-                                    })
-                                }
-                                className="px-3 py-2 bg-gradient-to-r from-teal-600 to-cyan-600 text-white rounded-lg text-xs font-bold hover:from-teal-700 hover:to-cyan-700 transition-all shadow-sm hover:shadow-md flex items-center gap-1.5"
-                            >
-                                <FiPlus className="text-sm" />
-                                Manage
-                            </button>
-                        </div>
+                    {/* Lessons Sidebar - 4 Columns */}
+                    <div className="lg:col-span-4">
+                        <div className="bg-white rounded-[2rem] shadow-xl border border-gray-100 p-6 sticky top-8">
+                            <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-50">
+                                <h2 className="font-black text-[#1E2EDE] flex items-center gap-2 uppercase tracking-tighter text-lg">
+                                    <BookOpen size={20} className="text-[#14C4E7]" />
+                                    Curriculum ({lessons.length})
+                                </h2>
+                            </div>
 
-                        {lessons.length > 0 ? (
-                            <div className="space-y-2 max-h-[800px] overflow-y-auto">
-                                {lessons.map((lesson, index) => (
-                                    <div
-                                        key={lesson._id}
-                                        onClick={() => handleLessonClick(lesson)}
-                                        className={`p-3 rounded-xl border transition-all cursor-pointer ${
-                                            selectedLesson?._id === lesson._id
-                                                ? "bg-gradient-to-r from-indigo-100 to-purple-100 border-indigo-300 shadow-md"
-                                                : "bg-gradient-to-r from-indigo-50 to-purple-50 border-indigo-100 hover:shadow-md hover:border-indigo-200"
-                                        }`}
-                                    >
-                                        <div className="flex items-start gap-3">
-                                            <div className="flex-shrink-0 w-7 h-7 bg-indigo-600 text-white rounded-full flex items-center justify-center font-bold text-xs">
-                                                {index + 1}
-                                            </div>
-                                            <div className="flex-1 min-w-0">
-                                                <h3 className="font-bold text-gray-900 text-sm mb-1 line-clamp-1">
-                                                    {lesson.title}
-                                                </h3>
-                                                {lesson.isBanned && (
-                                                    <div className="flex items-center gap-1 text-xs text-red-600 mb-1">
-                                                        <AlertCircle className="w-3 h-3" />
-                                                        This lesson is banned
-                                                    </div>
-                                                )}
-                                                <div className="flex items-center gap-3 text-xs text-gray-500">
-                                                    <span className="flex items-center gap-1">
-                                                        <Clock className="w-3 h-3" />
-                                                        {lesson.duration}s
-                                                    </span>
-                                                    {lesson.pdfUrl && (
-                                                        <span className="flex items-center gap-1 text-indigo-600">
-                                                            <FileText className="w-3 h-3" />
-                                                            PDF
+                            <div className="space-y-3 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
+                                {lessons.length > 0 ? (
+                                    lessons.map((lesson, index) => (
+                                        <div
+                                            key={lesson._id}
+                                            onClick={() => handleLessonClick(lesson)}
+                                            className={`group p-4 rounded-2xl border transition-all cursor-pointer relative overflow-hidden ${
+                                                selectedLesson?._id === lesson._id
+                                                    ? "bg-[#1E2EDE] border-[#1E2EDE] text-white shadow-lg translate-x-1"
+                                                    : "bg-gray-50 border-transparent hover:border-[#14C4E7] hover:bg-white text-gray-700"
+                                            }`}
+                                        >
+                                            <div className="flex items-start gap-4">
+                                                <div
+                                                    className={`w-8 h-8 rounded-lg flex items-center justify-center font-black text-xs flex-shrink-0 ${
+                                                        selectedLesson?._id === lesson._id
+                                                            ? "bg-[#14C4E7] text-white"
+                                                            : "bg-white text-[#1E2EDE] shadow-sm"
+                                                    }`}
+                                                >
+                                                    {String(index + 1).padStart(2, "0")}
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <h3 className="font-bold text-sm mb-1 truncate group-hover:whitespace-normal transition-all">
+                                                        {lesson.title}
+                                                    </h3>
+                                                    <div className="flex items-center gap-3">
+                                                        <span className="text-[10px] font-bold opacity-60 flex items-center gap-1">
+                                                            <Clock size={10} /> {lesson.duration}s
                                                         </span>
-                                                    )}
+                                                        {lesson.pdfUrl && (
+                                                            <FileText
+                                                                size={10}
+                                                                className={
+                                                                    selectedLesson?._id === lesson._id
+                                                                        ? "text-[#E6D929]"
+                                                                        : "text-[#14C4E7]"
+                                                                }
+                                                            />
+                                                        )}
+                                                    </div>
                                                 </div>
                                             </div>
+                                            {selectedLesson?._id === lesson._id && (
+                                                <div className="absolute right-0 top-0 bottom-0 w-1 bg-[#E6D929]" />
+                                            )}
                                         </div>
+                                    ))
+                                ) : (
+                                    <div className="text-center py-10 text-gray-400 font-medium">
+                                        No lessons published yet
                                     </div>
-                                ))}
+                                )}
                             </div>
-                        ) : (
-                            <div className="text-center py-12">
-                                <PlayCircle className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                                <p className="text-gray-500 text-sm">No lessons added yet</p>
-                            </div>
-                        )}
+                        </div>
                     </div>
                 </div>
 
-                {/* Enrolled Students Section - Full Width */}
-                <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/50 p-6 mt-6">
-                    <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-                        <Users className="w-5 h-5 text-green-600" />
-                        Enrolled Students ({enrolledStudents.length})
-                    </h2>
+                {/* Students Roster Section */}
+                <div className="mt-12">
+                    <div className="flex items-center gap-4 mb-8">
+                        <div className="p-3 bg-white rounded-2xl shadow-sm border border-gray-50">
+                            <Users className="text-[#14C4E7]" size={24} />
+                        </div>
+                        <div>
+                            <h2 className="text-2xl font-black text-[#1E2EDE]">Enrolled Students</h2>
+                            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">
+                                {enrolledStudents.length} Active Learners
+                            </p>
+                        </div>
+                        <div className="flex-1 h-[2px] bg-gradient-to-r from-gray-100 to-transparent"></div>
+                    </div>
 
                     {enrolledStudents.length > 0 ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                             {enrolledStudents.map((student) => (
                                 <div
                                     key={student.studentId}
-                                    className="bg-gradient-to-r from-green-50 to-emerald-50 p-4 rounded-xl border border-green-100 hover:shadow-md transition-all"
+                                    className="bg-white p-5 rounded-[2rem] border border-gray-100 hover:border-[#14C4E7] transition-all hover:shadow-xl group"
                                 >
-                                    <div className="flex items-center gap-3">
-                                        <img
-                                            src={student.profileImage || defaultProfileImage}
-                                            alt={student.fullName}
-                                            onError={(e) => (e.target.src = defaultProfileImage)}
-                                            className="w-12 h-12 rounded-full object-cover border-2 border-white shadow-md flex-shrink-0"
-                                        />
+                                    <div className="flex items-center gap-4">
+                                        <div className="relative">
+                                            <img
+                                                src={student.profileImage || defaultProfileImage}
+                                                alt=""
+                                                className="w-14 h-14 rounded-2xl object-cover border-2 border-white shadow-md"
+                                            />
+                                            <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-[#14C4E7] rounded-full border-2 border-white"></div>
+                                        </div>
                                         <div className="flex-1 min-w-0">
-                                            <h3 className="font-bold text-gray-900 text-sm truncate">
+                                            <h3 className="font-black text-[#1E2EDE] text-sm truncate">
                                                 {student.fullName}
                                             </h3>
-                                            {student.email && (
-                                                <p className="text-xs text-gray-600 flex items-center gap-1 truncate">
-                                                    <Mail className="w-3 h-3 flex-shrink-0" />
-                                                    <span className="truncate">{student.email}</span>
-                                                </p>
-                                            )}
-                                            <div className="flex items-center gap-2 mt-1 text-xs">
-                                                <span className="text-gray-500 flex items-center gap-1">
-                                                    <Calendar className="w-3 h-3" />
-                                                    {formatDate(student.enrolledAt)}
-                                                </span>
+                                            <div className="flex items-center gap-1.5 text-[10px] text-gray-400 font-bold mb-1">
+                                                <Calendar size={10} /> {formatDate(student.enrolledAt)}
                                             </div>
-                                            <span className="text-green-600 font-semibold text-xs">
+                                            <span className="text-xs font-black text-[#14C4E7]">
                                                 {formatCurrency(student.pricePaid)}
                                             </span>
                                         </div>
@@ -490,9 +498,9 @@ const CourseDetails = () => {
                             ))}
                         </div>
                     ) : (
-                        <div className="text-center py-12">
-                            <Users className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                            <p className="text-gray-500">No students enrolled yet</p>
+                        <div className="bg-white rounded-[2rem] p-16 text-center border-2 border-dashed border-gray-100">
+                            <Users className="w-12 h-12 text-gray-200 mx-auto mb-4" />
+                            <p className="text-gray-500 font-bold">Waiting for first enrollment</p>
                         </div>
                     )}
                 </div>

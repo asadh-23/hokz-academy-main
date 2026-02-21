@@ -1,32 +1,38 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { toast } from "sonner";
 import { useDispatch, useSelector } from "react-redux";
-
 import {
-    logoutTutor,
-    selectTutor,
-} from "../../store/features/auth/tutorAuthSlice";
+    LayoutDashboard,
+    User,
+    BookOpen,
+    Ticket,
+    BarChart3,
+    Wallet,
+    Video,
+    LogOut,
+    ChevronLeft,
+    ChevronRight,
+    MessageSquare,
+    X,
+} from "lucide-react";
 
+import { logoutTutor, selectTutor } from "../../store/features/auth/tutorAuthSlice";
 import defaultProfileImage from "../../assets/images/default-profile-image.webp";
 import { formatText } from "../../utils/formatText";
 
-const TutorSidebar = () => {
+const TutorSidebar = ({ isCollapsed, setIsCollapsed, isMobileOpen, setIsMobileOpen }) => {
     const navigate = useNavigate();
     const location = useLocation();
     const dispatch = useDispatch();
-
     const [showConfirm, setShowConfirm] = useState(false);
 
-    // ✅ New auth structure
     const tutor = useSelector(selectTutor);
-    console.log(tutor)
     const tutorName = tutor?.fullName || "Tutor";
     const tutorProfileImage = tutor?.profileImage || defaultProfileImage;
 
     const handleLogout = async () => {
         const res = await dispatch(logoutTutor());
-
         if (logoutTutor.fulfilled.match(res)) {
             toast.success("Logged out successfully");
             navigate("/tutor/login", { replace: true });
@@ -36,90 +42,112 @@ const TutorSidebar = () => {
     };
 
     const menuItems = [
-        { name: "Overview", icon: "📊", path: "/tutor/dashboard" },
-        { name: "Profile", icon: "👤", path: "/tutor/profile" },
-        { name: "Courses", icon: "📚", path: "/tutor/courses" },
-        { name: "Coupons", icon: "🎟️", path: "/tutor/coupons" },
-        { name: "Orders", icon: "📊", path: "/tutor/orders" },
-        { name: "Wallet", icon: "💰", path: "/tutor/wallet" },
-        { name: "Chat & Video", icon: "🎥", path: "/tutor/chat" },
-        { name: "LogOut", icon: "🚪" },
+        { name: "Overview", icon: <LayoutDashboard size={22} />, path: "/tutor/dashboard" },
+        { name: "Profile", icon: <User size={22} />, path: "/tutor/profile" },
+        { name: "Courses", icon: <BookOpen size={22} />, path: "/tutor/courses" },
+        { name: "Coupons", icon: <Ticket size={22} />, path: "/tutor/coupons" },
+        { name: "Orders", icon: <BarChart3 size={22} />, path: "/tutor/orders" },
+        { name: "Wallet", icon: <Wallet size={22} />, path: "/tutor/wallet" },
+        { name: "Chat & Video", icon: <MessageSquare size={22} />, path: "/tutor/chat" },
     ];
+
+    const activeClass = "bg-[#1E2EDE] text-[#E6D929] shadow-lg shadow-blue-900/20";
+    const inactiveClass = "text-slate-600 hover:bg-[#14C4E7]/5 hover:text-[#1E2EDE]";
 
     return (
         <>
-            <aside className="w-[280px] bg-white border-r border-gray-200 flex flex-col h-[calc(100vh-70px)] sticky top-0">
-                <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-6 scrollbar-hide">
+            <aside
+                className={`
+                    fixed lg:sticky top-[70px] left-0 z-40 h-[calc(100vh-70px)] bg-white border-r border-slate-100 transition-all duration-300 ease-in-out
+                    ${isMobileOpen ? "translate-x-0 w-72" : "-translate-x-full lg:translate-x-0"}
+                    ${isCollapsed ? "lg:w-20" : "lg:w-72"}
+                `}
+            >
+                <div className="flex flex-col h-full">
+                    {/* Desktop Collapse Toggle */}
+                    <button
+                        onClick={() => setIsCollapsed(!isCollapsed)}
+                        className="hidden lg:flex absolute -right-3 top-10 bg-[#14C4E7] text-white w-6 h-6 rounded-full items-center justify-center shadow-md hover:bg-[#1E2EDE] transition-colors z-50"
+                    >
+                        {isCollapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
+                    </button>
 
-                    {/* Profile Section */}
-                    <div className="text-center">
-                        <img
-                            src={tutorProfileImage}
-                            alt="Tutor"
-                            className="w-20 h-20 rounded-full border-4 border-emerald-400 mx-auto mb-3"
-                        />
-                        <h3 className="text-lg font-semibold text-emerald-600">
-                            {formatText(tutorName)}
-                        </h3>
+                    {/* Tutor Profile Header */}
+                    <div className={`p-6 border-b border-slate-50 flex items-center transition-all ${isCollapsed ? "justify-center" : "gap-4"}`}>
+                        <div className="shrink-0 w-10 h-10 rounded-xl border-2 border-[#E6D929] overflow-hidden shadow-sm">
+                            <img src={tutorProfileImage} alt="Tutor" className="w-full h-full object-cover" />
+                        </div>
+                        {!isCollapsed && (
+                            <div className="overflow-hidden whitespace-nowrap animate-in fade-in slide-in-from-left-2">
+                                <h4 className="font-black text-[#1E2EDE] text-sm">{formatText(tutorName)}</h4>
+                                <p className="text-[10px] text-[#14C4E7] font-black uppercase tracking-widest">Verified Instructor</p>
+                            </div>
+                        )}
                     </div>
 
-                    {/* Menu */}
-                    <div className="bg-gradient-to-br from-cyan-400 to-emerald-500 rounded-2xl p-5 text-white shadow-md">
-                        <h4 className="text-lg font-semibold mb-4">Dashboard</h4>
+                    {/* Navigation Links */}
+                    <nav className="flex-1 overflow-y-auto p-3 space-y-2 custom-scrollbar">
+                        {menuItems.map((item) => {
+                            const isActive = location.pathname === item.path;
+                            return (
+                                <div
+                                    key={item.name}
+                                    onClick={() => {
+                                        navigate(item.path);
+                                        setIsMobileOpen(false);
+                                    }}
+                                    className={`
+                                        flex items-center rounded-xl transition-all duration-200 cursor-pointer group
+                                        ${isActive ? activeClass : inactiveClass}
+                                        ${isCollapsed ? "justify-center p-3" : "px-4 py-3.5 gap-4"}
+                                    `}
+                                    title={isCollapsed ? item.name : ""}
+                                >
+                                    <span className="shrink-0">{item.icon}</span>
+                                    {!isCollapsed && <span className="font-bold text-sm whitespace-nowrap">{item.name}</span>}
+                                </div>
+                            );
+                        })}
+                    </nav>
 
-                        <div className="flex flex-col gap-2">
-                            {menuItems.map((item) => {
-                                const isActive = location.pathname === item.path;
-
-                                const handleClick =
-                                    item.name === "LogOut"
-                                        ? () => setShowConfirm(true)
-                                        : () => navigate(item.path);
-
-                                return (
-                                    <div
-                                        key={item.name}
-                                        onClick={handleClick}
-                                        className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-all
-                                        ${
-                                            isActive
-                                                ? "bg-white text-emerald-600 font-semibold"
-                                                : "hover:bg-white/20 hover:text-white"
-                                        }`}
-                                    >
-                                        <span className="text-lg">{item.icon}</span>
-                                        <span className="text-sm font-medium">{item.name}</span>
-                                    </div>
-                                );
-                            })}
-                        </div>
+                    {/* Sign Out Button */}
+                    <div className="p-3 border-t border-slate-50">
+                        <button
+                            onClick={() => setShowConfirm(true)}
+                            className={`
+                                flex items-center text-red-500 font-bold text-sm hover:bg-red-50 rounded-xl transition-all w-full
+                                ${isCollapsed ? "justify-center p-3" : "px-4 py-3.5 gap-4"}
+                            `}
+                        >
+                            <LogOut size={22} className="shrink-0" />
+                            {!isCollapsed && <span>Sign Out</span>}
+                        </button>
                     </div>
                 </div>
             </aside>
 
-            {/* Logout Modal */}
+            {/* Logout Confirmation Modal */}
             {showConfirm && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-                    <div className="bg-white rounded-2xl p-6 w-[90%] max-w-sm shadow-lg text-center">
-                        <h3 className="text-lg font-semibold text-gray-800 mb-3">
-                            Confirm Logout
-                        </h3>
-                        <p className="text-gray-500 mb-6">
-                            Are you sure you want to log out?
-                        </p>
+                <div className="fixed inset-0 bg-[#1E2EDE]/20 backdrop-blur-sm flex items-center justify-center z-[100]">
+                    <div className="bg-white rounded-[2rem] p-8 w-[90%] max-w-sm shadow-2xl text-center border border-white">
+                        <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <LogOut size={30} className="text-red-500" />
+                        </div>
+                        <h3 className="text-xl font-black text-[#1E2EDE] mb-2">End Session?</h3>
+                        <p className="text-slate-500 text-sm mb-8 font-medium">Are you sure you want to log out from the tutor portal?</p>
 
-                        <div className="flex justify-center gap-4">
+                        <div className="flex gap-3">
                             <button
                                 onClick={() => setShowConfirm(false)}
-                                className="px-5 py-2 rounded-full border border-gray-300 text-gray-600 hover:bg-gray-100 transition-all"
+                                className="flex-1 px-6 py-3 rounded-xl border-2 border-slate-100 text-slate-600 font-bold hover:bg-slate-50 transition-all"
                             >
-                                Cancel
+                                No, Stay
                             </button>
                             <button
                                 onClick={handleLogout}
-                                className="px-5 py-2 rounded-full bg-gradient-to-br from-cyan-400 to-emerald-500 text-white font-semibold hover:opacity-90 transition-all"
+                                className="flex-1 px-6 py-3 rounded-xl bg-[#1E2EDE] text-[#E6D929] font-bold hover:shadow-lg transition-all"
                             >
-                                Yes, Log Out
+                                Yes, Logout
                             </button>
                         </div>
                     </div>

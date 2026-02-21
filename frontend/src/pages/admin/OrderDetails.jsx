@@ -173,295 +173,299 @@ const OrderDetails = () => {
     };
 
     const getStatusBadge = (status) => {
-        const styles = {
-            paid: "bg-emerald-100 text-emerald-700 border-emerald-200",
-            pending: "bg-amber-100 text-amber-700 border-amber-200",
-            failed: "bg-red-100 text-red-700 border-red-200",
-        };
-        const icons = {
-            paid: <CheckCircle size={14} />,
-            pending: <AlertCircle size={14} />,
-            failed: <XCircle size={14} />,
-        };
-        return (
-            <span
-                className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase border ${styles[status] || styles.pending}`}
-            >
-                {icons[status] || icons.pending} {status}
-            </span>
-        );
+    const styles = {
+        paid: "bg-[#14C4E7]/10 text-[#14C4E7] border-[#14C4E7]/20",
+        pending: "bg-[#E6D929]/10 text-[#a89e1a] border-[#E6D929]/30",
+        failed: "bg-red-50 text-red-600 border-red-100",
     };
-
-    if (loading) {
-        return (
-            <div className="flex justify-center items-center h-screen bg-gray-50">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
-            </div>
-        );
-    }
-
-    if (!data) return null;
-
-    const { order, customer, items, financials } = data;
-
+    const icons = {
+        paid: <CheckCircle size={14} />,
+        pending: <AlertCircle size={14} />,
+        failed: <XCircle size={14} />,
+    };
     return (
-        <div className="min-h-screen bg-gray-50 p-6 md:p-8 font-sans">
-            {/* --- HEADER SECTION --- */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
-                <div className="flex items-center gap-4">
-                    <button
-                        onClick={() => navigate(-1)}
-                        className="p-2 bg-white border border-gray-200 rounded-full hover:bg-gray-100 transition shadow-sm"
-                    >
-                        <ArrowLeft size={20} className="text-gray-600" />
-                    </button>
-                    <div>
-                        <div className="flex items-center gap-3 mb-1">
-                            <h1 className="text-2xl font-bold text-gray-900">
-                                Order #{order.orderId?.split("_")[1] || order._id.slice(-6).toUpperCase()}
-                            </h1>
-                            {getStatusBadge(order.status)}
-                        </div>
-                        <div className="flex items-center gap-2 text-sm text-gray-500">
-                            <Calendar size={14} />
-                            Placed on {formatDate(order.createdAt)} via{" "}
-                            <span className="uppercase font-semibold">{order.paymentMethod}</span>
-                        </div>
+        <span
+            className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border-2 ${styles[status] || styles.pending}`}
+        >
+            {icons[status] || icons.pending} {status}
+        </span>
+    );
+};
+
+if (loading) {
+    return (
+        <div className="flex flex-col justify-center items-center h-screen bg-[#FDFDFD]">
+            <div className="animate-spin rounded-full h-12 w-12 border-4 border-[#14C4E7]/20 border-t-[#1E2EDE]"></div>
+            <p className="mt-4 text-[#1E2EDE] font-black uppercase tracking-widest text-xs">Loading Order Details...</p>
+        </div>
+    );
+}
+
+if (!data) return null;
+
+const { order, customer, items, financials } = data;
+
+return (
+    <div className="min-h-screen bg-[#FDFDFD] bg-gradient-to-br from-[#FDFDFD] via-[#14C4E7]/5 to-[#1E2EDE]/5 p-4 md:p-8 font-sans">
+        {/* --- HEADER SECTION --- */}
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-end mb-10 gap-6">
+            <div className="flex items-center gap-5">
+                <button
+                    onClick={() => navigate(-1)}
+                    className="p-3 bg-white border-2 border-[#1E2EDE]/10 rounded-2xl text-[#1E2EDE] hover:bg-[#1E2EDE] hover:text-white transition-all shadow-sm group"
+                >
+                    <ArrowLeft size={22} className="group-hover:-translate-x-1 transition-transform" />
+                </button>
+                <div>
+                    <div className="flex flex-wrap items-center gap-3 mb-2">
+                        <h1 className="text-2xl md:text-3xl font-black text-[#1E2EDE] tracking-tighter">
+                            Order #{order.orderId?.split("_")[1] || order._id.slice(-6).toUpperCase()}
+                        </h1>
+                        {getStatusBadge(order.status)}
+                    </div>
+                    <div className="flex flex-wrap items-center gap-4 text-xs font-bold text-gray-500 uppercase tracking-wider">
+                        <span className="flex items-center gap-1.5"><Calendar size={14} className="text-[#14C4E7]" /> {formatDate(order.createdAt)}</span>
+                        <span className="w-1.5 h-1.5 bg-[#E6D929] rounded-full"></span>
+                        <span className="flex items-center gap-1.5"><CreditCard size={14} className="text-[#14C4E7]" /> {order.paymentMethod}</span>
+                    </div>
+                </div>
+            </div>
+
+            <button
+                onClick={downloadInvoice}
+                className="w-full md:w-auto flex items-center justify-center gap-2 px-8 py-3.5 bg-[#14C4E7] text-white font-black rounded-2xl hover:bg-[#1E2EDE] transition-all shadow-lg shadow-[#14C4E7]/20 text-xs uppercase tracking-widest active:scale-95"
+            >
+                <Download size={18} /> Download Invoice
+            </button>
+        </div>
+
+        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* ================= LEFT COLUMN ================= */}
+            <div className="lg:col-span-2 space-y-8">
+                
+                {/* 1. PURCHASED COURSES */}
+                <div className="bg-white rounded-[2rem] shadow-xl shadow-blue-900/5 border border-white overflow-hidden">
+                    <div className="px-8 py-6 border-b border-gray-50 bg-[#1E2EDE]/5 flex justify-between items-center">
+                        <h2 className="font-black text-[#1E2EDE] flex items-center gap-3 uppercase text-sm tracking-widest">
+                            <GraduationCap size={22} className="text-[#14C4E7]" />
+                            Curriculum Inventory ({items.length})
+                        </h2>
+                    </div>
+
+                    <div className="overflow-x-auto">
+                        <table className="w-full">
+                            <thead>
+                                <tr className="bg-gray-50/50 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] border-b border-gray-100">
+                                    <th className="px-8 py-4 text-left">Course Asset</th>
+                                    <th className="px-4 py-4 text-right">Market Price</th>
+                                    <th className="px-4 py-4 text-right">Applied Offer</th>
+                                    <th className="px-8 py-4 text-right">Net Paid</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-50">
+                                {items.map((item, index) => (
+                                    <tr key={index} className="group hover:bg-[#14C4E7]/5 transition-colors">
+                                        <td className="px-8 py-5">
+                                            <div className="flex items-center gap-4">
+                                                <img
+                                                    src={item.thumbnail}
+                                                    alt=""
+                                                    className="w-16 h-10 rounded-xl object-cover border-2 border-white shadow-sm group-hover:scale-110 transition-transform"
+                                                />
+                                                <div>
+                                                    <h3 className="font-bold text-[#1E2EDE] text-sm line-clamp-1">{item.title}</h3>
+                                                    <p className="text-[10px] font-bold text-[#14C4E7] uppercase tracking-tighter">Instructor: {item.tutor?.fullName}</p>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td className="px-4 py-5 text-right text-xs text-gray-400 line-through">
+                                            {formatCurrency(item.originalPrice)}
+                                        </td>
+                                        <td className="px-4 py-5 text-right text-xs font-bold text-[#14C4E7]">
+                                            {formatCurrency(item.offerPrice)}
+                                        </td>
+                                        <td className="px-8 py-5 text-right">
+                                            <p className="font-black text-[#1E2EDE]">{formatCurrency(item.pricePaid)}</p>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
 
-                <button
-                    onClick={downloadInvoice}
-                    className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition shadow-sm text-sm"
-                >
-                    <Download size={16} /> Download Invoice
-                </button>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                {/* ================= LEFT COLUMN (Items & Financial Breakdown) ================= */}
-                <div className="lg:col-span-2 space-y-8">
-                    {/* 1. PURCHASED COURSES */}
-                    <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-                        <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex justify-between items-center">
-                            <h2 className="font-bold text-gray-800 flex items-center gap-2">
-                                <GraduationCap size={18} className="text-indigo-600" />
-                                Purchased Courses ({items.length})
-                            </h2>
-                        </div>
-
-                        {/* Table Header */}
-                        <div className="grid grid-cols-12 px-6 py-3 bg-gray-50 border-b border-gray-100 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                            <div className="col-span-6">Course Details</div>
-                            <div className="col-span-2 text-right">MRP</div>
-                            <div className="col-span-2 text-right">Offer Price</div>
-                            <div className="col-span-2 text-right">Paid</div>
-                        </div>
-
-                        <div className="divide-y divide-gray-100">
-                            {items.map((item, index) => (
-                                <div
-                                    key={index}
-                                    className="grid grid-cols-12 px-6 py-4 items-center hover:bg-gray-50/50 transition"
-                                >
-                                    {/* Course Info */}
-                                    <div className="col-span-6 flex gap-4">
-                                        <img
-                                            src={item.thumbnail}
-                                            alt={item.title}
-                                            className="w-16 h-12 rounded object-cover border border-gray-100"
-                                        />
-                                        <div>
-                                            <h3 className="font-bold text-gray-900 text-sm line-clamp-1">{item.title}</h3>
-                                            <p className="text-xs text-gray-500 mt-0.5">By {item.tutor?.fullName}</p>
-                                        </div>
-                                    </div>
-
-                                    {/* MRP */}
-                                    <div className="col-span-2 text-right text-sm text-gray-400 line-through">
-                                        {formatCurrency(item.originalPrice)}
-                                    </div>
-
-                                    {/* Offer Price */}
-                                    <div className="col-span-2 text-right text-sm font-medium text-gray-600">
-                                        {formatCurrency(item.offerPrice)}
-                                    </div>
-
-                                    {/* Final Paid */}
-                                    <div className="col-span-2 text-right">
-                                        <p className="font-bold text-gray-900">{formatCurrency(item.pricePaid)}</p>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-
-                    {/* 2. REVENUE DISTRIBUTION */}
-                    <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-                        <div className="px-6 py-4 border-b border-gray-100 bg-indigo-50/40 flex justify-between items-center">
-                            <h2 className="font-bold text-indigo-900 flex items-center gap-2">
-                                <ShieldCheck size={18} /> Revenue Distribution
-                            </h2>
-                            <span className="text-xs font-bold bg-indigo-600 text-white px-3 py-1 rounded-lg shadow-sm">
-                                Total Admin Profit: {formatCurrency(financials.totalAdminProfit)}
+                {/* 2. REVENUE DISTRIBUTION */}
+                <div className="bg-white rounded-[2rem] shadow-xl shadow-blue-900/5 border border-white overflow-hidden">
+                    <div className="px-8 py-6 border-b border-gray-50 bg-[#14C4E7]/5 flex flex-col sm:flex-row justify-between items-center gap-4">
+                        <h2 className="font-black text-[#1E2EDE] flex items-center gap-3 uppercase text-sm tracking-widest">
+                            <ShieldCheck size={22} className="text-[#14C4E7]" /> Financial Split
+                        </h2>
+                        <div className="flex flex-col items-end">
+                            <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Platform Profit</span>
+                            <span className="text-lg font-black text-[#1E2EDE] bg-[#E6D929] px-4 py-1 rounded-xl shadow-inner">
+                                {formatCurrency(financials.totalAdminProfit)}
                             </span>
                         </div>
+                    </div>
 
-                        <div className="overflow-x-auto">
-                            <table className="w-full text-left text-sm">
-                                <thead className="bg-gray-50 text-gray-500 font-medium border-b border-gray-100">
-                                    <tr>
-                                        <th className="px-6 py-3">Instructor</th>
-                                        <th className="px-6 py-3 text-right">Sales Amount</th>
-                                        <th className="px-6 py-3 text-right text-indigo-600">Admin Commission</th>
-                                        <th className="px-6 py-3 text-right text-emerald-600">Tutor Earnings</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-gray-100">
-                                    {financials.breakdown.map((split, idx) => (
-                                        <tr key={idx}>
-                                            <td className="px-6 py-4">
-                                                <div className="flex items-center gap-3">
-                                                    {split.tutorProfile ? (
-                                                        <img
-                                                            src={split.tutorProfile}
-                                                            alt=""
-                                                            className="w-8 h-8 rounded-full object-cover"
-                                                        />
-                                                    ) : (
-                                                        <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-xs">
-                                                            {split.tutorName.charAt(0)}
-                                                        </div>
-                                                    )}
-                                                    <div>
-                                                        <p className="font-bold text-gray-900">{split.tutorName}</p>
-                                                        <p className="text-xs text-gray-500">{split.tutorEmail}</p>
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-left">
+                            <thead className="bg-gray-50/50 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] border-b border-gray-100">
+                                <tr>
+                                    <th className="px-8 py-4">Tutor Entity</th>
+                                    <th className="px-4 py-4 text-right">Gross Sales</th>
+                                    <th className="px-4 py-4 text-right">Admin Comm.</th>
+                                    <th className="px-8 py-4 text-right">Tutor Payout</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-100">
+                                {financials.breakdown.map((split, idx) => (
+                                    <tr key={idx} className="hover:bg-[#E6D929]/5 transition-colors">
+                                        <td className="px-8 py-5">
+                                            <div className="flex items-center gap-3">
+                                                {split.tutorProfile ? (
+                                                    <img
+                                                        src={split.tutorProfile}
+                                                        alt=""
+                                                        className="w-10 h-10 rounded-full object-cover border-2 border-white shadow-sm"
+                                                    />
+                                                ) : (
+                                                    <div className="w-10 h-10 rounded-full bg-[#1E2EDE] text-white flex items-center justify-center font-black text-xs">
+                                                        {split.tutorName.charAt(0)}
                                                     </div>
+                                                )}
+                                                <div>
+                                                    <p className="font-bold text-[#1E2EDE] text-sm">{split.tutorName}</p>
+                                                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">{split.tutorEmail}</p>
                                                 </div>
-                                            </td>
-                                            <td className="px-6 py-4 text-right font-medium text-gray-600">
-                                                {formatCurrency(split.salesAmount)}
-                                            </td>
-                                            <td className="px-6 py-4 text-right font-bold text-indigo-600 bg-indigo-50/20">
-                                                {formatCurrency(split.adminCommission)}
-                                            </td>
-                                            <td className="px-6 py-4 text-right font-bold text-emerald-600">
-                                                {formatCurrency(split.tutorEarnings)}
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
+                                            </div>
+                                        </td>
+                                        <td className="px-4 py-5 text-right text-xs font-bold text-gray-600">
+                                            {formatCurrency(split.salesAmount)}
+                                        </td>
+                                        <td className="px-4 py-5 text-right font-black text-[#14C4E7] text-xs">
+                                            {formatCurrency(split.adminCommission)}
+                                        </td>
+                                        <td className="px-8 py-5 text-right font-black text-emerald-600">
+                                            {formatCurrency(split.tutorEarnings)}
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            {/* ================= RIGHT COLUMN ================= */}
+            <div className="space-y-8">
+                {/* CUSTOMER CARD */}
+                <div className="bg-white p-8 rounded-[2rem] shadow-xl shadow-blue-900/5 border border-white relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 w-24 h-24 bg-[#14C4E7]/5 rounded-full -mr-12 -mt-12 transition-all group-hover:scale-150"></div>
+                    <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-6 flex items-center gap-2 relative z-10">
+                        <User size={16} className="text-[#14C4E7]" /> Learner Profile
+                    </h3>
+                    <div className="flex items-center gap-5 mb-8 relative z-10">
+                        <img
+                            src={customer.profileImage || "https://via.placeholder.com/100"}
+                            alt=""
+                            className="w-16 h-16 rounded-[1.5rem] border-4 border-[#FDFDFD] object-cover shadow-xl"
+                        />
+                        <div>
+                            <h4 className="font-black text-[#1E2EDE] text-xl leading-tight mb-1">{customer.fullName}</h4>
+                            <span
+                                className={`text-[9px] uppercase font-black px-3 py-1 rounded-full border-2 ${
+                                    customer.isBlocked ? "bg-red-50 text-red-600 border-red-100" : "bg-[#14C4E7]/10 text-[#14C4E7] border-[#14C4E7]/20"
+                                }`}
+                            >
+                                {customer.isBlocked ? "Restricted" : "Verified Learner"}
+                            </span>
+                        </div>
+                    </div>
+                    <div className="space-y-3 relative z-10">
+                        <div className="flex items-center gap-3 text-xs font-bold text-gray-600 p-4 bg-gray-50/50 rounded-2xl border border-gray-100 transition-colors hover:border-[#14C4E7]/30">
+                            <Mail size={16} className="text-[#14C4E7]" />
+                            <span className="truncate">{customer.email}</span>
+                        </div>
+                        {customer.phone && (
+                            <div className="flex items-center gap-3 text-xs font-bold text-gray-600 p-4 bg-gray-50/50 rounded-2xl border border-gray-100">
+                                <Phone size={16} className="text-[#14C4E7]" />
+                                <span>{customer.phone}</span>
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                {/* PAYMENT SUMMARY CARD */}
+                <div className="bg-white rounded-[2rem] shadow-2xl shadow-blue-900/10 border border-white overflow-hidden">
+                    <div className="p-8">
+                        <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
+                            <Receipt size={16} className="text-[#14C4E7]" /> Order Summary
+                        </h3>
+
+                        <div className="space-y-4 mb-8">
+                            <div className="flex justify-between text-xs font-bold text-gray-500">
+                                <span className="uppercase tracking-tighter">Gross Assets (MRP)</span>
+                                <span>{formatCurrency(order.totalAmount)}</span>
+                            </div>
+                            
+                            {order.couponDiscount > 0 && (
+                                <div className="flex justify-between items-center p-3 bg-emerald-50 rounded-xl border-2 border-dashed border-emerald-200">
+                                    <span className="flex items-center gap-2 text-[10px] font-black text-emerald-700 uppercase tracking-widest">
+                                        <Tag size={12} /> Voucher Savings
+                                    </span>
+                                    <span className="text-xs font-black text-emerald-700">-{formatCurrency(order.couponDiscount)}</span>
+                                </div>
+                            )}
+
+                            <div className="flex justify-between text-xs font-bold text-gray-500">
+                                <span className="uppercase tracking-tighter">Promotional Markdown</span>
+                                <span className="text-emerald-600">-{formatCurrency(order.discountAmount)}</span>
+                            </div>
+
+                            <div className="flex justify-between text-xs font-bold text-gray-500">
+                                <span className="uppercase tracking-tighter">Service Tax (GST 3%)</span>
+                                <span className="text-[#1E2EDE]">+{formatCurrency(order.taxAmount)}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="bg-[#1E2EDE] p-8 text-white relative overflow-hidden">
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-[#14C4E7]/10 rounded-full -mr-16 -mt-16"></div>
+                        <div className="flex justify-between items-center relative z-10">
+                            <div>
+                                <span className="text-[10px] text-[#E6D929] font-black uppercase tracking-[0.25em]">Final Remittance</span>
+                                <div className="flex items-center gap-2 mt-1 opacity-80">
+                                    <CreditCard size={14} />
+                                    <span className="text-[10px] font-black uppercase tracking-widest">{order.paymentMethod}</span>
+                                </div>
+                            </div>
+                            <span className="text-3xl font-black tracking-tighter">{formatCurrency(order.finalAmount)}</span>
                         </div>
                     </div>
                 </div>
 
-                {/* ================= RIGHT COLUMN (Customer & Payment Summary) ================= */}
-                <div className="space-y-6">
-                    {/* CUSTOMER CARD */}
-                    <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
-                        <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4 flex items-center gap-2">
-                            <User size={14} /> Customer Details
-                        </h3>
-                        <div className="flex items-center gap-4 mb-6">
-                            <img
-                                src={customer.profileImage || "https://via.placeholder.com/100"}
-                                alt={customer.fullName}
-                                className="w-14 h-14 rounded-full border border-gray-100 object-cover shadow-sm"
-                            />
-                            <div>
-                                <h4 className="font-bold text-gray-900 text-lg">{customer.fullName}</h4>
-                                <span
-                                    className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded-full ${
-                                        customer.isBlocked ? "bg-red-100 text-red-600" : "bg-green-100 text-green-600"
-                                    }`}
-                                >
-                                    {customer.isBlocked ? "Blocked" : "Active"}
-                                </span>
-                            </div>
-                        </div>
-                        <div className="space-y-3">
-                            <div className="flex items-center gap-3 text-sm text-gray-600 p-2 bg-gray-50 rounded-lg">
-                                <Mail size={16} className="text-gray-400" />
-                                <span className="truncate">{customer.email}</span>
-                            </div>
-                            {customer.phone && (
-                                <div className="flex items-center gap-3 text-sm text-gray-600 p-2 bg-gray-50 rounded-lg">
-                                    <Phone size={16} className="text-gray-400" />
-                                    <span>{customer.phone}</span>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-
-                    {/* PAYMENT SUMMARY CARD */}
-                    <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
-                        <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4 flex items-center gap-2">
-                            <Receipt size={14} /> Payment Summary
-                        </h3>
-
-                        <div className="space-y-3 mb-6">
-                            {/* MRP Total */}
-                            <div className="flex justify-between text-sm text-gray-600">
-                                <span>Subtotal (MRP)</span>
-                                <span>{formatCurrency(order.totalAmount)}</span>
-                            </div>
-                            {order.couponDiscount > 0 && (
-                                <div className="flex justify-between text-sm text-emerald-700 bg-emerald-50 px-2.5 py-1.5 rounded-lg border border-emerald-100">
-                                    <span className="flex items-center gap-1.5 font-medium">
-                                        <Tag size={12} /> Coupon Savings
-                                    </span>
-                                    <span className="font-bold">-{formatCurrency(order.couponDiscount)}</span>
-                                </div>
-                            )}
-
-                            {/* Total Discount */}
-                            <div className="flex justify-between text-sm text-gray-600">
-                                <span>Total Discount</span>
-                                <span className="text-green-600 font-medium">-{formatCurrency(order.discountAmount)}</span>
-                            </div>
-
-                            {/* Tax */}
-                            <div className="flex justify-between text-sm text-gray-600">
-                                <span>Tax (GST 3%)</span>
-                                <span>+{formatCurrency(order.taxAmount)}</span>
-                            </div>
-                        </div>
-
-                        {/* Grand Total */}
-                        <div className="pt-4 border-t border-dashed border-gray-200 flex justify-between items-end bg-gray-50 -mx-6 -mb-6 p-6 rounded-b-2xl">
-                            <div>
-                                <span className="text-xs text-gray-500 font-medium uppercase">Total Paid</span>
-                                <div className="flex items-center gap-1.5 mt-1">
-                                    <CreditCard size={14} className="text-gray-400" />
-                                    <span className="text-xs font-bold text-gray-500 uppercase">{order.paymentMethod}</span>
-                                </div>
-                            </div>
-                            <span className="text-2xl font-bold text-gray-900">{formatCurrency(order.finalAmount)}</span>
-                        </div>
-                    </div>
-
-                    {/* TRANSACTION ID */}
-                    <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200 text-center">
-                        <p className="text-xs text-gray-500 mb-1">Transaction ID</p>
-                        <div className="flex items-center justify-center gap-2 bg-gray-50 p-2 rounded border border-gray-100">
-                            <p className="font-mono text-xs font-medium text-gray-900 break-all select-all">
-                                {order.transactionId || "N/A"}
-                            </p>
-                            {order.transactionId && (
-                                <button
-                                    onClick={() => copyToClipboard(order.transactionId)}
-                                    className="text-gray-400 hover:text-indigo-600"
-                                >
-                                    <Copy size={12} />
-                                </button>
-                            )}
-                        </div>
+                {/* TRANSACTION ID */}
+                <div className="bg-white p-6 rounded-2xl shadow-xl shadow-blue-900/5 border border-white">
+                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest text-center mb-3">System Trace ID</p>
+                    <div className="group flex items-center justify-between gap-3 bg-gray-50 px-4 py-3 rounded-xl border-2 border-gray-100 hover:border-[#14C4E7]/30 transition-colors">
+                        <p className="font-mono text-[10px] font-black text-[#1E2EDE] truncate select-all">
+                            {order.transactionId || "N/A"}
+                        </p>
+                        {order.transactionId && (
+                            <button
+                                onClick={() => copyToClipboard(order.transactionId)}
+                                className="text-gray-400 hover:text-[#14C4E7] transition-all p-1"
+                            >
+                                <Copy size={14} />
+                            </button>
+                        )}
                     </div>
                 </div>
             </div>
         </div>
-    );
+    </div>
+);
 };
 
 export default OrderDetails;

@@ -1,9 +1,16 @@
 import React from "react";
 import heroImage from "../../assets/images/heroImage.avif";
+import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { selectUserIsAuthenticated } from "../../store/features/auth/userAuthSlice";
 
 export const HeroSection = () => {
+    const navigate = useNavigate();
+
+    const isAuthenticated = useSelector(selectUserIsAuthenticated);
+
     return (
-        <section className="relative min-h-screen flex flex-col justify-center overflow-hidden bg-[#FDFDFD] pt-24 pb-16 lg:pt-32 lg:pb-24">
+        <section className="relative min-h-screen flex flex-col justify-center overflow-hidden bg-[#FDFDFD] pb-16 lg:pt-32 lg:pb-24">
             {/* Background Decor - Extends to the very top to show through the translucent header */}
             <div className="absolute top-0 right-0 w-1/2 h-full bg-[#1E2EDE]/[0.02] -skew-x-12 transform origin-top-right pointer-events-none"></div>
 
@@ -32,8 +39,17 @@ export const HeroSection = () => {
                         </p>
 
                         <div className="flex flex-col sm:flex-row gap-4 pt-4">
-                            <button className="px-10 py-5 bg-[#1E2EDE] hover:bg-[#14C4E7] text-[#FDFDFD] font-black rounded-2xl transition-all shadow-xl shadow-[#1E2EDE]/20 flex items-center justify-center gap-3 transform hover:-translate-y-1 active:scale-95 group">
-                                Register Now
+                            <button
+                                onClick={() => (isAuthenticated ? navigate("/user/courses") : navigate("/user/register"))}
+                                className={`px-10 py-5 ${
+                                    isAuthenticated
+                                        ? "bg-gradient-to-r from-[#E6D929] to-[#14C4E7] hover:from-[#14C4E7] hover:to-[#E6D929]"
+                                        : "bg-[#1E2EDE] hover:bg-[#14C4E7]"
+                                } text-[#FDFDFD] font-black rounded-2xl transition-all shadow-xl ${
+                                    isAuthenticated ? "shadow-[#E6D929]/20" : "shadow-[#1E2EDE]/20"
+                                } flex items-center justify-center gap-3 transform hover:-translate-y-1 active:scale-95 group`}
+                            >
+                                {isAuthenticated ? "Browse Courses" : "Register Now"}
                                 <svg
                                     className="w-5 h-5 group-hover:translate-x-1 transition-transform"
                                     fill="none"
@@ -48,19 +64,17 @@ export const HeroSection = () => {
                                     />
                                 </svg>
                             </button>
-                            <button className="px-10 py-5 bg-[#FDFDFD] hover:bg-slate-50 text-[#1E2EDE] border-2 border-[#1E2EDE]/10 font-black rounded-2xl transition-all flex items-center justify-center transform hover:-translate-y-1 active:scale-95">
-                                Login
-                            </button>
+                            {!isAuthenticated && (
+                                <button
+                                    onClick={() => navigate("/user/login")}
+                                    className="px-10 py-5 bg-[#FDFDFD] hover:bg-slate-50 text-[#1E2EDE] border-2 border-[#1E2EDE]/10 font-black rounded-2xl transition-all flex items-center justify-center transform hover:-translate-y-1 active:scale-95"
+                                >
+                                    Login
+                                </button>
+                            )}
                         </div>
 
-                        <div className="flex items-center gap-6 pt-6 grayscale opacity-60">
-                            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Trusted by</p>
-                            <div className="flex gap-4">
-                                <span className="font-black text-xl text-slate-300 tracking-tighter">GLOBAL</span>
-                                <span className="font-black text-xl text-slate-300 tracking-tighter">ELITE</span>
-                                <span className="font-black text-xl text-slate-300 tracking-tighter">INSPIRE</span>
-                            </div>
-                        </div>
+                        
                     </div>
 
                     {/* Visual Content */}
@@ -72,7 +86,7 @@ export const HeroSection = () => {
                             {/* Main Image Container */}
                             <div className="relative rounded-[3rem] overflow-hidden border-8 border-[#FDFDFD] shadow-2xl transform rotate-2 hover:rotate-0 transition-all duration-700 aspect-[4/5] group">
                                 <img
-                                    src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&q=80&w=1000"
+                                    src={heroImage}
                                     alt="Students Learning"
                                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000"
                                 />

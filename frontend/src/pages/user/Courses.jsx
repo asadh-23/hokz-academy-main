@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo } from "react";
-import { Search, Star, SlidersHorizontal, Heart, X, ChevronDown } from "lucide-react";
+import { Search, SlidersHorizontal, X, ChevronDown, Star, Heart, BookOpen, Clock } from "lucide-react";
 import { toast } from "sonner";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -130,7 +130,7 @@ const Courses = () => {
             toast.error("Please login to add courses to wishlist");
             return;
         }
-        
+
         try {
             const result = await dispatch(toggleUserWishlist(courseId)).unwrap();
             if (result.action === "added") {
@@ -168,272 +168,302 @@ const Courses = () => {
     const hasActiveFilters = filters.minPrice || filters.maxPrice || filters.sort;
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-            {/* Header Section */}
-            <div className="bg-white shadow-sm border-b border-gray-200">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-                    <div className="mb-6">
-                        <h1 className="text-4xl font-bold bg-gradient-to-r from-cyan-600 to-emerald-600 bg-clip-text text-transparent mb-2">
-                            Discover Courses
-                        </h1>
-                        <p className="text-gray-600">Learn from expert tutors and advance your skills</p>
-                    </div>
-
-                    {/* Search Bar with Filter Button */}
-                    <div className="flex gap-3">
-                        <div className="relative flex-1">
-                            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                <Search className="h-5 w-5 text-gray-400" />
-                            </div>
-                            <input
-                                type="text"
-                                className="block w-full pl-12 pr-4 py-3.5 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all"
-                                placeholder="Search for courses..."
-                                value={filters.search}
-                                onChange={handleSearchChange}
-                            />
-                        </div>
-
-                        {/* Filter Dropdown Button */}
-                        <div className="relative" ref={filterDropdownRef}>
-                            <button
-                                onClick={() => setIsFilterOpen(!isFilterOpen)}
-                                className={`flex items-center gap-2 px-6 py-3.5 rounded-xl font-medium transition-all ${
-                                    hasActiveFilters
-                                        ? "bg-gradient-to-r from-cyan-500 to-emerald-500 text-white shadow-lg"
-                                        : "bg-white border-2 border-gray-300 text-gray-700 hover:border-cyan-500"
-                                }`}
-                            >
-                                <SlidersHorizontal className="h-5 w-5" />
-                                <span>Filters</span>
-                                {hasActiveFilters && (
-                                    <span className="bg-white text-cyan-600 text-xs font-bold px-2 py-0.5 rounded-full">
-                                        Active
-                                    </span>
-                                )}
-                            </button>
-
-                            {/* Filter Dropdown */}
-                            {isFilterOpen && (
-                                <div className="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-2xl border border-gray-200 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
-                                    <div className="p-5">
-                                        <div className="flex items-center justify-between mb-4">
-                                            <h3 className="text-lg font-bold text-gray-900">Filter Options</h3>
-                                            <button
-                                                onClick={() => setIsFilterOpen(false)}
-                                                className="text-gray-400 hover:text-gray-600 transition-colors"
-                                            >
-                                                <X className="h-5 w-5" />
-                                            </button>
-                                        </div>
-
-                                        {/* Sort By */}
-                                        <div className="mb-4">
-                                            <label className="block text-sm font-semibold text-gray-700 mb-2">
-                                                Sort By
-                                            </label>
-                                            <div className="relative">
-                                                <select
-                                                    value={tempFilters.sort}
-                                                    onChange={(e) => handleTempFilterChange("sort", e.target.value)}
-                                                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 appearance-none bg-white cursor-pointer"
-                                                >
-                                                    {sortOptions.map((option) => (
-                                                        <option key={option.value} value={option.value}>
-                                                            {option.label}
-                                                        </option>
-                                                    ))}
-                                                </select>
-                                                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none" />
-                                            </div>
-                                        </div>
-
-                                        {/* Price Range */}
-                                        <div className="mb-5">
-                                            <label className="block text-sm font-semibold text-gray-700 mb-2">
-                                                Price Range
-                                            </label>
-                                            <div className="grid grid-cols-2 gap-3">
-                                                <div>
-                                                    <input
-                                                        type="number"
-                                                        placeholder="Min ₹"
-                                                        value={tempFilters.minPrice}
-                                                        onChange={(e) => handleTempFilterChange("minPrice", e.target.value)}
-                                                        className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500"
-                                                    />
-                                                </div>
-                                                <div>
-                                                    <input
-                                                        type="number"
-                                                        placeholder="Max ₹"
-                                                        value={tempFilters.maxPrice}
-                                                        onChange={(e) => handleTempFilterChange("maxPrice", e.target.value)}
-                                                        className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500"
-                                                    />
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        {/* Action Buttons */}
-                                        <div className="flex gap-2">
-                                            <button
-                                                onClick={handleClearFilters}
-                                                className="flex-1 px-4 py-2.5 border-2 border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors"
-                                            >
-                                                Clear
-                                            </button>
-                                            <button
-                                                onClick={handleApplyFilters}
-                                                className="flex-1 px-4 py-2.5 bg-gradient-to-r from-cyan-500 to-emerald-500 text-white rounded-lg font-medium hover:from-cyan-600 hover:to-emerald-600 transition-all shadow-md"
-                                            >
-                                                Apply
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                    </div>
+        <div className="min-h-screen bg-[#FDFDFD]">
+            {/* --- TOP NAVIGATION BREADCRUMB --- */}
+            <div className="bg-white border-b border-slate-100">
+                <div className="max-w-7xl mx-auto px-4 py-4 flex items-center text-[10px] font-black uppercase tracking-widest text-slate-400">
+                    <Link to="/" className="hover:text-[#1E2EDE]">
+                        Home
+                    </Link>
+                    <span className="mx-2 text-[#14C4E7]">/</span>
+                    <span className="text-[#1E2EDE]">Courses</span>
                 </div>
             </div>
 
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                {/* Category Pills */}
-                <div className="mb-8">
-                    <h2 className="text-lg font-bold text-gray-900 mb-4">Browse by Category</h2>
-                    <div className="flex flex-wrap gap-3">
-                        <button
-                            onClick={() => handleCategoryClick("")}
-                            className={`px-5 py-2.5 rounded-full font-medium transition-all ${
-                                filters.category === ""
-                                    ? "bg-gradient-to-r from-cyan-500 to-emerald-500 text-white shadow-lg scale-105"
-                                    : "bg-white text-gray-700 border-2 border-gray-300 hover:border-cyan-500"
-                            }`}
-                        >
-                            All Categories
-                        </button>
-                        {categories.map((cat) => (
-                            <button
-                                key={cat._id}
-                                onClick={() => handleCategoryClick(cat._id)}
-                                className={`px-5 py-2.5 rounded-full font-medium transition-all ${
-                                    filters.category === cat._id
-                                        ? "bg-gradient-to-r from-cyan-500 to-emerald-500 text-white shadow-lg scale-105"
-                                        : "bg-white text-gray-700 border-2 border-gray-300 hover:border-cyan-500"
-                                }`}
-                            >
-                                {cat.name}
-                            </button>
-                        ))}
-                    </div>
-                </div>
+            {/* --- SEARCH & DISCOVER HEADER --- */}
+            <section className="py-12 px-4">
+                <div className="max-w-7xl mx-auto">
+                    <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8">
+                        <div className="max-w-xl">
+                            <h1 className="text-4xl md:text-5xl font-black text-[#1E2EDE] leading-tight">
+                                Master New <span className="text-[#14C4E7]">Skills</span> <br />
+                                with Hokz Academy
+                            </h1>
+                            <p className="mt-4 text-slate-500 font-medium">
+                                Join over 5,000 students learning from top-tier professionals.
+                            </p>
+                        </div>
 
-                {/* Course Grid */}
-                {loading ? (
-                    <div className="flex justify-center items-center py-20">
-                        <div className="relative">
-                            <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-cyan-600"></div>
-                            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-                                <div className="h-8 w-8 bg-gradient-to-r from-cyan-500 to-emerald-500 rounded-full"></div>
+                        {/* Interactive Search Bar */}
+                        <div className="flex flex-col sm:flex-row items-center gap-3 w-full lg:w-auto">
+                            <div className="relative w-full sm:w-80 md:w-96">
+                                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[#14C4E7]" size={20} />
+                                <input
+                                    type="text"
+                                    value={filters.search}
+                                    onChange={handleSearchChange}
+                                    placeholder="Search for subjects..."
+                                    className="w-full pl-12 pr-4 py-4 bg-white border-2 border-slate-100 rounded-2xl focus:border-[#1E2EDE] focus:ring-0 transition-all font-bold text-[#1E2EDE] shadow-sm"
+                                />
+                            </div>
+
+                            {/* Filter Dropdown Logic */}
+                            <div className="relative w-full sm:w-auto" ref={filterDropdownRef}>
+                                <button
+                                    onClick={() => setIsFilterOpen(!isFilterOpen)}
+                                    className={`w-full flex items-center justify-center gap-2 px-6 py-4 rounded-2xl font-black text-xs uppercase tracking-widest transition-all shadow-md active:scale-95 ${
+                                        hasActiveFilters
+                                            ? "bg-[#E6D929] text-[#1E2EDE]"
+                                            : "bg-[#1E2EDE] text-white hover:bg-[#14C4E7]"
+                                    }`}
+                                >
+                                    <SlidersHorizontal size={18} />
+                                    <span>Filter</span>
+                                </button>
+
+                                {isFilterOpen && (
+                                    <div className="absolute right-0 mt-4 w-full sm:w-80 bg-white rounded-3xl shadow-2xl border border-slate-100 z-[100] p-6 animate-in fade-in zoom-in-95">
+                                        <div className="flex justify-between items-center mb-6">
+                                            <h4 className="font-black text-[#1E2EDE] uppercase text-xs tracking-widest">
+                                                Sort & Filter
+                                            </h4>
+                                            <button onClick={() => setIsFilterOpen(false)}>
+                                                <X size={20} className="text-slate-300 hover:text-red-500" />
+                                            </button>
+                                        </div>
+
+                                        <div className="space-y-6">
+                                            <div>
+                                                <label className="block text-[10px] font-black text-slate-400 uppercase mb-2">
+                                                    Sort Order
+                                                </label>
+                                                <div className="relative">
+                                                    <select
+                                                        value={tempFilters.sort}
+                                                        onChange={(e) => handleTempFilterChange("sort", e.target.value)}
+                                                        className="w-full p-3 bg-slate-50 border-none rounded-xl font-bold text-[#1E2EDE] appearance-none cursor-pointer"
+                                                    >
+                                                        {sortOptions.map((opt) => (
+                                                            <option key={opt.value} value={opt.value}>
+                                                                {opt.label}
+                                                            </option>
+                                                        ))}
+                                                    </select>
+                                                    <ChevronDown
+                                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-[#1E2EDE]"
+                                                        size={16}
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            <div>
+                                                <label className="block text-[10px] font-black text-slate-400 uppercase mb-2">
+                                                    Price Range (₹)
+                                                </label>
+                                                <div className="flex gap-2">
+                                                    <input
+                                                        type="number"
+                                                        placeholder="Min"
+                                                        value={tempFilters.minPrice}
+                                                        onChange={(e) => handleTempFilterChange("minPrice", e.target.value)}
+                                                        className="w-1/2 p-3 bg-slate-50 border-none rounded-xl font-bold text-[#1E2EDE]"
+                                                    />
+                                                    <input
+                                                        type="number"
+                                                        placeholder="Max"
+                                                        value={tempFilters.maxPrice}
+                                                        onChange={(e) => handleTempFilterChange("maxPrice", e.target.value)}
+                                                        className="w-1/2 p-3 bg-slate-50 border-none rounded-xl font-bold text-[#1E2EDE]"
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            <div className="flex gap-2 pt-2">
+                                                <button
+                                                    onClick={handleClearFilters}
+                                                    className="flex-1 py-3 font-black text-[10px] uppercase text-slate-400 hover:text-[#1E2EDE]"
+                                                >
+                                                    Reset
+                                                </button>
+                                                <button
+                                                    onClick={handleApplyFilters}
+                                                    className="flex-2 bg-[#1E2EDE] text-[#E6D929] px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-blue-100"
+                                                >
+                                                    Apply
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>
+                </div>
+            </section>
+
+            {/* --- CATEGORY SELECTOR --- */}
+            <div className="max-w-7xl mx-auto px-4 mb-12">
+                <div className="flex gap-3 overflow-x-auto pb-4 no-scrollbar">
+                    <button
+                        onClick={() => handleCategoryClick("")}
+                        className={`shrink-0 px-6 py-3 rounded-full font-black text-[10px] uppercase tracking-widest transition-all ${
+                            filters.category === ""
+                                ? "bg-[#14C4E7] text-white shadow-lg"
+                                : "bg-slate-100 text-slate-500 hover:bg-slate-200"
+                        }`}
+                    >
+                        All Classes
+                    </button>
+                    {categories.map((cat) => (
+                        <button
+                            key={cat._id}
+                            onClick={() => handleCategoryClick(cat._id)}
+                            className={`shrink-0 px-6 py-3 rounded-full font-black text-[10px] uppercase tracking-widest transition-all ${
+                                filters.category === cat._id
+                                    ? "bg-[#14C4E7] text-white shadow-lg"
+                                    : "bg-slate-100 text-slate-500 hover:bg-slate-200"
+                            }`}
+                        >
+                            {cat.name}
+                        </button>
+                    ))}
+                </div>
+            </div>
+
+            {/* --- MAIN GRID --- */}
+            <div className="max-w-7xl mx-auto px-4 pb-20">
+                {loading ? (
+                    <div className="flex justify-center items-center py-40">
+                        <div className="w-12 h-12 border-4 border-[#14C4E7] border-t-transparent rounded-full animate-spin"></div>
+                    </div>
                 ) : courses.length > 0 ? (
-                    <>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                            {courses.map((course) => (
-                                <Link
-                                    to={`/user/courses/${course._id}`}
-                                    key={course._id}
-                                    className="group bg-white rounded-2xl shadow-md hover:shadow-2xl transition-all duration-300 overflow-hidden flex flex-col cursor-pointer transform hover:-translate-y-2"
-                                >
-                                    {/* Course Image */}
-                                    <div className="relative h-48 overflow-hidden bg-gradient-to-br from-gray-200 to-gray-300">
-                                        <img
-                                            src={course.thumbnailUrl}
-                                            alt={course.title}
-                                            className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500"
-                                        />
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                        {courses.map((course) => (
+                            <Link
+                                to={`/user/courses/${course._id}`}
+                                key={course._id}
+                                className="group bg-[#FDFDFD] rounded-[2.5rem] border border-slate-100 flex flex-col hover:shadow-[0_20px_50px_rgba(30,46,222,0.1)] transition-all duration-500 overflow-hidden relative"
+                            >
+                                {/* --- IMAGE SECTION --- */}
+                                <div className="relative h-56 m-3 overflow-hidden rounded-[2rem]">
+                                    <img
+                                        src={course.thumbnailUrl}
+                                        className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700"
+                                        alt={course.title}
+                                    />
 
-                                        {course.offerPercentage > 0 && (
-                                            <div className="absolute top-3 left-3 bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold shadow-lg">
-                                                {course.offerPercentage}% OFF
-                                            </div>
-                                        )}
+                                    {/* Glassmorphism Gradient Overlay */}
+                                    <div className="absolute inset-0 bg-gradient-to-t from-slate-900/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
-                                        {/* Only show wishlist button if authenticated */}
-                                        {isAuthenticated && (
-                                            <button
-                                                disabled={loadingById[course._id]}
-                                                className="absolute top-3 right-3 p-2.5 bg-white/90 backdrop-blur-sm rounded-full shadow-lg hover:bg-white transition-all group/heart"
-                                                onClick={(e) => {
-                                                    e.preventDefault();
-                                                    e.stopPropagation();
-                                                    handleToggleWishlist(course._id, course.title);
-                                                }}
-                                            >
-                                                {loadingById[course._id] ? (
-                                                    <div className="w-5 h-5 border-2 border-red-500 border-t-transparent rounded-full animate-spin"></div>
-                                                ) : (
-                                                    <Heart
-                                                        className={`w-5 h-5 transition-all ${
-                                                            isInWishlist(course._id)
-                                                                ? "text-red-500 fill-red-500"
-                                                                : "text-gray-700 group-hover/heart:text-red-500 group-hover/heart:fill-red-500"
-                                                        }`}
-                                                    />
-                                                )}
-                                            </button>
-                                        )}
+                                    {/* Floating Offer Badge - Using Golden for High Contrast */}
+                                    {course.offerPercentage > 0 && (
+                                        <div className="absolute top-4 left-4 z-10 bg-[#E6D929] text-[#1E2EDE] px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider shadow-lg">
+                                            SAVE {course.offerPercentage}%
+                                        </div>
+                                    )}
+
+                                    {/* Wishlist Button - Functional & Refined */}
+                                    {isAuthenticated && (
+                                        <button
+                                            disabled={loadingById[course._id]}
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                e.stopPropagation();
+                                                handleToggleWishlist(course._id, course.title);
+                                            }}
+                                            className="absolute top-4 right-4 w-11 h-11 bg-white/80 backdrop-blur-md rounded-2xl flex items-center justify-center shadow-lg transition-all active:scale-90 group/heart"
+                                        >
+                                            {loadingById[course._id] ? (
+                                                <div className="w-5 h-5 border-2 border-[#14C4E7] border-t-transparent rounded-full animate-spin" />
+                                            ) : (
+                                                <Heart
+                                                    size={22}
+                                                    className={`transition-all duration-300 ${
+                                                        isInWishlist(course._id)
+                                                            ? "fill-red-500 text-red-500 scale-110"
+                                                            : "text-slate-400 group-hover/heart:text-red-500"
+                                                    }`}
+                                                />
+                                            )}
+                                        </button>
+                                    )}
+                                </div>
+
+                                {/* --- CONTENT SECTION --- */}
+                                <div className="px-7 pb-7 flex flex-col flex-1">
+                                    {/* Category Label - Cyan Accent */}
+                                    <div className="flex items-center gap-2 mb-3">
+                                        <span className="w-2 h-2 rounded-full bg-[#14C4E7]" />
+                                        <span className="text-[10px] font-black uppercase tracking-[0.15em] text-[#14C4E7]">
+                                            {course.category?.name}
+                                        </span>
                                     </div>
 
-                                    {/* Course Details */}
-                                    <div className="p-5 flex-1 flex flex-col">
-                                        <div className="mb-2">
-                                            <span className="inline-block bg-gradient-to-r from-purple-100 to-pink-100 text-purple-700 px-3 py-1 rounded-full text-xs font-semibold">
-                                                {course.category?.name}
-                                            </span>
-                                        </div>
+                                    {/* Title - Slate base, Blue on Hover */}
+                                    <h3 className="text-xl font-bold text-slate-800 leading-snug mb-3 line-clamp-2 transition-colors duration-300 group-hover:text-[#1E2EDE]">
+                                        {course.title}
+                                    </h3>
 
-                                        <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-2 leading-tight group-hover:text-cyan-600 transition-colors">
-                                            {course.title}
-                                        </h3>
-
-                                        <p className="text-gray-500 text-sm mb-3 line-clamp-1">
-                                            {course.tutor?.fullName || "Unknown Instructor"}
-                                        </p>
-
-                                        <div className="flex items-center gap-1 mb-4">
-                                            <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                                            <span className="text-sm font-semibold text-gray-900">
+                                    {/* Rating Section - Golden Accent */}
+                                    <div className="flex items-center gap-3 mb-6">
+                                        <div className="flex items-center gap-1 bg-[#E6D929]/10 px-2 py-1 rounded-lg">
+                                            <Star size={14} className="fill-[#E6D929] text-[#E6D929]" />
+                                            <span className="text-xs font-black text-slate-700">
                                                 {course.rating || "4.5"}
                                             </span>
-                                            <span className="text-sm text-gray-500">({course.reviews || "0"})</span>
+                                        </div>
+                                        <span className="text-[11px] text-slate-400 font-bold uppercase tracking-widest">
+                                            ({course.reviews || "0"} Students)
+                                        </span>
+                                    </div>
+
+                                    {/* --- FOOTER SECTION --- */}
+                                    <div className="mt-auto pt-6 border-t border-slate-50 flex items-center justify-between">
+                                        <div className="flex flex-col">
+                                            {course.offerPercentage > 0 && (
+                                                <span className="text-[11px] text-slate-300 line-through font-bold tracking-wide">
+                                                    ₹{course.price}
+                                                </span>
+                                            )}
+                                            <span className="text-2xl font-black text-slate-900 group-hover:text-[#1E2EDE] transition-colors">
+                                                ₹{Math.round(course.price - (course.price * course.offerPercentage) / 100)}
+                                            </span>
                                         </div>
 
-                                        <div className="mt-auto pt-4 border-t border-gray-100">
-                                            <div className="flex items-center gap-2">
-                                                <span className="text-2xl font-bold bg-gradient-to-r from-cyan-600 to-emerald-600 bg-clip-text text-transparent">
-                                                    ₹
-                                                    {Math.round(
-                                                        course.price - (course.price * course.offerPercentage) / 100,
-                                                    )}
-                                                </span>
-
-                                                {course.offerPercentage > 0 && (
-                                                    <span className="text-base text-gray-400 line-through">
-                                                        ₹{course.price}
-                                                    </span>
-                                                )}
+                                        {/* CTA Icon Button - Transitions to Blue */}
+                                        <div className="relative">
+                                            <div className="w-12 h-12 bg-slate-50 text-[#14C4E7] rounded-2xl flex items-center justify-center transition-all duration-500 group-hover:bg-[#1E2EDE] group-hover:text-[#E6D929] group-hover:rotate-[360deg] shadow-sm">
+                                                <BookOpen size={20} />
                                             </div>
+                                            {/* Visual "Plus" hint */}
+                                            <div className="absolute -top-1 -right-1 w-4 h-4 bg-[#14C4E7] rounded-full border-2 border-white group-hover:bg-[#E6D929] transition-colors" />
                                         </div>
                                     </div>
-                                </Link>
-                            ))}
+                                </div>
+                            </Link>
+                        ))}
+                    </div>
+                ) : (
+                    <div className="text-center py-32 bg-slate-50 rounded-[3rem] border-2 border-dashed border-slate-200">
+                        <div className="bg-white w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 shadow-xl text-slate-200">
+                            <Search size={32} />
                         </div>
+                        <h2 className="text-2xl font-black text-[#1E2EDE] mb-2">No Courses Found</h2>
+                        <p className="text-slate-400 mb-8 max-w-xs mx-auto">
+                            We couldn't find anything matching your search criteria.
+                        </p>
+                        <button
+                            onClick={handleClearFilters}
+                            className="bg-[#1E2EDE] text-[#E6D929] px-8 py-3 rounded-xl font-black uppercase text-[10px] tracking-widest shadow-lg"
+                        >
+                            Clear All Filters
+                        </button>
+                    </div>
+                )}
 
-                        {/* Pagination */}
+                {/* --- PAGINATION --- */}
+                {courses.length > 0 && (
+                    <div className="mt-20 flex justify-center">
                         <Pagination
                             currentPage={pagination.currentPage}
                             totalPages={pagination.totalPages}
@@ -442,22 +472,6 @@ const Courses = () => {
                             onPageChange={handlePageChange}
                             label="Courses"
                         />
-                    </>
-                ) : (
-                    <div className="text-center py-20 bg-white rounded-2xl border-2 border-dashed border-gray-300">
-                        <div className="mx-auto h-20 w-20 text-gray-300 mb-4">
-                            <Search size={80} strokeWidth={1.5} />
-                        </div>
-                        <h3 className="text-2xl font-bold text-gray-900 mb-2">No courses found</h3>
-                        <p className="text-gray-500 mb-6 max-w-md mx-auto">
-                            Try adjusting your search or filters to find what you're looking for.
-                        </p>
-                        <button
-                            onClick={handleClearFilters}
-                            className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-cyan-500 to-emerald-500 text-white font-semibold rounded-xl hover:from-cyan-600 hover:to-emerald-600 transition-all shadow-lg"
-                        >
-                            Clear all filters
-                        </button>
                     </div>
                 )}
             </div>

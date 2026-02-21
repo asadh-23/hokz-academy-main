@@ -1,91 +1,109 @@
 import React from "react";
-import { Play, Award, Clock, BookOpen, User } from "lucide-react";
+import { BookOpen, Clock, Play, Award, CheckCircle2, ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { formatText } from "../../../utils/formatText";
 
 const CourseCard = ({ course, viewMode = "grid" }) => {
     const navigate = useNavigate();
     const isCompleted = course.progress === 100;
+    const progressColor = isCompleted ? "#E6D929" : "#14C4E7";
 
-    // Button Click Handler
     const handleNavigation = (isCompleted) => {
-        isCompleted ? navigate("/user/certificates") : navigate(`/user/learn/${course._id}`);
+        if (!isCompleted) {
+            navigate(`/user/learn/${course._id}`);
+            return;
+        }
+
+        if (course.exam) {
+            if (course.examStatus?.isPassed) {
+                navigate("/user/certificates");
+            } else {
+                navigate(`/user/learn/${course._id}`);
+            }
+        } else {
+            navigate("/user/certificates");
+        }
     };
 
     if (viewMode === "list") {
         return (
-            <div className="group bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden transition-all duration-300 hover:shadow-xl hover:border-indigo-200 p-6">
-                <div className="flex items-center gap-6">
+            <div className="group bg-white rounded-[2rem] border border-slate-100 p-4 md:p-6 transition-all duration-500 hover:shadow-[0_20px_50px_rgba(30,46,222,0.08)]">
+                <div className="flex flex-col md:flex-row items-center gap-6">
                     {/* Thumbnail */}
-                    <div className="relative w-32 h-20 rounded-xl overflow-hidden shrink-0">
+                    <div className="relative w-full md:w-48 h-32 rounded-2xl overflow-hidden shrink-0 shadow-inner bg-slate-100">
                         <img
                             src={course.thumbnailUrl || "https://via.placeholder.com/400x225"}
                             alt={course.title}
-                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                        {isCompleted && (
+                            <div className="absolute inset-0 bg-[#1E2EDE]/20 backdrop-blur-[2px] flex items-center justify-center">
+                                <CheckCircle2 className="text-[#E6D929]" size={32} />
+                            </div>
+                        )}
                     </div>
 
-                    {/* Content */}
-                    <div className="flex-1 min-w-0">
-                        <div className="flex items-start justify-between mb-2">
-                            <div className="flex-1">
+                    {/* Content Section */}
+                    <div className="flex-1 w-full min-w-0">
+                        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-4">
+                            <div>
                                 <div className="flex items-center gap-3 mb-2">
-                                    <span className="bg-blue-50 text-blue-600 text-xs px-3 py-1 rounded-full font-semibold">
+                                    <span className="text-[9px] font-black uppercase tracking-widest text-[#14C4E7] bg-[#14C4E7]/5 px-3 py-1 rounded-lg">
                                         {course.category?.name || "General"}
                                     </span>
-                                    <span className="text-xs text-gray-500 flex items-center gap-1">
-                                        <BookOpen size={12} />
-                                        {course.lessonsCount || 0} Lessons
-                                    </span>
-                                    <span className="text-xs text-gray-500 flex items-center gap-1">
-                                        <Clock size={12} />
-                                        {course.totalDurationSeconds || 0}
-                                    </span>
+                                    <div className="flex items-center gap-4 text-slate-400 font-bold text-[10px] uppercase tracking-tighter">
+                                        <span className="flex items-center gap-1">
+                                            <BookOpen size={12} /> {course.lessonsCount || 0} Lessons
+                                        </span>
+                                        <span className="flex items-center gap-1">
+                                            <Clock size={12} /> {course.totalDurationSeconds || "0m"}
+                                        </span>
+                                    </div>
                                 </div>
-                                <h3 className="text-lg font-bold text-gray-800 mb-2 line-clamp-1">{course.title}</h3>
-
-                                {/* Course Description */}
-                                {course.description && (
-                                    <p className="text-sm text-gray-600 mb-3 line-clamp-2 leading-relaxed">
-                                        {course.description}
-                                    </p>
-                                )}
-
-                                <div className="flex items-center gap-2 mb-3">
+                                <h3 className="text-xl font-black text-[#1E2EDE] mb-1 line-clamp-1 group-hover:text-[#14C4E7] transition-colors">
+                                    {course.title}
+                                </h3>
+                                <div className="flex items-center gap-2">
                                     <img
-                                        src={course.tutor?.profileImage || "https://via.placeholder.com/32"}
-                                        className="w-6 h-6 rounded-full border border-gray-200 object-cover"
-                                        alt="tutor"
+                                        src={course.tutor?.profileImage}
+                                        className="w-5 h-5 rounded-full object-cover border border-[#14C4E7]"
+                                        alt="Tutor"
                                     />
-                                    <span className="text-sm text-gray-600">{course.tutor?.fullName || "Instructor"}</span>
+                                    <span className="text-xs font-bold text-slate-500 uppercase tracking-tight">
+                                        {course.tutor?.fullName}
+                                    </span>
                                 </div>
                             </div>
 
-                            <div className="text-right">
-                                <div
-                                    className={`text-sm font-semibold mb-1 ${isCompleted ? "text-emerald-500" : "text-indigo-600"}`}
+                            {/* Action & Percentage */}
+                            <div className="flex flex-row lg:flex-col items-center lg:items-end justify-between gap-2">
+                                <span
+                                    className={`text-xs font-black uppercase tracking-widest ${isCompleted ? "text-[#E6D929]" : "text-[#1E2EDE]"}`}
                                 >
                                     {course.progress || 0}% Complete
-                                </div>
+                                </span>
                                 <button
                                     onClick={() => handleNavigation(isCompleted)}
-                                    className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
+                                    className={`px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center gap-2 transition-all active:scale-95 shadow-lg ${
                                         isCompleted
-                                            ? "bg-emerald-500 hover:bg-emerald-600 text-white"
-                                            : "bg-indigo-600 hover:bg-indigo-700 text-white"
+                                            ? "bg-[#E6D929] text-[#1E2EDE] shadow-yellow-100"
+                                            : "bg-[#1E2EDE] text-[#FDFDFD] shadow-blue-100 hover:bg-[#14C4E7]"
                                     }`}
                                 >
+                                    {isCompleted ? <Award size={14} /> : <Play size={14} />}
                                     {isCompleted ? "Certificate" : "Continue"}
                                 </button>
                             </div>
                         </div>
 
                         {/* Progress Bar */}
-                        <div className="w-full bg-gray-100 rounded-full h-2">
+                        <div className="w-full bg-slate-50 rounded-full h-2 overflow-hidden border border-slate-100">
                             <div
-                                className={`h-2 rounded-full transition-all duration-1000 ${isCompleted ? "bg-emerald-500" : "bg-indigo-600"}`}
-                                style={{ width: `${course.progress || 0}%` }}
+                                className="h-full rounded-full transition-all duration-1000 ease-out"
+                                style={{
+                                    width: `${course.progress || 0}%`,
+                                    backgroundColor: progressColor,
+                                }}
                             />
                         </div>
                     </div>
@@ -94,123 +112,120 @@ const CourseCard = ({ course, viewMode = "grid" }) => {
         );
     }
 
+    // --- GRID MODE DESIGN ---
     return (
-        <div className="group relative bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 hover:border-indigo-200 flex flex-col h-full">
-            {/* Thumbnail Section */}
-            <div className="relative h-48 w-full overflow-hidden shrink-0">
+        <div className="group bg-white rounded-[2.5rem] border border-slate-100 flex flex-col h-full transition-all duration-500 hover:shadow-[0_30px_60px_rgba(30,46,222,0.12)] hover:-translate-y-2 overflow-hidden">
+            {/* Thumbnail Header */}
+            <div className="relative h-48 m-3 overflow-hidden rounded-[2rem] shrink-0">
                 <img
                     src={course.thumbnailUrl || "https://via.placeholder.com/400x225"}
                     alt={course.title}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                 />
 
-                {/* Progress Badge */}
-                <div className="absolute top-4 right-4">
+                {/* Status Overlay */}
+                <div className="absolute top-4 right-4 z-10">
                     <div
-                        className={`px-3 py-1 rounded-full text-xs font-bold backdrop-blur-sm border ${
+                        className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest backdrop-blur-md border ${
                             isCompleted
-                                ? "bg-emerald-500/90 text-white border-emerald-400"
-                                : "bg-indigo-600/90 text-white border-indigo-400"
+                                ? "bg-[#E6D929]/90 text-[#1E2EDE] border-[#E6D929]"
+                                : "bg-[#1E2EDE]/80 text-white border-white/20"
                         }`}
                     >
                         {course.progress || 0}%
                     </div>
                 </div>
 
-                {/* Hover Overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                    {!isCompleted ? (
-                        <button
-                            onClick={() => handleNavigation(isCompleted)}
-                            className="bg-white text-indigo-600 px-6 py-3 rounded-2xl flex items-center gap-2 font-semibold transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 shadow-lg hover:shadow-xl"
-                        >
-                            <Play size={18} fill="currentColor" />
-                            Continue Learning
-                        </button>
-                    ) : (
-                        <button
-                            onClick={() => handleNavigation(isCompleted)}
-                            className="bg-white text-emerald-600 px-6 py-3 rounded-2xl flex items-center gap-2 font-semibold transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 shadow-lg hover:shadow-xl"
-                        >
-                            <Award size={18} />
-                            View Certificate
-                        </button>
-                    )}
+                {/* Play Button Overlay on Hover */}
+                <div className="absolute inset-0 bg-[#1E2EDE]/40 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-all duration-500 flex items-center justify-center">
+                    <button
+                        onClick={() => handleNavigation(isCompleted)}
+                        className={`p-5 rounded-full transform scale-50 group-hover:scale-100 transition-all duration-500 shadow-2xl ${
+                            isCompleted ? "bg-[#E6D929] text-[#1E2EDE]" : "bg-white text-[#1E2EDE]"
+                        }`}
+                    >
+                        {!isCompleted ? (
+                            <Play size={28} fill="currentColor" />
+                        ) : course.examStatus?.isPassed ? (
+                            <Award size={28} /> // പാസ്സായവർക്ക് അവാർഡ് ഐക്കൺ
+                        ) : (
+                            <BookOpen size={28} /> // പാസ്സാകാത്തവർക്ക് ബുക്ക് ഐക്കൺ
+                        )}
+                    </button>
                 </div>
             </div>
 
-            {/* Course Info */}
-            <div className="p-6 flex flex-col flex-1">
-                <div className="mb-4">
-                    <span className="bg-gradient-to-r from-blue-50 to-indigo-50 text-indigo-600 text-xs px-3 py-1.5 rounded-full font-semibold uppercase tracking-wide inline-block border border-indigo-100">
+            {/* Course Information */}
+            <div className="p-7 pt-2 flex flex-col flex-1">
+                <div className="flex items-center justify-between mb-4">
+                    <span className="text-[9px] font-black uppercase tracking-widest text-[#14C4E7] px-3 py-1 bg-[#14C4E7]/5 rounded-lg">
                         {course.category?.name || "General"}
                     </span>
-                </div>
-
-                <div className="flex justify-between items-center mb-3">
-                    <span className="text-xs font-bold text-indigo-600 uppercase tracking-wider flex items-center gap-1">
-                        <BookOpen size={12} />
-                        {course.lessonsCount || 0} Lessons
-                    </span>
-                    <div className="flex items-center text-gray-500 text-xs">
-                        <Clock size={12} className="mr-1" />
-                        {course.totalDurationSeconds || 0}
+                    <div className="flex items-center gap-2 text-slate-300">
+                        <Clock size={12} />
+                        <span className="text-[10px] font-bold">{course.totalDurationSeconds || "0m"}</span>
                     </div>
                 </div>
 
-                <h3 className="text-xl font-bold text-gray-800 mb-3 line-clamp-2 leading-tight">
-                    {formatText(course.title, 26)}
+                <h3 className="text-xl font-black text-[#1E2EDE] mb-3 line-clamp-2 leading-tight group-hover:text-[#14C4E7] transition-colors">
+                    {course.title}
                 </h3>
 
-                {/* Course Description */}
                 {course.description && (
-                    <p className="text-sm text-gray-600 mb-4 line-clamp-3 leading-relaxed">
-                        {formatText(course.description, 40)}
+                    <p className="text-xs text-slate-400 font-medium leading-relaxed mb-6 line-clamp-2">
+                        {course.description}
                     </p>
                 )}
 
-                {/* Progress Bar */}
-                <div className="mt-auto">
-                    <div className="mb-6">
-                        <div className="flex justify-between text-sm font-semibold text-gray-600 mb-2">
-                            <span>Progress</span>
-                            <span className={isCompleted ? "text-emerald-500" : "text-indigo-600"}>
+                {/* Footer Logic: Progress & Tutor */}
+                <div className="mt-auto space-y-6">
+                    {/* Progress Visual */}
+                    <div>
+                        <div className="flex justify-between items-end mb-2">
+                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                                Progress
+                            </span>
+                            <span className={`text-xs font-black ${isCompleted ? "text-[#E6D929]" : "text-[#1E2EDE]"}`}>
                                 {course.progress || 0}%
                             </span>
                         </div>
-                        <div className="w-full bg-gray-100 rounded-full h-3 overflow-hidden">
+                        <div className="w-full bg-slate-50 h-2 rounded-full overflow-hidden border border-slate-100">
                             <div
-                                className={`h-3 rounded-full transition-all duration-1000 ${
-                                    isCompleted
-                                        ? "bg-gradient-to-r from-emerald-400 to-emerald-500"
-                                        : "bg-gradient-to-r from-indigo-500 to-purple-600"
-                                }`}
-                                style={{ width: `${course.progress || 0}%` }}
+                                className="h-full rounded-full transition-all duration-1000 ease-out"
+                                style={{
+                                    width: `${course.progress || 0}%`,
+                                    backgroundColor: progressColor,
+                                }}
                             />
                         </div>
                     </div>
 
                     {/* Tutor Details */}
-                    <div className="flex items-center justify-between border-t border-gray-100 pt-4">
+                    <div className="flex items-center justify-between pt-5 border-t border-slate-50">
                         <div className="flex items-center gap-3">
-                            <img
-                                src={course.tutor?.profileImage || "https://via.placeholder.com/32"}
-                                className="w-10 h-10 rounded-full border-2 border-gray-100 shadow-sm object-cover"
-                                alt="tutor"
-                            />
-                            <div>
-                                <p className="text-xs text-gray-400 font-medium leading-none mb-1">INSTRUCTOR</p>
-                                <p className="text-sm font-semibold text-gray-700">
-                                    {formatText(course.tutor?.fullName, 18) || "Instructor"}
+                            <div className="w-10 h-10 rounded-xl overflow-hidden border-2 border-[#14C4E7]/20 shadow-sm">
+                                <img
+                                    src={course.tutor?.profileImage || "https://via.placeholder.com/32"}
+                                    className="w-full h-full object-cover"
+                                    alt="Instructor"
+                                />
+                            </div>
+                            <div className="overflow-hidden">
+                                <p className="text-[8px] text-slate-300 font-black uppercase tracking-widest leading-none mb-1">
+                                    Expert Mentor
+                                </p>
+                                <p className="text-xs font-black text-slate-700 truncate max-w-[100px]">
+                                    {course.tutor?.fullName}
                                 </p>
                             </div>
                         </div>
 
-                        {isCompleted && (
-                            <div className="bg-emerald-50 p-2 rounded-full">
-                                <Award className="text-emerald-500" size={16} />
-                            </div>
-                        )}
+                        <button
+                            onClick={() => handleNavigation(isCompleted)}
+                            className="w-10 h-10 bg-slate-50 text-[#14C4E7] rounded-xl flex items-center justify-center group-hover:bg-[#1E2EDE] group-hover:text-[#E6D929] transition-all duration-500 shadow-sm"
+                        >
+                            <ChevronRight size={18} />
+                        </button>
                     </div>
                 </div>
             </div>

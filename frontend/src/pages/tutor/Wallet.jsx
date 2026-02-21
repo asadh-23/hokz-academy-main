@@ -72,9 +72,14 @@ const TutorWallet = () => {
         <div className="min-h-screen bg-gray-50 p-6 font-sans">
             {/* --- HEADER --- */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
-                <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Financial Overview</h1>
-                    <p className="text-sm text-gray-500 mt-1">Track your earnings, sales, and withdrawals.</p>
+                <div className="mb-10 text-center md:text-left">
+                    <h2 className="text-3xl font-black text-[#1E2EDE] tracking-tighter uppercase">
+                        Instructor <span className="text-[#14C4E7]">Wallet</span>
+                    </h2>
+                    <p className="text-slate-400 text-[10px] font-black uppercase tracking-[0.25em] mt-1">
+                        Track your earnings, sales, and withdrawals.
+                    </p>
+                    <div className="h-1 w-20 bg-[#E6D929] mt-4 rounded-full mx-auto md:mx-0"></div>
                 </div>
                 <div className="flex gap-3">
                     <button className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 text-sm font-medium transition shadow-sm">
@@ -261,7 +266,6 @@ const TutorWallet = () => {
                                                         <Clock size={10} /> Pending
                                                     </span>
 
-                                                 
                                                     {txn.unlockDate && (
                                                         <span className="text-[10px] text-gray-500 font-medium bg-gray-100/80 px-2 py-0.5 rounded border border-gray-200">
                                                             Unlocks: {formatDate(txn.unlockDate)}

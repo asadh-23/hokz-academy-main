@@ -30,12 +30,14 @@ export const fetchUserCourses = createAsyncThunk(
 // Fetch single course details
 export const fetchUserCourseDetails = createAsyncThunk(
     "userCourses/fetchUserCourseDetails",
-    async (courseId, { rejectWithValue }) => {
+    async ({ courseId, userId }, { rejectWithValue }) => {
         try {
-            const res = await publicAxios.get(`/user/courses/${courseId}/details`);
+            const url = userId ? `/user/courses/${courseId}/details?userId=${userId}` : `/user/courses/${courseId}/details`;
+
+            const res = await publicAxios.get(url);
             return res.data.courseData;
         } catch (err) {
-            return rejectWithValue(err.response?.data?.message || "Failed to fetch course details");
+            return rejectWithValue(err.response?.data?.message || "Failed");
         }
     },
 );
@@ -79,7 +81,7 @@ const initialState = {
         minPrice: "",
         maxPrice: "",
         page: 1,
-        limit: 8,
+        limit: 12,
     },
 
     pagination: {
@@ -167,15 +169,13 @@ const userCoursesSlice = createSlice({
         builder
             .addCase(fetchMyCourses.pending, (state) => {
                 state.loadingMyCourses = true;
-                
             })
             .addCase(fetchMyCourses.fulfilled, (state, action) => {
                 state.loadingMyCourses = false;
                 state.myCourses = action.payload;
             })
             .addCase(fetchMyCourses.rejected, (state, action) => {
-                state.loadingMyCourses= false;
-                
+                state.loadingMyCourses = false;
             });
     },
 });

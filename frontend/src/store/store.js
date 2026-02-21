@@ -16,6 +16,7 @@ import userCoursesReducer from "./features/user/userCoursesSlice";
 import courseProgressReducer from "./features/user/courseProgressSlice";
 import userWishlistReducer from "./features/user/userWishlistSlice";
 import userCartReducer from "./features/user/userCartSlice";
+import userCertificatesReducer from "./features/user/certificatesSlice";
 
 // ================== TUTOR ==================
 import tutorProfileReducer from "./features/tutor/tutorProfileSlice";
@@ -58,6 +59,7 @@ export const store = configureStore({
     courseProgress: courseProgressReducer,
     userWishlist: userWishlistReducer,
     userCart: userCartReducer,
+    userCertificates: userCertificatesReducer,
 
     // TUTOR
     tutorProfile: tutorProfileReducer,

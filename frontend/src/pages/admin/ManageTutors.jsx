@@ -36,7 +36,7 @@ const ManageTutors = () => {
                     limit: filters.limit,
                     search: filters.search,
                     status: filters.status,
-                })
+                }),
             ).unwrap();
             setFirstLoad(false);
         } catch (error) {
@@ -52,7 +52,6 @@ const ManageTutors = () => {
         fetchTutors();
     }, [filters.page, filters.status]);
 
-    
     useEffect(() => {
         dispatch(setAdminTutorFilters({ page: 1 }));
     }, [filters.search, filters.status]);
@@ -116,9 +115,14 @@ const ManageTutors = () => {
     return (
         <div className="flex-1 bg-gray-50 p-6 md:p-8 overflow-y-auto">
             {/* Page Header */}
-            <div className="mb-8">
-                <h1 className="text-2xl font-bold text-gray-800 mb-2">Tutors</h1>
-                <p className="text-gray-600">Manage all registered tutors</p>
+            <div className="mb-10 text-center md:text-left">
+                <h2 className="text-3xl font-black text-[#1E2EDE] tracking-tighter uppercase">
+                    Tutors <span className="text-[#14C4E7]">Management</span>
+                </h2>
+                <p className="text-slate-400 text-[10px] font-black uppercase tracking-[0.25em] mt-1">
+                    Manage all registered Tutors
+                </p>
+                <div className="h-1 w-20 bg-[#E6D929] mt-4 rounded-full mx-auto md:mx-0"></div>
             </div>
 
             {/* ✅ Stats Section */}

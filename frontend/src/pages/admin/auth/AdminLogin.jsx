@@ -2,9 +2,12 @@ import React, { useState } from "react";
 import AuthLayout from "../../../components/auth/AuthLayout";
 import { toast } from "sonner";
 import { validateEmail, validatePassword } from "../../../utils/validation";
-import { useDispatch } from "react-redux";
+import { Mail, Lock, EyeOff, ArrowRight, ShieldCheck } from "lucide-react";
+import { Link } from "react-router-dom";
+
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { adminLogin } from "../../../store/features/auth/adminAuthSlice";
+import { adminLogin, selectAdminAuthLoading } from "../../../store/features/auth/adminAuthSlice";
 
 export default function AdminLogin() {
     const [formData, setFormData] = useState({
@@ -14,6 +17,8 @@ export default function AdminLogin() {
 
     const navigate = useNavigate();
     const dispatch = useDispatch();
+
+    const isLoading = useSelector(selectAdminAuthLoading);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -60,51 +65,80 @@ export default function AdminLogin() {
 
     return (
         <AuthLayout subtitle="Log In" role="admin">
-            <h2 className="text-3xl font-bold mb-4 text-gray-900 drop-shadow-md">Welcome back, Admin</h2>
-
-            <form className="w-full space-y-6" onSubmit={handleSubmit}>
-                {/* Email */}
-                <div className="relative">
-                    <input
-                        type="email"
-                        required
-                        name="email"
-                        placeholder="Email"
-                        className="w-full rounded-full border border-gray-300 px-6 py-3 focus:outline-none focus:ring-4 focus:ring-teal-300 transition"
-                        value={formData.email}
-                        onChange={handleChange}
-                    />
-                    <span className="absolute left-6 top-3.5 text-gray-400">
-                        <i className="fas fa-envelope" />
-                    </span>
+            <form className="w-full space-y-5" onSubmit={handleSubmit}>
+                {/* 1. Email Input Group */}
+                <div className="group">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4 mb-2 block">
+                        Email
+                    </label>
+                    <div className="relative">
+                        <div className="absolute left-6 top-1/2 -translate-y-1/2 text-[#14C4E7] group-focus-within:text-[#1E2EDE] transition-colors">
+                            <Mail size={18} />
+                        </div>
+                        <input
+                            type="email"
+                            required
+                            name="email"
+                            placeholder="your@email.com"
+                            className="w-full bg-slate-50 rounded-2xl border-2 border-transparent px-14 py-4 focus:outline-none focus:border-[#1E2EDE] focus:bg-white transition-all font-bold text-[#1E2EDE] placeholder-slate-300 shadow-sm"
+                            value={formData.email}
+                            onChange={handleChange}
+                        />
+                    </div>
                 </div>
 
-                {/* Password */}
-                <div className="relative">
-                    <input
-                        type="password"
-                        required
-                        name="password"
-                        placeholder="Password"
-                        className="w-full rounded-full border border-gray-300 px-6 py-3 pr-12 focus:outline-none focus:ring-4 focus:ring-teal-300 transition"
-                        value={formData.password}
-                        onChange={handleChange}
-                    />
-                    <span className="absolute left-6 top-3.5 text-gray-400">
-                        <i className="fas fa-lock" />
-                    </span>
-                    <span className="absolute right-4 top-3.5 text-gray-400 cursor-pointer">
-                        <i className="fas fa-eye-slash" />
-                    </span>
+                {/* 2. Password Input Group */}
+                <div className="group">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4 mb-2 block">
+                        Password
+                    </label>
+                    <div className="relative">
+                        <div className="absolute left-6 top-1/2 -translate-y-1/2 text-[#14C4E7] group-focus-within:text-[#1E2EDE] transition-colors">
+                            <Lock size={18} />
+                        </div>
+                        <input
+                            type="password"
+                            required
+                            name="password"
+                            placeholder="••••••••"
+                            className="w-full bg-slate-50 rounded-2xl border-2 border-transparent px-14 py-4 focus:outline-none focus:border-[#1E2EDE] focus:bg-white transition-all font-bold text-[#1E2EDE] placeholder-slate-300 shadow-sm"
+                            value={formData.password}
+                            onChange={handleChange}
+                        />
+                        {/* Visual Eye Icon (Matches the Register style) */}
+                        <div className="absolute right-6 top-1/2 -translate-y-1/2 text-slate-300 cursor-pointer hover:text-[#1E2EDE] transition-colors">
+                            <EyeOff size={18} />
+                        </div>
+                    </div>
                 </div>
 
-                {/* Login Button */}
-                <button
-                    type="submit"
-                    className="w-full bg-teal-400 text-white font-bold text-lg py-3 rounded-full shadow-lg hover:bg-teal-500 transition-all"
-                >
-                    Login
-                </button>
+                {/* 3. Forgot Password Link */}
+              
+
+                {/* 4. Login Button */}
+                <div className="pt-4">
+                    <button
+                        type="submit"
+                        disabled={isLoading}
+                        className="group w-full bg-[#1E2EDE] text-[#E6D929] font-black text-xs uppercase tracking-[0.2em] py-5 rounded-2xl shadow-xl shadow-blue-900/20 hover:bg-[#14C4E7] hover:text-white transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
+                    >
+                        {isLoading ? (
+                            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                        ) : (
+                            <>
+                                Enter Academy{" "}
+                                <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                            </>
+                        )}
+                    </button>
+                </div>
+
+                {/* 5. Security Note */}
+                <div className="mt-8 flex items-center justify-center gap-2 text-slate-300">
+                    <div className="h-px w-8 bg-slate-100"></div>
+                    <p className="text-[9px] font-black uppercase tracking-widest">SSL Encrypted Session</p>
+                    <div className="h-px w-8 bg-slate-100"></div>
+                </div>
             </form>
         </AuthLayout>
     );

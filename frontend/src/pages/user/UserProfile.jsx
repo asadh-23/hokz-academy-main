@@ -18,6 +18,16 @@ import {
 } from "../../store/features/user/userProfileSlice";
 import { patchUser } from "../../store/features/auth/userAuthSlice";
 import { formatText } from "../../utils/formatText";
+import { 
+  User, 
+  Mail, 
+  Phone, 
+  Camera, 
+  ShieldCheck, 
+  Edit3, 
+  X as CloseIcon, 
+  Check 
+} from "lucide-react";
 
 const UserProfile = () => {
     const [isEditing, setIsEditing] = useState(false);
@@ -183,35 +193,49 @@ const UserProfile = () => {
 
     // --- Render Component ---
     return (
-        <div className="flex flex-col min-h-screen bg-gray-50">
-            <div className="flex-1 p-6 md:p-8 overflow-y-auto">
-                {/* Header */}
-                <div className="mb-8">
-                    <div className="bg-gradient-to-r from-cyan-500 to-emerald-600 text-white p-5 md:p-6 rounded-t-xl md:rounded-t-2xl shadow">
-                        <h2 className="text-xl md:text-2xl font-semibold text-center m-0">User Profile</h2>
-                    </div>
+        <div className="min-h-screen bg-[#FDFDFD] pb-12">
+            {/* Header / Hero Section */}
+            <div className="bg-[#1E2EDE] h-48 md:h-64 relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-20 translate-x-20"></div>
+                <div className="absolute bottom-0 left-0 w-40 h-40 bg-[#14C4E7]/20 rounded-full translate-y-10 -translate-x-10"></div>
+                
+                <div className="max-w-4xl mx-auto h-full flex flex-col justify-center px-6">
+                    <h2 className="text-3xl md:text-4xl font-black text-[#FDFDFD] tracking-tight">
+                        Account <span className="text-[#E6D929]">Settings</span>
+                    </h2>
+                    <p className="text-[#FDFDFD]/70 text-sm mt-2 font-bold uppercase tracking-widest flex items-center gap-2">
+                        <ShieldCheck size={16} /> Verified Profile
+                    </p>
                 </div>
+            </div>
 
-                {/* Profile Card */}
-                <div className="bg-white rounded-xl md:rounded-2xl p-6 md:p-8 max-w-4xl mx-auto shadow-xl border border-gray-100 relative overflow-hidden">
-                    {/* Decorative background pattern */}
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-cyan-100 to-emerald-100 rounded-full -translate-y-16 translate-x-16 opacity-50"></div>
-                    <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-emerald-100 to-cyan-100 rounded-full translate-y-12 -translate-x-12 opacity-50"></div>
-
-                    <div className="relative z-10">
-                        {/* Profile Image */}
-                        <div className="flex justify-center mb-8 md:mb-10">
+            {/* Profile Card Container */}
+            <div className="max-w-4xl mx-auto px-4 -mt-16 md:-mt-24 relative z-10">
+                <div className="bg-white rounded-[2.5rem] shadow-2xl shadow-blue-900/10 border border-slate-100 overflow-hidden">
+                    
+                    <div className="p-8 md:p-12">
+                        {/* Profile Image Section */}
+                        <div className="flex flex-col items-center mb-10">
                             <div className="relative group">
-                                <div className="absolute inset-0 bg-gradient-to-r from-cyan-400 to-emerald-500 rounded-full animate-pulse opacity-20 group-hover:opacity-30 transition-opacity duration-300"></div>
-                                <img
-                                    src={profileData.profileImage || defaultProfileImage}
-                                    alt="Profile"
-                                    onError={(e) => {
-                                        e.target.onerror = null;
-                                        e.target.src = defaultProfileImage;
-                                    }}
-                                    className="relative w-28 h-28 md:w-36 md:h-36 object-cover rounded-full border-4 border-white shadow-xl transition-all duration-300 group-hover:scale-105 group-hover:shadow-2xl"
-                                />
+                                <div className="w-32 h-32 md:w-40 md:h-40 rounded-full border-4 border-white shadow-xl overflow-hidden ring-4 ring-[#14C4E7]/30 transition-all duration-300 group-hover:ring-[#E6D929]">
+                                    <img
+                                        src={profileData.profileImage || defaultProfileImage}
+                                        alt="Profile"
+                                        onError={(e) => {
+                                            e.target.onerror = null;
+                                            e.target.src = defaultProfileImage;
+                                        }}
+                                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                                    />
+                                    
+                                    {/* Loading Overlay */}
+                                    {isUploading && (
+                                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                                            <ButtonLoader />
+                                        </div>
+                                    )}
+                                </div>
+
                                 {/* Hidden file input */}
                                 <input
                                     type="file"
@@ -220,26 +244,26 @@ const UserProfile = () => {
                                     accept="image/*"
                                     className="hidden"
                                 />
-                                {/* Edit button */}
+
+                                {/* Camera Action Button */}
                                 <button
                                     onClick={triggerFileInput}
                                     disabled={isUploading}
-                                    className={`absolute bottom-2 right-2 md:bottom-3 md:right-3 w-10 h-10 bg-gradient-to-r from-cyan-500 to-emerald-500 text-white rounded-full flex items-center justify-center hover:from-cyan-600 hover:to-emerald-600 transition-all shadow-lg transform hover:scale-110 ${
-                                        isUploading ? "opacity-50 cursor-not-allowed" : "opacity-0 group-hover:opacity-100"
-                                    }`}
+                                    className="absolute bottom-1 right-1 md:bottom-2 md:right-2 w-10 h-10 bg-[#E6D929] text-[#1E2EDE] rounded-full flex items-center justify-center shadow-lg hover:bg-[#14C4E7] transition-all transform hover:scale-110 active:scale-90 disabled:opacity-50"
                                     aria-label="Edit profile picture"
                                 >
-                                    {isUploading ? <ButtonLoader /> : "📷"}
+                                    <Camera size={20} />
                                 </button>
                             </div>
+                            <p className="mt-4 text-[10px] font-black uppercase tracking-widest text-slate-400">Student ID: #HKZ-9921</p>
                         </div>
 
-                        {/* Fields */}
-                        <div className="space-y-5 md:space-y-6">
+                        {/* Form Fields Grid */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
                             {/* Full Name */}
-                            <div>
-                                <label className="block text-sm text-gray-600 font-medium mb-2 flex items-center gap-2">
-                                    <span>👤</span>
+                            <div className="md:col-span-2">
+                                <label className="flex items-center gap-2 text-xs font-black text-slate-500 uppercase tracking-widest mb-3 px-1">
+                                    <User size={14} className="text-[#14C4E7]" />
                                     Full Name
                                 </label>
                                 {isEditing ? (
@@ -248,28 +272,33 @@ const UserProfile = () => {
                                         value={profileData.fullName}
                                         onChange={(e) => handleInputChange("fullName", e.target.value)}
                                         placeholder="Enter your full name"
-                                        className="w-full py-3 px-4 bg-white rounded-lg border-2 border-gray-300 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-200 outline-none text-gray-800 transition-all duration-200 hover:border-gray-400"
+                                        className="w-full py-4 px-6 bg-slate-50 rounded-2xl border-2 border-transparent focus:border-[#1E2EDE] focus:bg-white transition-all outline-none font-bold text-slate-700 shadow-inner"
                                     />
                                 ) : (
-                                    <div className="bg-gradient-to-r from-gray-50 to-gray-100 py-3 px-4 rounded-lg border border-gray-200 min-h-[48px] flex items-center">
-                                        {profileData.fullName || <span className="text-gray-400 italic">Not set</span>}
+                                    <div className="group bg-slate-50/50 py-4 px-6 rounded-2xl border border-slate-100 min-h-[56px] flex items-center justify-between">
+                                        <span className="font-bold text-slate-700">
+                                            {profileData.fullName || <span className="text-slate-300 font-medium italic tracking-normal">Name not provided</span>}
+                                        </span>
                                     </div>
                                 )}
                             </div>
-                            {/* Email (Read Only) */}
+
+                            {/* Email */}
                             <div>
-                                <label className="block text-sm text-gray-600 font-medium mb-2 flex items-center gap-2">
-                                    <span>📧</span>
-                                    Email
+                                <label className="flex items-center gap-2 text-xs font-black text-slate-500 uppercase tracking-widest mb-3 px-1">
+                                    <Mail size={14} className="text-[#14C4E7]" />
+                                    Email Address
                                 </label>
-                                <div className="bg-gray-100 py-3 px-4 rounded-lg text-gray-500 border-2 border-gray-200 cursor-not-allowed min-h-[48px] flex items-center">
-                                    {profileData.email || <span className="text-gray-400 italic">Not set</span>}
+                                <div className="bg-slate-100 py-4 px-6 rounded-2xl text-slate-400 border border-slate-200 cursor-not-allowed min-h-[56px] flex items-center font-bold">
+                                    {profileData.email}
                                 </div>
+                                <p className="text-[10px] text-slate-400 mt-2 px-1 italic">* Email is used for account verification.</p>
                             </div>
+
                             {/* Phone */}
                             <div>
-                                <label className="block text-sm text-gray-600 font-medium mb-2 flex items-center gap-2">
-                                    <span>📱</span>
+                                <label className="flex items-center gap-2 text-xs font-black text-slate-500 uppercase tracking-widest mb-3 px-1">
+                                    <Phone size={14} className="text-[#14C4E7]" />
                                     Phone Number
                                 </label>
                                 {isEditing ? (
@@ -277,62 +306,63 @@ const UserProfile = () => {
                                         type="tel"
                                         value={profileData.phone}
                                         onChange={(e) => handleInputChange("phone", e.target.value)}
-                                        placeholder="Enter your phone number"
-                                        className="w-full py-3 px-4 bg-white rounded-lg border-2 border-gray-300 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-200 outline-none text-gray-800 transition-all duration-200 hover:border-gray-400"
+                                        placeholder="Ex: +1 234 567 890"
+                                        className="w-full py-4 px-6 bg-slate-50 rounded-2xl border-2 border-transparent focus:border-[#1E2EDE] focus:bg-white transition-all outline-none font-bold text-slate-700 shadow-inner"
                                     />
                                 ) : (
-                                    <div className="bg-gradient-to-r from-gray-50 to-gray-100 py-3 px-4 rounded-lg border border-gray-200 min-h-[48px] flex items-center">
-                                        {profileData.phone || <span className="text-gray-400 italic">Not set</span>}
+                                    <div className="bg-slate-50/50 py-4 px-6 rounded-2xl border border-slate-100 min-h-[56px] flex items-center">
+                                        <span className="font-bold text-slate-700">
+                                            {profileData.phone || <span className="text-slate-300 font-medium italic tracking-normal">Phone not set</span>}
+                                        </span>
                                     </div>
                                 )}
                             </div>
                         </div>
-                    </div>
 
-                    {/* Profile Buttons */}
-                    <div className="flex flex-col sm:flex-row justify-center items-center gap-3 md:gap-4 mt-8 md:mt-10">
-                        {!isEditing ? (
-                            <button
-                                onClick={handleEditClick}
-                                className="w-full sm:w-auto bg-gradient-to-r from-cyan-500 to-emerald-600 text-white py-2.5 px-10 rounded-full font-semibold hover:from-cyan-600 hover:to-emerald-700 transition-all transform hover:scale-105 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
-                            >
-                                Edit Profile
-                            </button>
-                        ) : (
-                            <>
+                        {/* Action Buttons */}
+                        <div className="mt-12 pt-8 border-t border-slate-50 flex flex-col sm:flex-row justify-center items-center gap-4">
+                            {!isEditing ? (
                                 <button
-                                    onClick={handleSaveChanges}
-                                    disabled={isSaving || isUploading}
-                                    className={`w-full sm:w-auto bg-gradient-to-r from-cyan-500 to-emerald-600 text-white py-2.5 px-8 rounded-full font-semibold transition-all focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 ${
-                                        isSaving || isUploading
-                                            ? "opacity-50 cursor-not-allowed"
-                                            : "hover:from-cyan-600 hover:to-emerald-700 hover:scale-105 hover:shadow-lg"
-                                    }`}
+                                    onClick={handleEditClick}
+                                    className="w-full sm:w-auto min-w-[200px] bg-[#1E2EDE] text-[#FDFDFD] py-4 px-10 rounded-2xl font-black text-sm uppercase tracking-widest flex items-center justify-center gap-3 shadow-xl shadow-blue-200 hover:bg-[#14C4E7] transition-all transform hover:scale-105 active:scale-95"
                                 >
-                                    {isSaving ? <ButtonLoader text="Saving..." /> : "Save Changes"}
+                                    <Edit3 size={18} />
+                                    Edit Profile
                                 </button>
-                                <button
-                                    onClick={handleCancel}
-                                    disabled={isSaving || isUploading}
-                                    className={`w-full sm:w-auto bg-gray-200 text-gray-700 py-2.5 px-8 rounded-full font-semibold hover:bg-gray-300 transition-all focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 ${
-                                        isSaving || isUploading ? "opacity-50 cursor-not-allowed" : ""
-                                    }`}
-                                >
-                                    Cancel
-                                </button>
-                            </>
-                        )}
+                            ) : (
+                                <>
+                                    <button
+                                        onClick={handleSaveChanges}
+                                        disabled={isSaving || isUploading}
+                                        className="w-full sm:w-auto min-w-[180px] bg-[#E6D929] text-[#1E2EDE] py-4 px-10 rounded-2xl font-black text-sm uppercase tracking-widest flex items-center justify-center gap-3 shadow-xl shadow-yellow-100 hover:bg-[#14C4E7] disabled:opacity-50 transition-all transform hover:scale-105 active:scale-95"
+                                    >
+                                        {isSaving ? <ButtonLoader /> : <Check size={20} />}
+                                        {isSaving ? "Saving..." : "Save Changes"}
+                                    </button>
+                                    <button
+                                        onClick={handleCancel}
+                                        disabled={isSaving || isUploading}
+                                        className="w-full sm:w-auto min-w-[140px] bg-slate-100 text-slate-500 py-4 px-10 rounded-2xl font-black text-sm uppercase tracking-widest flex items-center justify-center gap-3 hover:bg-slate-200 disabled:opacity-50 transition-all"
+                                    >
+                                        <CloseIcon size={20} />
+                                        Cancel
+                                    </button>
+                                </>
+                            )}
+                        </div>
                     </div>
                 </div>
 
-                {/* Security Card */}
-                <SecurityCard
-                    onEmailChange={() => setIsChangeEmailOpen(true)}
-                    onPasswordChange={() => setIsChangePasswordOpen(true)}
-                />
+                {/* Security Section (Handled by SecurityCard) */}
+                <div className="mt-8">
+                    <SecurityCard
+                        onEmailChange={() => setIsChangeEmailOpen(true)}
+                        onPasswordChange={() => setIsChangePasswordOpen(true)}
+                    />
+                </div>
             </div>
 
-            {/* Modals */}
+            {/* Modals (No logic change) */}
             {isChangeEmailOpen && (
                 <ChangeEmailModal
                     isOpen={isChangeEmailOpen}

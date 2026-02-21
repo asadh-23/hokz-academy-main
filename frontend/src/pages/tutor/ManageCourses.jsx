@@ -80,6 +80,15 @@ const ManageCourses = () => {
         <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-6">
             <div className="max-w-[1800px] mx-auto">
                 {/* Header Section */}
+                <div className="mb-10 text-center md:text-left">
+                        <h2 className="text-3xl font-black text-[#1E2EDE] tracking-tighter uppercase">
+                            Course <span className="text-[#14C4E7]">Management</span>
+                        </h2>
+                        <p className="text-slate-400 text-[10px] font-black uppercase tracking-[0.25em] mt-1">
+                            Manage youre all courses
+                        </p>
+                        <div className="h-1 w-20 bg-[#E6D929] mt-4 rounded-full mx-auto md:mx-0"></div>
+                    </div>
                 <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/50 p-6 mb-8">
                     <div className="flex flex-wrap items-center justify-between gap-4">
                         <StatsCards stats={stats} label={"Courses"} />
@@ -133,7 +142,7 @@ const ManageCourses = () => {
                             className="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-100 hover:border-teal-200 hover:-translate-y-1"
                         >
                             {/* Course Thumbnail - Clickable */}
-                            <div 
+                            <div
                                 className="relative h-[240px] w-full overflow-hidden cursor-pointer"
                                 onClick={() => navigate(`/tutor/courses/${course._id}`)}
                             >
@@ -176,7 +185,7 @@ const ManageCourses = () => {
 
                             <div className="p-7">
                                 {/* Course Title - Clickable */}
-                                <h3 
+                                <h3
                                     className="text-xl font-bold text-gray-900 mb-2 group-hover:text-teal-600 transition-colors cursor-pointer"
                                     onClick={() => navigate(`/tutor/courses/${course._id}`)}
                                 >

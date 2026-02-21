@@ -73,7 +73,6 @@ const MessageInput = ({ chatId, receiverId }) => {
 
         typingTimeoutRef.current = setTimeout(() => {
             socket.emit("stop_typing", { receiverId, senderId: currentUserId });
-            
         }, 2000);
     };
 
@@ -108,10 +107,10 @@ const MessageInput = ({ chatId, receiverId }) => {
             optimisticMessage.fileType = file.type.startsWith("image")
                 ? "image"
                 : file.type.startsWith("video")
-                ? "video"
-                : file.type === "application/pdf"
-                ? "pdf"
-                : "file";
+                  ? "video"
+                  : file.type === "application/pdf"
+                    ? "pdf"
+                    : "file";
             optimisticMessage.fileUrl = preview; // Use the preview URL temporarily
             optimisticMessage.fileName = file.name;
         } else {
@@ -152,40 +151,25 @@ const MessageInput = ({ chatId, receiverId }) => {
     };
 
     return (
-        <div className="p-3 bg-white/90 backdrop-blur-sm border-t border-gray-100 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-20 relative">
-            {/* =========================================================
-                🟢 FILE PREVIEW AREA (Animated Card)
-               ========================================================= */}
+        <div className="p-4 bg-white/95 backdrop-blur-md border-t border-slate-100 relative z-20">
             {file && (
-                <div className="absolute bottom-full left-4 mb-2 animate-in fade-in slide-in-from-bottom-3 duration-200">
-                    <div className="relative flex items-center gap-3 p-2 pr-8 bg-white rounded-2xl border border-gray-200 shadow-xl w-fit max-w-[90vw]">
-                        {/* Thumbnail */}
-                        <div className="relative flex-shrink-0 w-12 h-12 rounded-xl overflow-hidden bg-gray-100 border border-gray-100">
+                <div className="absolute bottom-full left-6 mb-4 animate-in slide-in-from-bottom-2 duration-300">
+                    <div className="relative flex items-center gap-4 p-3 bg-[#1E2EDE] text-white rounded-[1.5rem] shadow-2xl border border-white/20">
+                        <div className="w-12 h-12 bg-white/10 rounded-xl overflow-hidden flex items-center justify-center">
                             {file.type.startsWith("image") ? (
-                                <img src={preview} alt="Preview" className="w-full h-full object-cover" />
-                            ) : file.type.startsWith("video") ? (
-                                <div className="w-full h-full flex items-center justify-center bg-purple-50 text-purple-500">
-                                    <VideoCameraIcon className="w-6 h-6" />
-                                </div>
+                                <img src={preview} className="w-full h-full object-cover" alt="" />
                             ) : (
-                                <div className="w-full h-full flex items-center justify-center bg-red-50 text-red-500">
-                                    <DocumentIcon className="w-6 h-6" />
-                                </div>
+                                <DocumentIcon className="w-6 h-6 text-[#E6D929]" />
                             )}
                         </div>
-
-                        {/* File Info */}
-                        <div className="flex flex-col overflow-hidden">
-                            <span className="text-xs font-semibold text-gray-700 truncate max-w-[150px]">{file.name}</span>
-                            <span className="text-[10px] text-gray-400 font-medium uppercase tracking-wider mt-0.5">
-                                {(file.size / 1024).toFixed(1)} KB • {file.type.split("/")[1] || "FILE"}
-                            </span>
+                        <div className="pr-8">
+                            <p className="text-[10px] font-black truncate max-w-[120px] uppercase tracking-widest">
+                                {file.name}
+                            </p>
                         </div>
-
-                        {/* Close Button */}
                         <button
                             onClick={clearFile}
-                            className="absolute -top-2 -right-2 bg-gray-800 text-white rounded-full p-1 shadow-md hover:bg-red-500 hover:scale-110 transition-all duration-200"
+                            className="absolute -top-2 -right-2 bg-[#E6D929] text-[#1E2EDE] rounded-lg p-1 hover:rotate-90 transition-transform shadow-lg"
                         >
                             <XCircleIcon className="w-4 h-4" />
                         </button>
@@ -193,55 +177,34 @@ const MessageInput = ({ chatId, receiverId }) => {
                 </div>
             )}
 
-            {/* =========================================================
-                🟢 INPUT FORM
-               ========================================================= */}
-            <form onSubmit={handleSend} className="flex items-end gap-2 max-w-6xl mx-auto">
-                {/* 1. Attachment Button */}
+            <form onSubmit={handleSend} className="flex items-center gap-4 max-w-7xl mx-auto">
                 <button
                     type="button"
                     onClick={() => fileInputRef.current.click()}
-                    className="p-3 mb-0.5 text-gray-400 hover:text-cyan-600 hover:bg-cyan-50 rounded-full transition-all duration-200 active:scale-90"
-                    title="Attach File"
+                    className="p-3 text-slate-400 hover:text-[#14C4E7] bg-slate-50 rounded-2xl transition active:scale-95"
                 >
                     <PaperClipIcon className="w-6 h-6" />
                 </button>
+                <input type="file" ref={fileInputRef} className="hidden" onChange={handleFileChange} />
 
-                {/* Hidden File Input */}
-                <input
-                    type="file"
-                    ref={fileInputRef}
-                    className="hidden"
-                    onChange={handleFileChange}
-                    accept="image/*,video/*,application/pdf"
-                />
-
-                {/* 2. Text Area */}
-                <div className="flex-1 bg-gray-100 rounded-[24px] focus-within:bg-white focus-within:ring-2 focus-within:ring-cyan-500/50 focus-within:border-cyan-200 border border-transparent transition-all duration-200">
+                <div className="flex-1 relative">
                     <input
                         type="text"
                         value={text}
                         onChange={handleTyping}
                         onKeyDown={handleKeyDown}
-                        placeholder="Type a message..."
-                        className="w-full py-3 px-5 bg-transparent text-gray-800 placeholder-gray-400 text-sm focus:outline-none rounded-[24px]"
-                        autoComplete="off"
+                        placeholder="Inquire or discuss with mentor..."
+                        className="w-full py-4 px-6 bg-slate-50 border-none rounded-2xl text-slate-700 placeholder-slate-300 font-bold focus:ring-2 focus:ring-[#14C4E7] focus:bg-white transition-all"
                     />
                 </div>
 
-                {/* 3. Send Button */}
                 <button
                     type="submit"
                     disabled={!text.trim() && !file}
-                    className={`p-3 rounded-full mb-0.5 shadow-sm flex items-center justify-center transition-all duration-300 ease-out
-                        ${
-                            !text.trim() && !file
-                                ? "bg-gray-200 text-gray-400 cursor-not-allowed scale-95 opacity-80"
-                                : "bg-gradient-to-r from-cyan-500 to-blue-600 text-white hover:from-cyan-400 hover:to-blue-500 hover:shadow-lg hover:scale-105 active:scale-95"
-                        }
-                    `}
+                    className={`p-4 rounded-2xl shadow-xl transition-all active:scale-90 flex items-center justify-center
+                        ${!text.trim() && !file ? "bg-slate-100 text-slate-300" : "bg-[#1E2EDE] text-[#E6D929] hover:bg-[#14C4E7] hover:text-white shadow-blue-200"}`}
                 >
-                    <PaperAirplaneIcon className="w-5 h-5 -ml-0.5 mt-0.5 -rotate-45 transform translate-x-0.5" />
+                    <PaperAirplaneIcon className="w-6 h-6 -rotate-45" />
                 </button>
             </form>
         </div>

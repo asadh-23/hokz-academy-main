@@ -38,7 +38,7 @@ const TopPerformingCourse = ({ courses, formatCurrency }) => {
             {/* Compact Image Section */}
             <div className="relative h-32 rounded-xl overflow-hidden mb-3 bg-gradient-to-br from-gray-100 to-gray-200 shadow-inner group">
               <img 
-                src={course.thumbnail || course.thumbnailUrl || "https://via.placeholder.com/400x200?text=Course"} 
+                src={course.thumbnailUrl || "https://via.placeholder.com/400x200?text=Course"} 
                 alt={course.title} 
                 className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110"
               />
@@ -135,7 +135,7 @@ const TopPerformingCourse = ({ courses, formatCurrency }) => {
         <div className="mt-4 pt-3 border-t border-gray-100">
           <button className="w-full py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl text-xs font-semibold hover:from-indigo-700 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 flex items-center justify-center gap-2">
             <TrendingUp className="w-3.5 h-3.5" />
-            View Analytics
+           
           </button>
         </div>
       )}

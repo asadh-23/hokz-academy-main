@@ -1,6 +1,7 @@
 import Tutor from "../../models/user/Tutor.js";
 import Course from "../../models/course/Course.js";
 import mongoose from "mongoose";
+import Enrollment from "../../models/course/Enrollment.js";
 
 export const getAllVerifiedTutors = async (req, res) => {
     try {
@@ -29,20 +30,21 @@ export const getAllVerifiedTutors = async (req, res) => {
 export const getTutorDetails = async (req, res) => {
     try {
         const { tutorId } = req.params;
+        const userId = req.query.userId;
 
         if (!mongoose.Types.ObjectId.isValid(tutorId)) {
             return res.status(400).json({ success: false, message: "Invalid Tutor ID" });
         }
 
-        const tutor = await Tutor.findOne({ 
-            _id: tutorId, 
-            isBlocked: false 
+        const tutor = await Tutor.findOne({
+            _id: tutorId,
+            isBlocked: false,
         }).select("-password -passwordResetToken -passwordResetExpiry -fcmToken -googleId");
 
         if (!tutor) {
-            return res.status(404).json({ 
-                success: false, 
-                message: "Tutor not found or account is suspended." 
+            return res.status(404).json({
+                success: false,
+                message: "Tutor not found or account is suspended.",
             });
         }
 
@@ -50,27 +52,37 @@ export const getTutorDetails = async (req, res) => {
             tutor: tutorId,
             isBanned: false,
             isListed: true,
-            isDeleted: false
+            isDeleted: false,
         })
-        .select("title thumbnailUrl price offerPercentage averageRating lessonsCount totalDurationSeconds category")
-        .populate("category", "name")
-        .sort({ createdAt: -1 });
+            .select("title thumbnailUrl price offerPercentage averageRating lessonsCount totalDurationSeconds category")
+            .populate("category", "name")
+            .sort({ createdAt: -1 });
+
+        let isEligibleToMessage = false;
+        if (userId && userId !== "undefined" && userId !== "null") {
+            const enrollment = await Enrollment.findOne({
+                user: userId,
+                course: { $in: courses.map((c) => c._id) },
+                status: "active",
+            });
+            isEligibleToMessage = !!enrollment;
+        }
 
         res.status(200).json({
             success: true,
             data: {
                 tutor,
                 courses,
-                totalCourses: courses.length
-            }
+                totalCourses: courses.length,
+                isEligibleToMessage,
+            },
         });
-
     } catch (error) {
         console.error("Error in getTutorDetails:", error);
-        res.status(500).json({ 
-            success: false, 
-            message: "Server Error", 
-            error: error.message 
+        res.status(500).json({
+            success: false,
+            message: "Server Error",
+            error: error.message,
         });
     }
 };

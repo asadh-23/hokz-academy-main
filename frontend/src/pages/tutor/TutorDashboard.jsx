@@ -47,14 +47,16 @@ const TutorDashboard = () => {
     }).format(amount);
   };
 
-  return (
-    <div className="p-6 bg-gradient-to-br from-gray-50 via-blue-50/30 to-indigo-50/20 min-h-screen">
+return (
+  <div className="p-4 md:p-8 bg-[#fdfdfd] min-h-screen">
+    <div className="max-w-7xl mx-auto space-y-8">
       <DashboardHeader />
       <DashboardStats stats={stats} formatCurrency={formatCurrency} />
       <DashboardAnalytics chartData={chartData} courses={courses} formatCurrency={formatCurrency} />
       <TopSellerCourses courses={courses} formatCurrency={formatCurrency} />
     </div>
-  );
+  </div>
+);
 };
 
 export default TutorDashboard;

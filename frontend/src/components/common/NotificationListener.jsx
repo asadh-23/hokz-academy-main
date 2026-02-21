@@ -17,7 +17,6 @@ const NotificationListener = () => {
         // Socket Event Listener On
         socket.on("new_notification", handleNewNotification);
 
-        // Component Unmount ആകുമ്പോൾ Listener Off ചെയ്യുന്നു (Cleanup)
         return () => {
             socket.off("new_notification", handleNewNotification);
         };

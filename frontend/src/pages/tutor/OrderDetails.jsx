@@ -195,288 +195,277 @@ const OrderDetails = () => {
     const { orderInfo, student, items, financials, timeline } = order;
 
     return (
-        <div className="min-h-screen bg-gray-50 p-6 font-sans print:bg-white print:p-0">
-            {/* --- HEADER --- */}
-            <div className="max-w-6xl mx-auto mb-6 print:hidden">
-                <button
-                    onClick={() => navigate(-1)}
-                    className="flex items-center gap-2 text-gray-500 hover:text-gray-900 transition mb-4 text-sm"
-                >
-                    <ArrowLeft size={16} /> Back to Orders
-                </button>
+    <div className="min-h-screen bg-[#FDFDFD] bg-gradient-to-br from-[#FDFDFD] via-[#14C4E7]/5 to-[#1E2EDE]/5 p-4 md:p-8 font-sans print:bg-white print:p-0">
+        {/* --- HEADER --- */}
+        <div className="max-w-6xl mx-auto mb-8 print:hidden">
+            <button
+                onClick={() => navigate(-1)}
+                className="flex items-center gap-2 text-[#1E2EDE] hover:text-[#14C4E7] transition-all mb-6 font-bold group"
+            >
+                <div className="p-2 bg-white rounded-full shadow-sm group-hover:shadow-md">
+                    <ArrowLeft size={18} />
+                </div>
+                Back to Orders
+            </button>
 
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                    <div>
-                        <div className="flex items-center gap-3">
-                            <h1 className="text-2xl font-bold text-gray-900">Order #{orderInfo.displayId}</h1>
-                            <span
-                                className={`px-3 py-1 rounded-full text-xs font-bold uppercase border ${getStatusStyles(orderInfo.status)}`}
-                            >
-                                {orderInfo.status}
-                            </span>
-                        </div>
-                        <p className="text-sm text-gray-500 mt-1 flex items-center gap-2">
-                            <Calendar size={14} /> Placed on {formatDate(orderInfo.date)}
-                        </p>
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 bg-white p-6 rounded-[2rem] shadow-sm border border-[#14C4E7]/10">
+                <div>
+                    <div className="flex flex-wrap items-center gap-3">
+                        <h1 className="text-2xl md:text-3xl font-black text-[#1E2EDE]">Order #{orderInfo.displayId}</h1>
+                        <span
+                            className={`px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border-2 ${getStatusStyles(orderInfo.status)}`}
+                        >
+                            {orderInfo.status}
+                        </span>
+                    </div>
+                    <p className="text-sm text-gray-500 mt-2 flex items-center gap-2 font-medium">
+                        <Calendar size={16} className="text-[#14C4E7]" /> 
+                        Placed on <span className="text-gray-800">{formatDate(orderInfo.date)}</span>
+                    </p>
+                </div>
+
+                <button
+                    onClick={downloadInvoice}
+                    className="w-full md:w-auto flex items-center justify-center gap-2 px-6 py-3 bg-[#14C4E7] text-white rounded-2xl hover:bg-[#1E2EDE] transition-all font-bold shadow-lg shadow-[#14C4E7]/20 active:scale-95"
+                >
+                    <Download size={18} /> Download Invoice
+                </button>
+            </div>
+        </div>
+
+        <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* ================= LEFT COLUMN (Items & Student) ================= */}
+            <div className="lg:col-span-2 space-y-8">
+                
+                {/* 1. PURCHASED ITEMS CARD */}
+                <div className="bg-white rounded-[2rem] shadow-xl shadow-blue-900/5 border border-white overflow-hidden">
+                    <div className="px-8 py-5 border-b border-gray-50 bg-[#1E2EDE]/5 flex justify-between items-center">
+                        <h3 className="font-black text-[#1E2EDE] flex items-center gap-3 uppercase tracking-tighter">
+                            <FileText size={20} className="text-[#14C4E7]" /> Purchased Courses
+                        </h3>
+                        <span className="px-3 py-1 bg-white rounded-lg text-xs font-bold text-[#14C4E7] shadow-sm">
+                            {items.length} {items.length === 1 ? 'Course' : 'Items'}
+                        </span>
                     </div>
 
-                    <button
-                        onClick={downloadInvoice}
-                        className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 text-sm font-medium transition shadow-sm"
-                    >
-                        <Download size={16} /> Download Invoice
-                    </button>
-                </div>
-            </div>
+                    <div className="divide-y divide-gray-50">
+                        {items.map((item) => {
+                            const discountPercent =
+                                item.originalPrice > item.soldPrice
+                                    ? Math.round(((item.originalPrice - item.soldPrice) / item.originalPrice) * 100)
+                                    : 0;
 
-            <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* ================= LEFT COLUMN (Items & Student) ================= */}
-                <div className="lg:col-span-2 space-y-6">
-                    {/* 1. PURCHASED ITEMS CARD */}
-                    <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-                        <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex justify-between items-center">
-                            <h3 className="font-bold text-gray-800 flex items-center gap-2">
-                                <FileText size={18} className="text-indigo-600" /> Purchased Courses
-                            </h3>
-                            <span className="text-xs text-gray-500">{items.length} Items</span>
-                        </div>
-
-                        <div className="divide-y divide-gray-100">
-                            {items.map((item) => {
-                                // Discount Percentage Calculation for Badge
-                                const discountPercent =
-                                    item.originalPrice > item.soldPrice
-                                        ? Math.round(((item.originalPrice - item.soldPrice) / item.originalPrice) * 100)
-                                        : 0;
-
-                                return (
-                                    <div
-                                        key={item.courseId}
-                                        className="p-6 flex flex-col sm:flex-row gap-4 hover:bg-gray-50 transition"
-                                    >
+                            return (
+                                <div
+                                    key={item.courseId}
+                                    className="p-6 md:p-8 flex flex-col sm:flex-row gap-6 hover:bg-[#FDFDFD] transition group"
+                                >
+                                    <div className="relative flex-shrink-0">
                                         <img
                                             src={item.thumbnail || "https://via.placeholder.com/150"}
                                             alt={item.title}
-                                            className="w-full sm:w-24 h-32 sm:h-16 object-cover rounded-lg border border-gray-200 shadow-sm"
+                                            className="w-full sm:w-32 h-40 sm:h-20 object-cover rounded-2xl border-2 border-white shadow-md group-hover:scale-105 transition-transform duration-300"
                                         />
+                                        {discountPercent > 0 && (
+                                            <div className="absolute -top-2 -left-2 bg-[#E6D929] text-[#1E2EDE] text-[10px] font-black px-2 py-1 rounded-lg shadow-md">
+                                                {discountPercent}% OFF
+                                            </div>
+                                        )}
+                                    </div>
 
-                                        <div className="flex-1">
-                                            <div className="flex justify-between items-start">
-                                                <div>
-                                                    <h4 className="font-semibold text-gray-900 line-clamp-1">
-                                                        {item.title}
-                                                    </h4>
-                                                    <div className="flex items-center gap-2 mt-1">
-                                                        <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded">
-                                                            {item.category}
-                                                        </span>
-                                                        {/* Offer Badge */}
-                                                        {discountPercent > 0 && (
-                                                            <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-100">
-                                                                {discountPercent}% OFF
-                                                            </span>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                                <div className="text-right">
-                                                    <p className="font-bold text-gray-900">
-                                                        {formatCurrency(item.soldPrice)}
+                                    <div className="flex-1">
+                                        <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
+                                            <div className="max-w-md">
+                                                <h4 className="font-bold text-[#1E2EDE] text-lg leading-tight mb-2">
+                                                    {item.title}
+                                                </h4>
+                                                <span className="text-[10px] font-black text-[#14C4E7] bg-[#14C4E7]/10 px-3 py-1 rounded-full uppercase tracking-widest">
+                                                    {item.category}
+                                                </span>
+                                            </div>
+                                            <div className="text-left sm:text-right bg-gray-50 sm:bg-transparent p-3 sm:p-0 rounded-xl w-full sm:w-auto">
+                                                <p className="font-black text-[#1E2EDE] text-xl">
+                                                    {formatCurrency(item.soldPrice)}
+                                                </p>
+                                                {item.originalPrice > item.soldPrice && (
+                                                    <p className="text-xs text-gray-400 line-through font-medium">
+                                                        {formatCurrency(item.originalPrice)}
                                                     </p>
-                                                    {item.originalPrice > item.soldPrice && (
-                                                        <p className="text-xs text-gray-400 line-through">
-                                                            {formatCurrency(item.originalPrice)}
-                                                        </p>
-                                                    )}
-                                                </div>
+                                                )}
                                             </div>
                                         </div>
                                     </div>
-                                );
-                            })}
-                        </div>
-                    </div>
-
-                    {/* 2. STUDENT DETAILS CARD */}
-                    <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
-                        <h3 className="font-bold text-gray-800 mb-4 flex items-center gap-2">
-                            <User size={18} className="text-indigo-600" /> Student Information
-                        </h3>
-                        <div className="flex items-center gap-4">
-                            {/* Avatar with Fallback Logic */}
-                            {student.image ? (
-                                <img
-                                    src={student.image}
-                                    alt=""
-                                    className="w-14 h-14 rounded-full object-cover border-2 border-white shadow-md"
-                                />
-                            ) : (
-                                <div className="w-14 h-14 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 text-xl font-bold border-2 border-white shadow-md uppercase">
-                                    {student.name.charAt(0)}
                                 </div>
-                            )}
+                            );
+                        })}
+                    </div>
+                </div>
 
-                            <div className="flex-1">
-                                <h4 className="font-bold text-gray-900 text-lg">{student.name}</h4>
-                                <div className="flex flex-wrap gap-4 mt-1">
-                                    <div className="flex items-center gap-1.5 text-sm text-gray-600">
-                                        <Mail size={14} className="text-gray-400" /> {student.email}
-                                    </div>
-                                    <div className="flex items-center gap-1.5 text-sm text-gray-600">
-                                        <Phone size={14} className="text-gray-400" /> {student.phone}
-                                    </div>
+                {/* 2. STUDENT DETAILS CARD */}
+                <div className="bg-white rounded-[2rem] shadow-xl shadow-blue-900/5 border border-white p-8">
+                    <h3 className="font-black text-[#1E2EDE] mb-6 flex items-center gap-3 uppercase tracking-tighter">
+                        <User size={20} className="text-[#14C4E7]" /> Student Profile
+                    </h3>
+                    <div className="flex flex-col sm:flex-row items-center gap-6">
+                        {student.image ? (
+                            <img
+                                src={student.image}
+                                alt=""
+                                className="w-20 h-20 rounded-[1.5rem] object-cover border-4 border-[#FDFDFD] shadow-lg"
+                            />
+                        ) : (
+                            <div className="w-20 h-20 rounded-[1.5rem] bg-[#14C4E7] flex items-center justify-center text-white text-3xl font-black shadow-lg uppercase">
+                                {student.name.charAt(0)}
+                            </div>
+                        )}
+
+                        <div className="flex-1 text-center sm:text-left">
+                            <h4 className="font-black text-[#1E2EDE] text-2xl">{student.name}</h4>
+                            <div className="flex flex-col sm:flex-row flex-wrap justify-center sm:justify-start gap-3 mt-3">
+                                <div className="flex items-center gap-2 text-sm font-medium text-gray-600 bg-gray-50 px-4 py-2 rounded-xl border border-gray-100">
+                                    <Mail size={16} className="text-[#14C4E7]" /> {student.email}
+                                </div>
+                                <div className="flex items-center gap-2 text-sm font-medium text-gray-600 bg-gray-50 px-4 py-2 rounded-xl border border-gray-100">
+                                    <Phone size={16} className="text-[#14C4E7]" /> {student.phone}
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                {/* ================= RIGHT COLUMN (Financials & Meta) ================= */}
-                <div className="space-y-6">
-                    {/* 3. FINANCIAL SUMMARY */}
-                    <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-                        <div className="bg-gray-900 px-6 py-4 text-white">
-                            <h3 className="font-bold flex items-center gap-2">
-                                <CreditCard size={18} /> Financial Summary
-                            </h3>
-                        </div>
+            {/* ================= RIGHT COLUMN (Financials & Meta) ================= */}
+            <div className="space-y-8">
+                {/* 3. FINANCIAL SUMMARY */}
+                <div className="bg-white rounded-[2rem] shadow-2xl shadow-blue-900/10 border border-white overflow-hidden">
+                    <div className="bg-[#1E2EDE] px-8 py-6 text-white relative overflow-hidden">
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-[#14C4E7]/20 rounded-full -mr-16 -mt-16"></div>
+                        <h3 className="font-black text-xl flex items-center gap-3 relative z-10 uppercase tracking-tighter">
+                            <CreditCard size={22} className="text-[#E6D929]" /> Payment Summary
+                        </h3>
+                    </div>
 
-                        <div className="p-6 space-y-5">
-                            {/* A. Student Payment Section */}
-                            <div>
-                                <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">
-                                    Student Payment
-                                </p>
-                                <div className="space-y-2 text-sm">
-                                    <div className="flex justify-between text-gray-600">
-                                        <span>Item Total (MRP)</span>
-                                        <span>{formatCurrency(financials.itemTotal)}</span>
-                                    </div>
+                    <div className="p-8 space-y-6">
+                        {/* A. Student Payment Section */}
+                        <div className="bg-gray-50/50 p-5 rounded-2xl border border-gray-100">
+                            <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-4">
+                                Billing Details
+                            </p>
+                            <div className="space-y-3 text-sm">
+                                <div className="flex justify-between font-bold text-gray-600">
+                                    <span>Base Total</span>
+                                    <span>{formatCurrency(financials.itemTotal)}</span>
+                                </div>
 
-                                    {/* --- COUPON DISPLAY LOGIC START --- */}
-                                    {financials.couponDeduction > 0 && (
-                                        <div className="py-1">
-                                            {/* Case 1: Multiple Coupons (Show detailed list) */}
-                                            {financials.couponDetails?.list && financials.couponDetails.list.length > 1 ? (
-                                                <div className="space-y-1 bg-emerald-50/50 p-2 rounded border border-emerald-100">
-                                                    <p className="text-[10px] text-emerald-800 font-bold mb-1">
-                                                        Coupons Applied:
-                                                    </p>
-                                                    {financials.couponDetails.list.map((coupon, idx) => (
-                                                        <div
-                                                            key={idx}
-                                                            className="flex justify-between text-emerald-600 text-xs"
-                                                        >
-                                                            <span className="flex items-center gap-1">
-                                                                <Tag size={10} /> {coupon.code}
-                                                            </span>
-                                                            <span>-{formatCurrency(coupon.discountAmount)}</span>
-                                                        </div>
-                                                    ))}
-                                                    <div className="border-t border-emerald-200 my-1"></div>
-                                                    <div className="flex justify-between text-emerald-700 font-medium text-xs">
-                                                        <span>Total Savings</span>
-                                                        <span>-{formatCurrency(financials.couponDeduction)}</span>
+                                {financials.couponDeduction > 0 && (
+                                    <div className="py-1">
+                                        {financials.couponDetails?.list && financials.couponDetails.list.length > 1 ? (
+                                            <div className="space-y-2 bg-[#E6D929]/10 p-3 rounded-xl border border-[#E6D929]/30">
+                                                <p className="text-[10px] text-[#1E2EDE] font-black uppercase tracking-wider mb-1">
+                                                    Coupons:
+                                                </p>
+                                                {financials.couponDetails.list.map((coupon, idx) => (
+                                                    <div key={idx} className="flex justify-between text-[#1E2EDE] text-xs font-bold">
+                                                        <span className="flex items-center gap-1.5"><Tag size={12} className="text-[#14C4E7]"/> {coupon.code}</span>
+                                                        <span>-{formatCurrency(coupon.discountAmount)}</span>
                                                     </div>
-                                                </div>
-                                            ) : (
-                                                // Case 2: Single Coupon
-                                                <div className="flex justify-between text-emerald-600 font-medium">
-                                                    <span className="flex items-center gap-1">
-                                                        <Tag size={12} /> Coupon ({financials.couponDetails?.code})
-                                                    </span>
-                                                    <span>-{formatCurrency(financials.couponDeduction)}</span>
-                                                </div>
-                                            )}
-                                        </div>
-                                    )}
-                                    {/* --- COUPON DISPLAY LOGIC END --- */}
-
-                                    <div className="flex justify-between text-gray-500 text-xs">
-                                        <span>Tax (GST 3%)</span>
-                                        <span>+{formatCurrency(financials.taxCollected)}</span>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <div className="flex justify-between text-[#14C4E7] font-black bg-[#14C4E7]/5 p-3 rounded-xl border border-[#14C4E7]/10">
+                                                <span className="flex items-center gap-2 uppercase tracking-tighter"><Tag size={14} /> {financials.couponDetails?.code}</span>
+                                                <span>-{formatCurrency(financials.couponDeduction)}</span>
+                                            </div>
+                                        )}
                                     </div>
+                                )}
 
-                                    <div className="border-t border-gray-200 my-1"></div>
+                                <div className="flex justify-between text-gray-400 font-bold text-[11px] uppercase tracking-wider">
+                                    <span>GST (3%)</span>
+                                    <span>+{formatCurrency(financials.taxCollected)}</span>
+                                </div>
 
-                                    <div className="flex justify-between font-bold text-gray-900 text-base">
-                                        <span>Total Paid by Student</span>
+                                <div className="pt-4 border-t-2 border-dashed border-gray-200">
+                                    <div className="flex justify-between font-black text-[#1E2EDE] text-xl">
+                                        <span className="uppercase tracking-tighter">Total Paid</span>
                                         <span>{formatCurrency(financials.totalPaidByStudent)}</span>
                                     </div>
                                 </div>
                             </div>
+                        </div>
 
-                            <div className="border-t border-dashed border-gray-200"></div>
-
-                            {/* B. Tutor Payout Section */}
-                            <div>
-                                <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">
-                                    Payout Breakdown
-                                </p>
-                                <div className="space-y-2 text-sm">
-                                    <div className="flex justify-between text-gray-500 text-xs">
-                                        <span>Tax Deduction (Govt)</span>
-                                        <span>-{formatCurrency(financials.taxCollected)}</span>
-                                    </div>
-                                    <div className="flex justify-between text-gray-500 text-xs">
-                                        <span>Platform Fee (10%)</span>
-                                        <span>-{formatCurrency(financials.adminFee)}</span>
-                                    </div>
-                                    <div className="border-t border-gray-200 my-2"></div>
-
-                                    {/* Net Earnings Highlight */}
-                                    <div className="flex justify-between items-center bg-gradient-to-r from-emerald-50 to-teal-50 p-3 rounded-lg border border-emerald-100">
-                                        <div>
-                                            <span className="block text-xs font-bold text-emerald-800 uppercase tracking-wider">
-                                                Net Earnings
-                                            </span>
-                                            <span className="text-[10px] text-emerald-600">Credited to wallet</span>
-                                        </div>
-                                        <span className="text-xl font-bold text-emerald-700">
-                                            {formatCurrency(financials.netEarnings)}
-                                        </span>
-                                    </div>
+                        {/* B. Tutor Payout Section */}
+                        <div className="space-y-4">
+                            <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">
+                                Revenue Split
+                            </p>
+                            <div className="space-y-2 px-1">
+                                <div className="flex justify-between text-xs font-bold text-gray-500">
+                                    <span>Tax Withheld</span>
+                                    <span>-{formatCurrency(financials.taxCollected)}</span>
                                 </div>
+                                <div className="flex justify-between text-xs font-bold text-gray-500">
+                                    <span>Platform Comm.</span>
+                                    <span>-{formatCurrency(financials.adminFee)}</span>
+                                </div>
+                            </div>
+
+                            {/* Net Earnings Highlight */}
+                            <div className="flex justify-between items-center bg-gradient-to-r from-[#1E2EDE] to-[#14C4E7] p-5 rounded-2xl shadow-lg shadow-blue-900/20 relative overflow-hidden group">
+                                <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                                <div className="relative z-10">
+                                    <span className="block text-[10px] font-black text-[#E6D929] uppercase tracking-widest">
+                                        Your Earnings
+                                    </span>
+                                    <span className="text-[10px] text-white/80 font-bold">Transferred to Wallet</span>
+                                </div>
+                                <span className="text-2xl font-black text-white relative z-10">
+                                    {formatCurrency(financials.netEarnings)}
+                                </span>
                             </div>
                         </div>
                     </div>
+                </div>
 
-                    {/* 4. VISUAL TIMELINE */}
-                    <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
-                        <h3 className="font-bold text-gray-800 mb-4 text-sm uppercase">Order Activity</h3>
-                        <div className="relative border-l-2 border-indigo-100 ml-2 space-y-6">
-                            {/* Placed Node */}
-                            <div className="relative pl-6">
-                                <div className="absolute -left-[7px] top-1 w-3.5 h-3.5 rounded-full bg-indigo-500 border-2 border-white shadow-sm"></div>
-                                <h4 className="text-sm font-semibold text-gray-900">Order Placed</h4>
-                                <p className="text-xs text-gray-500 mt-0.5">{formatDate(timeline.orderedAt)}</p>
-                            </div>
+                {/* 4. VISUAL TIMELINE */}
+                <div className="bg-white rounded-[2rem] shadow-xl shadow-blue-900/5 border border-white p-8">
+                    <h3 className="font-black text-[#1E2EDE] mb-8 text-[11px] uppercase tracking-[0.2em] border-b border-gray-50 pb-4">Order Tracking</h3>
+                    <div className="relative ml-2 space-y-10">
+                        {/* Timeline Connector */}
+                        <div className="absolute left-[7px] top-2 bottom-2 w-0.5 bg-gradient-to-b from-[#14C4E7] to-[#1E2EDE]"></div>
 
-                            {/* Verified Node */}
-                            <div className="relative pl-6">
-                                <div className="absolute -left-[7px] top-1 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-white shadow-sm"></div>
-                                <h4 className="text-sm font-semibold text-gray-900">Payment Verified</h4>
-                                <p className="text-xs text-gray-500 mt-0.5">via {orderInfo.paymentMethod}</p>
+                        {/* Placed Node */}
+                        <div className="relative pl-8 group">
+                            <div className="absolute left-0 top-1 w-4 h-4 rounded-full bg-white border-4 border-[#14C4E7] shadow-md group-hover:scale-125 transition-transform z-10"></div>
+                            <h4 className="text-sm font-black text-[#1E2EDE] uppercase tracking-tight">Order Placed</h4>
+                            <p className="text-xs text-gray-500 font-bold mt-1">{formatDate(timeline.orderedAt)}</p>
+                        </div>
 
-                                {/* Transaction ID with Copy */}
-                                <div className="flex items-center gap-2 mt-2 bg-gray-50 p-1.5 rounded border border-gray-200 w-fit">
-                                    <code className="text-[10px] font-mono text-gray-600">
-                                        {orderInfo.transactionId || "N/A"}
-                                    </code>
-                                    <button
-                                        onClick={() => copyToClipboard(orderInfo.transactionId)}
-                                        className="text-gray-400 hover:text-indigo-600 transition"
-                                        title="Copy Transaction ID"
-                                    >
-                                        <Copy size={12} />
-                                    </button>
-                                </div>
+                        {/* Verified Node */}
+                        <div className="relative pl-8 group">
+                            <div className="absolute left-0 top-1 w-4 h-4 rounded-full bg-white border-4 border-[#E6D929] shadow-md group-hover:scale-125 transition-transform z-10"></div>
+                            <h4 className="text-sm font-black text-[#1E2EDE] uppercase tracking-tight">Payment Verified</h4>
+                            <p className="text-xs text-gray-500 font-bold mt-1 uppercase tracking-tighter">Via {orderInfo.paymentMethod}</p>
+
+                            <div className="flex items-center gap-2 mt-3 bg-[#FDFDFD] p-3 rounded-xl border border-[#14C4E7]/20 w-full shadow-inner group-hover:border-[#14C4E7] transition-colors">
+                                <code className="text-[10px] font-black text-[#14C4E7] truncate">
+                                    ID: {orderInfo.transactionId || "N/A"}
+                                </code>
+                                <button
+                                    onClick={() => copyToClipboard(orderInfo.transactionId)}
+                                    className="text-[#1E2EDE] hover:text-[#14C4E7] transition-all ml-auto"
+                                    title="Copy Transaction ID"
+                                >
+                                    <Copy size={14} />
+                                </button>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    );
+    </div>
+);
 };
 
 export default OrderDetails;

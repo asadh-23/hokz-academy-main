@@ -39,6 +39,7 @@ import userExamRoutes from "./routes/user/examRoutes.js";
 import userChatRoutes from './routes/user/chatRoutes.js';
 import userNotificationRoutes from './routes/user/notificationRoutes.js'
 import userTutorRoutes from './routes/user/tutorRoutes.js'
+import userDashboardRoutes from "./routes/user/dashboardRoutes.js"
 
 // COMMON
 import publicRoutes from "./routes/public/publicRoutes.js";
@@ -107,8 +108,9 @@ app.use("/api/user/payment", userPaymentRoutes);
 app.use("/api/user/learning", userCourseProgress);
 app.use("/api/user/exam", userExamRoutes);
 app.use("/api/user/chat", userChatRoutes);
-app.use("/api/user/notification", userNotificationRoutes);
+app.use("/api/user/notifications", userNotificationRoutes);
 app.use("/api/user/tutors", userTutorRoutes);
+app.use("/api/user/dashboard", userDashboardRoutes);
 
 app.use("/api/categories", publicRoutes);
 

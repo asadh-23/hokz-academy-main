@@ -139,11 +139,14 @@ const DashboardHeader = () => {
     return (
         <div className="mb-8">
             <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
-                        Instructor Dashboard
-                    </h1>
-                    <p className="text-gray-600 mt-1">Full detailed report export available below.</p>
+                <div className="mb-10 text-center md:text-left">
+                    <h2 className="text-3xl font-black text-[#1E2EDE] tracking-tighter uppercase">
+                        Instructor <span className="text-[#14C4E7]">Dashboard</span>
+                    </h2>
+                    <p className="text-slate-400 text-[10px] font-black uppercase tracking-[0.25em] mt-1">
+                        Full detailed report export available below
+                    </p>
+                    <div className="h-1 w-20 bg-[#E6D929] mt-4 rounded-full mx-auto md:mx-0"></div>
                 </div>
                 <div className="flex items-center gap-3">
                     <button

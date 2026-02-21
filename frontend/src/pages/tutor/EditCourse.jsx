@@ -195,267 +195,272 @@ const EditCourse = () => {
         );
     }
 
-    return (
-        <div className="min-h-screen bg-gray-50 pb-12 font-sans text-gray-900">
-            {/* Top Navigation Bar */}
-            <nav className="sticky top-0 z-30 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                    <div className="bg-indigo-600 p-2 rounded-lg text-white">
-                        <LayoutDashboard size={20} />
-                    </div>
-                    <div>
-                        <h1 className="text-lg font-bold text-gray-900 leading-none">Course Manager</h1>
-                        <p className="text-xs text-gray-500 mt-1">Editing Mode</p>
-                    </div>
-                </div>
-
-                <div className="flex gap-3">
-                    <button
-                        onClick={handleSubmit}
-                        disabled={isUpdating || isUploadingThumbnail}
-                        className={`flex items-center gap-2 px-6 py-2 text-sm font-medium text-white rounded-lg transition-all shadow-lg shadow-indigo-200 ${
-                            isUpdating || isUploadingThumbnail
-                                ? "bg-indigo-400 cursor-not-allowed"
-                                : "bg-indigo-600 hover:bg-indigo-700"
-                        }`}
-                    >
-                        {isUpdating ? "Saving..." : "Save Changes"}
-                    </button>
-                </div>
-            </nav>
-
-            <main className="max-w-7xl mx-auto px-4 sm:px-6 pt-8">
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    {/* LEFT COLUMN */}
-                    <div className="lg:col-span-2 space-y-6">
-                        {/* General Info */}
-                        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8">
-                            <h2 className="text-xl font-semibold mb-6 flex items-center gap-2">
-                                <span className="w-1 h-6 bg-indigo-500 rounded-full"></span>
-                                General Information
-                            </h2>
-
-                            <div className="space-y-5">
-                                {/* Title */}
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Course Title</label>
-                                    <input
-                                        type="text"
-                                        name="title"
-                                        value={formData.title}
-                                        onChange={handleInputChange}
-                                        disabled={isUpdating}
-                                        className="w-full px-4 py-2.5 rounded-xl border border-gray-300 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all outline-none"
-                                    />
-                                </div>
-
-                                {/* Category */}
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
-                                    <select
-                                        name="category"
-                                        value={formData.category}
-                                        onChange={handleInputChange}
-                                        disabled={isUpdating}
-                                        className="w-full px-4 py-2.5 rounded-xl border border-gray-300 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 bg-white outline-none"
-                                    >
-                                        {categories.map((c) => (
-                                            <option key={c._id} value={c._id}>
-                                                {c.name}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
-
-                                {/* Description */}
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
-                                    <div className="relative">
-                                        <textarea
-                                            name="description"
-                                            value={formData.description}
-                                            onChange={handleInputChange}
-                                            disabled={isUpdating}
-                                            rows="6"
-                                            className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 resize-none outline-none"
-                                        />
-                                        <div className="absolute bottom-3 right-3 text-xs text-gray-400">
-                                            {formData.description.length} chars
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Pricing */}
-                        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8">
-                            <h2 className="text-xl font-semibold mb-6 flex items-center gap-2">
-                                <span className="w-1 h-6 bg-indigo-500 rounded-full"></span>
-                                Pricing & Offers
-                            </h2>
-
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                                {/* Price */}
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Price ($)</label>
-                                    <div className="relative">
-                                        <DollarSign size={18} className="absolute left-3 top-3 text-gray-400" />
-                                        <input
-                                            type="number"
-                                            name="price"
-                                            value={formData.price}
-                                            onChange={handleInputChange}
-                                            disabled={isUpdating}
-                                            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-300 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none"
-                                        />
-                                    </div>
-                                </div>
-
-                                {/* Discount */}
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Discount (%)</label>
-                                    <input
-                                        type="number"
-                                        name="offerPercentage"
-                                        value={formData.offerPercentage}
-                                        onChange={handleInputChange}
-                                        disabled={isUpdating}
-                                        className="w-full px-4 py-2.5 rounded-xl border border-gray-300 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none"
-                                    />
-                                </div>
-                            </div>
-
-                            {/* Final Price */}
-                            <div className="mt-6 bg-indigo-50 rounded-xl p-4 flex justify-between border border-indigo-100">
-                                <span className="text-indigo-900 font-medium">Final Price:</span>
-                                <span className="text-2xl font-bold text-indigo-600">${finalPrice}</span>
-                            </div>
-                        </div>
-
-                        {/* Thumbnail */}
-                        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8">
-                            <h2 className="text-xl font-semibold mb-6 flex items-center gap-2">
-                                <span className="w-1 h-6 bg-indigo-500 rounded-full"></span>
-                                Course Thumbnail
-                            </h2>
-
-                            <div
-                                className="border-2 border-dashed border-gray-300 rounded-2xl p-8 text-center 
-                                       hover:border-indigo-400 hover:bg-gray-50 transition-all cursor-pointer"
-                                onClick={() => !isUploadingThumbnail && fileInputRef.current.click()}
-                            >
-                                <input
-                                    type="file"
-                                    id="fileUpload"
-                                    ref={fileInputRef}
-                                    className="hidden"
-                                    accept="image/*"
-                                    onChange={handleImageChange}
-                                    disabled={isUploadingThumbnail}
-                                />
-
-                                {formData.thumbnailUrl ? (
-                                    <div className="relative w-full h-64 bg-gray-100 rounded-lg overflow-hidden group">
-                                        <img
-                                            src={formData.thumbnailUrl}
-                                            alt="Preview"
-                                            className="w-full h-full object-cover"
-                                        />
-                                        {isUploadingThumbnail ? (
-                                            <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                                                <span className="text-white font-medium">Uploading...</span>
-                                            </div>
-                                        ) : (
-                                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
-                                                <span className="text-white font-medium flex items-center gap-2">
-                                                    <UploadCloud size={20} /> Change Image
-                                                </span>
-                                            </div>
-                                        )}
-                                    </div>
-                                ) : (
-                                    <div className="flex flex-col items-center justify-center py-6">
-                                        <div className="w-16 h-16 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center mb-4">
-                                            <ImageIcon size={32} />
-                                        </div>
-                                        <p className="text-gray-900 font-medium">
-                                            {isUploadingThumbnail ? "Uploading..." : "Click to upload"}
-                                        </p>
-                                        <p className="text-gray-500 text-sm mt-1">JPG, PNG, GIF (Max 10MB)</p>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* RIGHT COLUMN (Preview) */}
-                    <div className="hidden lg:block col-span-1">
-                        <div className="sticky top-28">
-                            <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">Live Preview</h3>
-
-                            <div className="bg-white rounded-2xl overflow-hidden shadow-lg border border-gray-100">
-                                {/* Image */}
-                                <div className="h-48 bg-gray-200 relative">
-                                    {formData.thumbnailUrl ? (
-                                        <img
-                                            src={formData.thumbnailUrl}
-                                            alt="Preview"
-                                            className="w-full h-full object-cover"
-                                        />
-                                    ) : (
-                                        <div className="w-full h-full flex items-center justify-center text-gray-400">
-                                            <ImageIcon size={40} />
-                                        </div>
-                                    )}
-
-                                    {formData.offerPercentage > 0 && (
-                                        <div className="absolute top-3 left-3 bg-yellow-400 text-yellow-900 text-xs font-bold px-2 py-1 rounded">
-                                            {formData.offerPercentage}% OFF
-                                        </div>
-                                    )}
-                                </div>
-
-                                {/* Content */}
-                                <div className="p-5">
-                                    <span className="text-xs font-semibold text-indigo-600 bg-indigo-50 px-2 py-1 rounded-md">
-                                        {getCategoryName(formData.category)}
-                                    </span>
-
-                                    <h3 className="font-bold text-gray-900 mt-3 mb-2 line-clamp-2 h-14 leading-snug">
-                                        {formData.title || "Course Title Placeholder"}
-                                    </h3>
-
-                                    <p className="text-gray-500 text-xs line-clamp-3 mb-4 h-12">
-                                        {formData.description || "Course description preview..."}
-                                    </p>
-
-                                    <div className="flex items-center gap-2 border-t pt-4">
-                                        <span className="text-xl font-bold text-gray-900">${finalPrice}</span>
-                                        {formData.offerPercentage > 0 && (
-                                            <span className="text-sm text-gray-400 line-through">${formData.price}</span>
-                                        )}
-                                    </div>
-
-                                    <button className="w-full mt-4 bg-gray-900 text-white py-2.5 rounded-xl text-sm font-semibold">
-                                        Add to Cart
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div className="mt-6 bg-blue-50 rounded-xl p-5 border border-blue-100">
-                                <h4 className="text-blue-900 font-semibold text-sm mb-2">Course Tips</h4>
-                                <ul className="text-blue-800 text-xs space-y-2 list-disc pl-4">
-                                    <li>Use a high-quality thumbnail (1280×720)</li>
-                                    <li>Keep the title under 60 characters.</li>
-                                    <li>Bullet points convert better.</li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </main>
+  return (
+  <div className="min-h-screen bg-[#FDFDFD] pb-12 font-sans text-gray-900">
+    {/* Top Navigation Bar */}
+    <nav className="sticky top-0 z-50 bg-[#FDFDFD]/80 backdrop-blur-md border-b border-[#14C4E7]/20 px-4 sm:px-8 py-4 flex items-center justify-between">
+      <div className="flex items-center gap-4">
+        <div className="bg-[#1E2EDE] p-2.5 rounded-xl text-white shadow-lg shadow-[#1E2EDE]/20">
+          <LayoutDashboard size={22} />
         </div>
-    );
+        <div>
+          <h1 className="text-xl font-extrabold text-[#1E2EDE] leading-none tracking-tight">Course Editor</h1>
+          <div className="flex items-center gap-2 mt-1">
+            <span className="h-2 w-2 rounded-full bg-[#E6D929] animate-pulse"></span>
+            <p className="text-[10px] uppercase font-bold text-gray-400 tracking-widest">Live Editing Mode</p>
+          </div>
+        </div>
+      </div>
+
+      <button
+        onClick={handleSubmit}
+        disabled={isUpdating || isUploadingThumbnail}
+        className={`flex items-center gap-2 px-8 py-2.5 text-sm font-bold text-white rounded-full transition-all transform active:scale-95 shadow-xl ${
+          isUpdating || isUploadingThumbnail
+            ? "bg-gray-300 cursor-not-allowed"
+            : "bg-gradient-to-r from-[#1E2EDE] to-[#14C4E7] hover:shadow-[#14C4E7]/40 hover:-translate-y-0.5"
+        }`}
+      >
+        {isUpdating ? (
+          <span className="flex items-center gap-2">
+            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+            SAVING...
+          </span>
+        ) : (
+          "SAVE CHANGES"
+        )}
+      </button>
+    </nav>
+
+    <main className="max-w-7xl mx-auto px-4 sm:px-6 pt-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+        
+        {/* LEFT COLUMN: Editor */}
+        <div className="lg:col-span-2 space-y-8">
+          
+          {/* General Info Section */}
+          <div className="bg-white rounded-[2rem] shadow-xl shadow-blue-900/5 border border-gray-100 p-6 sm:p-10">
+            <div className="flex items-center gap-3 mb-8">
+              <div className="w-2 h-8 bg-[#14C4E7] rounded-full"></div>
+              <h2 className="text-2xl font-bold text-[#1E2EDE]">General Information</h2>
+            </div>
+
+            <div className="space-y-6">
+              {/* Title */}
+              <div className="group">
+                <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">Course Title</label>
+                <input
+                  type="text"
+                  name="title"
+                  value={formData.title}
+                  onChange={handleInputChange}
+                  disabled={isUpdating}
+                  placeholder="Enter a descriptive title"
+                  className="w-full px-5 py-4 rounded-2xl border-2 border-gray-50 bg-gray-50/50 focus:bg-white focus:border-[#14C4E7] focus:ring-4 focus:ring-[#14C4E7]/10 transition-all outline-none text-gray-700 font-medium"
+                />
+              </div>
+
+              {/* Category */}
+              <div>
+                <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">Category</label>
+                <div className="relative">
+                  <select
+                    name="category"
+                    value={formData.category}
+                    onChange={handleInputChange}
+                    disabled={isUpdating}
+                    className="w-full px-5 py-4 rounded-2xl border-2 border-gray-50 bg-gray-50/50 focus:bg-white focus:border-[#14C4E7] focus:ring-4 focus:ring-[#14C4E7]/10 appearance-none outline-none text-gray-700 font-medium"
+                  >
+                    {categories.map((c) => (
+                      <option key={c._id} value={c._id}>{c.name}</option>
+                    ))}
+                  </select>
+                  <div className="absolute inset-y-0 right-5 flex items-center pointer-events-none text-[#14C4E7]">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+                  </div>
+                </div>
+              </div>
+
+              {/* Description */}
+              <div>
+                <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">Description</label>
+                <div className="relative">
+                  <textarea
+                    name="description"
+                    value={formData.description}
+                    onChange={handleInputChange}
+                    disabled={isUpdating}
+                    rows="6"
+                    className="w-full px-5 py-4 rounded-2xl border-2 border-gray-50 bg-gray-50/50 focus:bg-white focus:border-[#14C4E7] focus:ring-4 focus:ring-[#14C4E7]/10 transition-all resize-none outline-none text-gray-700 font-medium"
+                  />
+                  <div className="absolute bottom-4 right-5 bg-white px-2 py-1 rounded-md shadow-sm border border-gray-100 text-[10px] font-bold text-[#14C4E7]">
+                    {formData.description.length} CHARACTERS
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Pricing Section */}
+          <div className="bg-white rounded-[2.5rem] shadow-xl shadow-blue-900/5 border border-gray-100 p-6 sm:p-10 relative overflow-hidden">
+            <div className="flex items-center gap-3 mb-8">
+              <div className="w-2 h-8 bg-[#E6D929] rounded-full"></div>
+              <h2 className="text-2xl font-bold text-[#1E2EDE]">Pricing & Economics</h2>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+              <div>
+                <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">Base Price (₹)</label>
+                <div className="relative group">
+                  <div className="absolute left-5 top-1/2 -translate-y-1/2 text-[#1E2EDE]">
+                    <DollarSign size={20} />
+                  </div>
+                  <input
+                    type="number"
+                    name="price"
+                    value={formData.price}
+                    onChange={handleInputChange}
+                    disabled={isUpdating}
+                    className="w-full pl-12 pr-5 py-4 rounded-2xl border-2 border-gray-50 bg-gray-50/50 focus:bg-white focus:border-[#14C4E7] outline-none transition-all font-bold text-lg"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">Offer Percentage (%)</label>
+                <input
+                  type="number"
+                  name="offerPercentage"
+                  value={formData.offerPercentage}
+                  onChange={handleInputChange}
+                  disabled={isUpdating}
+                  className="w-full px-5 py-4 rounded-2xl border-2 border-gray-50 bg-gray-50/50 focus:bg-white focus:border-[#E6D929] outline-none transition-all font-bold text-lg"
+                />
+              </div>
+            </div>
+
+            <div className="mt-10 bg-gradient-to-br from-[#1E2EDE] to-[#14C4E7] rounded-3xl p-6 flex flex-col sm:flex-row items-center justify-between text-white shadow-lg shadow-blue-500/20">
+              <div className="mb-4 sm:mb-0">
+                <p className="text-white/70 text-sm font-bold uppercase tracking-wider">Final Student Price</p>
+                <p className="text-xs text-white/50 italic">Calculated automatically after discount</p>
+              </div>
+              <div className="text-4xl font-black">₹{finalPrice}</div>
+            </div>
+          </div>
+
+          {/* Thumbnail Section */}
+          <div className="bg-white rounded-[2rem] shadow-xl shadow-blue-900/5 border border-gray-100 p-6 sm:p-10">
+            <div className="flex items-center gap-3 mb-8">
+              <div className="w-2 h-8 bg-[#14C4E7] rounded-full"></div>
+              <h2 className="text-2xl font-bold text-[#1E2EDE]">Media Assets</h2>
+            </div>
+
+            <div
+              className={`group relative border-4 border-dashed rounded-[2rem] p-4 text-center transition-all cursor-pointer overflow-hidden
+                ${formData.thumbnailUrl ? 'border-[#14C4E7]/30' : 'border-gray-100 hover:border-[#14C4E7] hover:bg-gray-50'}`}
+              onClick={() => !isUploadingThumbnail && fileInputRef.current.click()}
+            >
+              <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleImageChange} disabled={isUploadingThumbnail} />
+
+              {formData.thumbnailUrl ? (
+                <div className="relative w-full h-80 rounded-[1.5rem] overflow-hidden">
+                  <img src={formData.thumbnailUrl} alt="Preview" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                  <div className="absolute inset-0 bg-[#1E2EDE]/60 opacity-0 group-hover:opacity-100 transition-all flex flex-col items-center justify-center backdrop-blur-sm">
+                    <div className="bg-white p-4 rounded-full text-[#1E2EDE] shadow-2xl transform translate-y-4 group-hover:translate-y-0 transition-transform">
+                      <UploadCloud size={30} />
+                    </div>
+                    <span className="text-white font-black mt-4 tracking-tighter">CHANGE THUMBNAIL</span>
+                  </div>
+                  {isUploadingThumbnail && (
+                    <div className="absolute inset-0 bg-white/90 flex flex-col items-center justify-center">
+                      <div className="w-12 h-12 border-4 border-[#14C4E7] border-t-transparent rounded-full animate-spin mb-4"></div>
+                      <span className="text-[#1E2EDE] font-bold animate-pulse">UPLOADING...</span>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="py-12 flex flex-col items-center">
+                  <div className="w-20 h-20 bg-[#14C4E7]/10 text-[#14C4E7] rounded-3xl flex items-center justify-center mb-6 transform group-hover:rotate-12 transition-transform">
+                    <ImageIcon size={40} />
+                  </div>
+                  <h4 className="text-xl font-bold text-[#1E2EDE]">Drop your thumbnail here</h4>
+                  <p className="text-gray-400 mt-2 max-w-xs mx-auto">High resolution 16:9 images work best for course engagement</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* RIGHT COLUMN: Live Preview */}
+        <div className="hidden lg:block relative">
+          <div className="sticky top-28 space-y-6">
+            <div className="flex items-center justify-between px-2">
+              <h3 className="text-xs font-black text-[#1E2EDE] uppercase tracking-widest">Live Preview</h3>
+              <span className="px-2 py-1 bg-[#E6D929]/20 text-[#8b8214] text-[10px] font-black rounded-md">DESKTOP VIEW</span>
+            </div>
+
+            <div className="bg-white rounded-[2.5rem] overflow-hidden shadow-2xl shadow-blue-900/10 border border-gray-100 transition-all duration-500">
+              {/* Card Image */}
+              <div className="h-56 bg-gray-100 relative group overflow-hidden">
+                {formData.thumbnailUrl ? (
+                  <img src={formData.thumbnailUrl} alt="Preview" className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-gray-300">
+                    <ImageIcon size={60} />
+                  </div>
+                )}
+                {formData.offerPercentage > 0 && (
+                  <div className="absolute top-4 right-4 bg-[#E6D929] text-[#1E2EDE] text-xs font-black px-4 py-1.5 rounded-full shadow-lg">
+                    {formData.offerPercentage}% OFF
+                  </div>
+                )}
+              </div>
+
+              {/* Card Content */}
+              <div className="p-8">
+                <span className="text-[10px] font-black text-[#14C4E7] bg-[#14C4E7]/10 px-3 py-1.5 rounded-full uppercase tracking-widest">
+                  {getCategoryName(formData.category) || "Uncategorized"}
+                </span>
+
+                <h3 className="font-bold text-xl text-[#1E2EDE] mt-4 mb-3 line-clamp-2 leading-tight min-h-[3.5rem]">
+                  {formData.title || "Your Course Title Will Appear Here"}
+                </h3>
+
+                <p className="text-gray-400 text-sm line-clamp-3 mb-6 min-h-[3rem]">
+                  {formData.description || "Start typing your course description to see how it looks to your students..."}
+                </p>
+
+                <div className="flex items-center gap-3 border-t border-gray-50 pt-6">
+                  <span className="text-3xl font-black text-[#1E2EDE]">₹{finalPrice}</span>
+                  {formData.offerPercentage > 0 && (
+                    <span className="text-lg text-gray-300 line-through font-bold">₹{formData.price}</span>
+                  )}
+                </div>
+
+                <button className="w-full mt-8 bg-[#1E2EDE] text-white py-4 rounded-2xl text-sm font-black shadow-lg shadow-blue-900/20 hover:bg-[#14C4E7] transition-colors">
+                  ENROLL NOW
+                </button>
+              </div>
+            </div>
+
+            {/* Hint Box */}
+            <div className="bg-gradient-to-br from-[#1E2EDE] to-[#14C4E7] rounded-[2rem] p-6 text-white shadow-xl shadow-blue-500/10">
+              <h4 className="font-black text-sm mb-3 flex items-center gap-2">
+                <div className="w-1.5 h-1.5 bg-[#E6D929] rounded-full"></div>
+                PRO TIPS
+              </h4>
+              <ul className="text-xs space-y-3 font-medium text-white/80">
+                <li className="flex gap-2"><span>•</span> Use actionable titles like "Mastering..."</li>
+                <li className="flex gap-2"><span>•</span> Discounts between 10-30% convert best</li>
+                <li className="flex gap-2"><span>•</span> Ensure your thumbnail text is readable</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+);
 };
 
 export default EditCourse;

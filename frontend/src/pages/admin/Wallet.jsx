@@ -74,13 +74,14 @@ const AdminWallet = () => {
         <div className="min-h-screen bg-gray-50 p-6 md:p-8 font-sans">
             {/* --- HEADER --- */}
             <div className="mb-8 flex justify-between items-center">
-                <div>
-                    <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-                        <Wallet className="text-indigo-600" /> Admin Wallet
-                    </h1>
-                    <p className="text-sm text-gray-500 mt-1">
+                <div className="mb-10 text-center md:text-left">
+                    <h2 className="text-3xl font-black text-[#1E2EDE] tracking-tighter uppercase">
+                        Admin <span className="text-[#14C4E7]">Wallet</span>
+                    </h2>
+                    <p className="text-slate-400 text-[10px] font-black uppercase tracking-[0.25em] mt-1">
                         Track revenue streams, tax liabilities, and commission profits.
                     </p>
+                    <div className="h-1 w-20 bg-[#E6D929] mt-4 rounded-full mx-auto md:mx-0"></div>
                 </div>
                 <div className="flex items-center gap-3">
                     <button

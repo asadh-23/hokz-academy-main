@@ -26,15 +26,15 @@ import CourseMotivation from "../../components/user/courseDetails/CourseMotivati
 import CourseCurriculum from "../../components/user/courseDetails/CourseCurriculum";
 import CourseInstructor from "../../components/user/courseDetails/CourseInstructor";
 import CourseSidebar from "../../components/user/courseDetails/CourseSidebar";
-import { selectUserIsAuthenticated } from "../../store/features/auth/userAuthSlice";
+import { selectUserAuth } from "../../store/features/auth/userAuthSlice";
 
 const CourseDetails = () => {
     const { courseId } = useParams();
     const navigate = useNavigate();
     const dispatch = useDispatch();
 
-    const isAuthenticated = useSelector(selectUserIsAuthenticated);
-    
+    const { isAuthenticated, user } = useSelector(selectUserAuth);
+
     const courseData = useSelector(selectUserSelectedCourse);
     const loading = useSelector(selectUserCourseDetailsLoading);
 
@@ -47,7 +47,7 @@ const CourseDetails = () => {
     useEffect(() => {
         const loadPageData = async () => {
             try {
-                await dispatch(fetchUserCourseDetails(courseId)).unwrap();
+                await dispatch(fetchUserCourseDetails({ courseId, userId: user?._id })).unwrap();
                 if (isAuthenticated) {
                     await Promise.allSettled([dispatch(fetchUserCart()), dispatch(fetchUserWishlist())]);
                 }
@@ -143,14 +143,16 @@ const CourseDetails = () => {
     const isTogglingWishlist = wishlistLoadingById[courseId] || false;
     const isInCart = cart?.items?.some((item) => item.course?._id === courseId) || false;
 
-    return (
-        <div className="min-h-screen bg-gray-50 font-sans text-gray-900">
+   return (
+        <div className="min-h-screen bg-[#FDFDFD]">
+            {/* BRANDED HERO */}
             <CourseHero courseData={courseData} />
 
-            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                <div className="lg:grid lg:grid-cols-3 lg:gap-12">
-                    {/* Left Column - Course Content */}
-                    <div className="lg:col-span-2 space-y-10">
+            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+                <div className="flex flex-col lg:flex-row gap-12">
+                    
+                    {/* LEFT: CONTENT (66% Width) */}
+                    <div className="flex-1 space-y-16">
                         <CourseOverview
                             courseData={courseData}
                             totalLessons={totalLessons}
@@ -169,10 +171,12 @@ const CourseDetails = () => {
                             seconds={seconds}
                         />
 
-                        {/* Description */}
-                        <div>
-                            <h2 className="text-2xl font-bold text-gray-900 mb-4">Description</h2>
-                            <div className="prose prose-indigo text-gray-600 max-w-none">
+                        {/* Description Section */}
+                        <div className="bg-white rounded-[2rem] p-8 border border-slate-100 shadow-sm">
+                            <h2 className="text-2xl font-black text-[#1E2EDE] mb-6 uppercase tracking-tight">
+                                Deep Dive <span className="text-[#14C4E7]">Description</span>
+                            </h2>
+                            <div className="text-slate-600 leading-relaxed font-medium">
                                 <p className="whitespace-pre-wrap">{course.description}</p>
                             </div>
                         </div>
@@ -180,8 +184,8 @@ const CourseDetails = () => {
                         <CourseInstructor tutor={course.tutor} averageRating={course.averageRating} />
                     </div>
 
-                    {/* Right Column - Sidebar */}
-                    <div className="lg:col-span-1 relative">
+                    {/* RIGHT: SIDEBAR (33% Width) */}
+                    <aside className="w-full lg:w-[400px] shrink-0">
                         <CourseSidebar
                             courseData={courseData}
                             hours={hours}
@@ -198,16 +202,16 @@ const CourseDetails = () => {
                             isEnrolled={isEnrolled}
                             isAuthenticated={isAuthenticated}
                         />
-                    </div>
+                    </aside>
                 </div>
             </main>
 
-            {/* --- Footer --- */}
-            <footer className="bg-white border-t border-gray-200 mt-20 py-12">
-                <div className="max-w-7xl mx-auto px-4 text-center">
-                    <div className="font-bold text-xl text-gray-800 mb-4">Hokz Academy</div> {/* 👇 2. Name Updated */}
-                    <p className="text-gray-500 text-sm">
-                        &copy; {new Date().getFullYear()} Hokz Academy. All rights reserved.
+            <footer className="bg-[#1E2EDE] py-16 mt-20 relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-[#14C4E7] opacity-5 rounded-full -translate-y-20 translate-x-20"></div>
+                <div className="max-w-7xl mx-auto px-4 text-center relative z-10">
+                    <div className="text-2xl font-black text-[#FDFDFD] mb-4">HOKZ<span className="text-[#E6D929]">ACADEMY</span></div>
+                    <p className="text-[#FDFDFD]/50 text-xs font-bold uppercase tracking-widest">
+                        &copy; {new Date().getFullYear()} Hokz Academy. Sculpting the future of education.
                     </p>
                 </div>
             </footer>

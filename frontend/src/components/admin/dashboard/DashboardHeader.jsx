@@ -11,7 +11,6 @@ const AdminDashboardHeader = () => {
 
     const fetchOrderDetails = async () => {
         try {
-            
             const response = await adminAxios.get("/dashboard/orders");
             return response.data.orders || [];
         } catch (error) {
@@ -68,7 +67,7 @@ const AdminDashboardHeader = () => {
                     fillColor: [79, 70, 229],
                     textColor: [255, 255, 255],
                     fontStyle: "bold",
-                    fontSize: 8
+                    fontSize: 8,
                 },
                 styles: {
                     fontSize: 7,
@@ -119,8 +118,8 @@ const AdminDashboardHeader = () => {
                 "Tutor Share (INR)": order.tutorShare ?? 0,
                 "Tax (INR)": order.tax ?? 0,
                 "Payment Method": order.paymentGateway || "N/A",
-                "Date": order.date ? new Date(order.date).toLocaleDateString() : "N/A",
-                "Status": order.status || "N/A",
+                Date: order.date ? new Date(order.date).toLocaleDateString() : "N/A",
+                Status: order.status || "N/A",
             }));
 
             const ws = XLSX.utils.json_to_sheet(excelData);
@@ -128,9 +127,21 @@ const AdminDashboardHeader = () => {
             XLSX.utils.book_append_sheet(wb, ws, "Master Orders");
 
             const wscols = [
-                {wch:5}, {wch:15}, {wch:20}, {wch:25}, {wch:20}, {wch:30}, {wch:15}, {wch:18}, {wch:15}, {wch:10}, {wch:15}, {wch:12}, {wch:10}
+                { wch: 5 },
+                { wch: 15 },
+                { wch: 20 },
+                { wch: 25 },
+                { wch: 20 },
+                { wch: 30 },
+                { wch: 15 },
+                { wch: 18 },
+                { wch: 15 },
+                { wch: 10 },
+                { wch: 15 },
+                { wch: 12 },
+                { wch: 10 },
             ];
-            ws['!cols'] = wscols;
+            ws["!cols"] = wscols;
 
             XLSX.writeFile(wb, `admin-sales-report-${Date.now()}.xlsx`);
 
@@ -148,11 +159,14 @@ const AdminDashboardHeader = () => {
     return (
         <div className="mb-8">
             <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-800 to-indigo-600 bg-clip-text text-transparent">
-                        Admin Dashboard
-                    </h1>
-                    <p className="text-gray-600 mt-1">Platform-wide sales and financial reports.</p>
+                <div className="mb-10 text-center md:text-left">
+                    <h2 className="text-3xl font-black text-[#1E2EDE] tracking-tighter uppercase">
+                        Admin <span className="text-[#14C4E7]">Dashboard</span>
+                    </h2>
+                    <p className="text-slate-400 text-[10px] font-black uppercase tracking-[0.25em] mt-1">
+                        Platform-wide sales and financial reports.
+                    </p>
+                    <div className="h-1 w-20 bg-[#E6D929] mt-4 rounded-full mx-auto md:mx-0"></div>
                 </div>
                 <div className="flex items-center gap-3">
                     <button

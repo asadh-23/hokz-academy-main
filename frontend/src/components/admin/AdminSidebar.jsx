@@ -1,12 +1,26 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { toast } from "sonner";
-import { authAxios } from "../../api/authAxios";
 import { useDispatch, useSelector } from "react-redux";
-import { clearAdminAuthState, logoutAdmin } from "../../store/features/auth/adminAuthSlice";
-import defaultProfileImage from "../../assets/images/default-profile-image.webp"
+import {
+    LayoutDashboard,
+    User,
+    Layers,
+    Users,
+    GraduationCap,
+    ClipboardList,
+    Wallet,
+    BookOpen,
+    Settings,
+    LogOut,
+    ChevronLeft,
+    ChevronRight,
+} from "lucide-react";
 
-const AdminSidebar = () => {
+import { clearAdminAuthState, logoutAdmin } from "../../store/features/auth/adminAuthSlice";
+import defaultProfileImage from "../../assets/images/default-profile-image.webp";
+
+const AdminSidebar = ({ isCollapsed, setIsCollapsed, isMobileOpen, setIsMobileOpen }) => {
     const navigate = useNavigate();
     const location = useLocation();
     const dispatch = useDispatch();
@@ -30,105 +44,117 @@ const AdminSidebar = () => {
     const adminProfileImage = admin?.profileImage || defaultProfileImage;
 
     const menuItems = [
-        { name: "Dashboard", icon: "📊", path: "/admin/dashboard" },
-        { name: "Profile", icon: "👤", path: "/admin/profile" },
-        { name: "Category", icon: "📂", path: "/admin/categories" },
-        { name: "Students", icon: "🎓", path: "/admin/users" },
-        { name: "Tutors", icon: "👨‍🏫", path: "/admin/tutors" },
-        { name: "Orders", icon: "📋", path: "/admin/orders" },
-        { name: "Wallet", icon: "🎫", path: "/admin/Wallet" },
-        { name: "Courses", icon: "📚", path: "/admin/courses" },
-        { name: "Logout", icon: "🚪" }, // no path needed
+        { name: "Dashboard", icon: <LayoutDashboard size={22} />, path: "/admin/dashboard" },
+        { name: "Profile", icon: <User size={22} />, path: "/admin/profile" },
+        { name: "Category", icon: <Layers size={22} />, path: "/admin/categories" },
+        { name: "Students", icon: <GraduationCap size={22} />, path: "/admin/users" },
+        { name: "Tutors", icon: <Users size={22} />, path: "/admin/tutors" },
+        { name: "Orders", icon: <ClipboardList size={22} />, path: "/admin/orders" },
+        { name: "Wallet", icon: <Wallet size={22} />, path: "/admin/Wallet" },
+        { name: "Courses", icon: <BookOpen size={22} />, path: "/admin/courses" },
     ];
+
+    const activeClass = "bg-[#1E2EDE] text-[#E6D929] shadow-lg shadow-blue-900/20";
+    const inactiveClass = "text-slate-600 hover:bg-[#14C4E7]/5 hover:text-[#1E2EDE]";
 
     return (
         <>
-            <aside className="w-[280px] bg-white border-r border-gray-200 flex flex-col h-[calc(100vh-70px)] sticky top-0">
-                {/* Scrollable Section */}
-                <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-6 scrollbar-hide">
-                    {/* Profile Section */}
-                    <div className="text-center relative">
-                        <div className="mb-3">
-                            <img
-                                src={adminProfileImage}
-                                alt="Admin"
-                                onError={(e) => {
-                                    e.target.onerror = null;
-                                    e.target.src = defaultProfileImage;
-                                }}
-                                className="w-20 h-20 rounded-full border-4 border-cyan-400 mx-auto object-cover"
-                            />
-                        </div>
-                        <h3 className="text-lg font-semibold text-cyan-600">{adminName}</h3>
-                        <p className="text-sm text-gray-500">Administrator</p>
-                    </div>
-
-                    {/* Admin Panel Section */}
-                    <div className="bg-gradient-to-br from-cyan-400 to-blue-500 rounded-2xl p-5 text-white shadow-md">
-                        <h4 className="text-lg font-semibold mb-4">Admin Panel</h4>
-
-                        <div className="flex flex-col gap-2">
-                            {menuItems.map((item) => {
-                                const isActive = location.pathname === item.path;
-
-                                // ✅ For logout button, open confirmation modal instead
-                                const handleClick =
-                                    item.name === "Logout"
-                                        ? () => setShowConfirm(true)
-                                        : () => navigate(item.path);
-
-                                return (
-                                    <div
-                                        key={item.name}
-                                        onClick={handleClick}
-                                        className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-all
-                    ${isActive
-                                                ? "bg-white text-cyan-600 font-semibold shadow-sm"
-                                                : "hover:bg-white/20 hover:text-white"
-                                            }`}
-                                    >
-                                        <span className="text-lg">{item.icon}</span>
-                                        <span className="text-sm font-medium">{item.name}</span>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    </div>
-                </div>
-
-                {/* System Settings Button */}
-                <div className="p-6 border-t border-gray-100">
+            <aside
+                className={`
+                   fixed lg:sticky top-[70px] left-0 z-40 h-[calc(100vh-70px)] bg-white border-r border-slate-100 transition-all duration-300 ease-in-out
+                    ${isMobileOpen ? "translate-x-0 w-72" : "-translate-x-full lg:translate-x-0"}
+                    ${isCollapsed ? "lg:w-20" : "lg:w-72"}
+                `}
+            >
+                <div className="flex flex-col h-full">
+                    {/* Desktop Collapse Toggle */}
                     <button
-                        onClick={() => navigate("/admin/settings")}
-                        className="w-full bg-gradient-to-br from-cyan-400 to-blue-500 text-white py-3 px-5 rounded-full text-sm font-semibold cursor-pointer transition-all hover:-translate-y-0.5 hover:shadow-lg hover:shadow-cyan-500/30"
+                        onClick={() => setIsCollapsed(!isCollapsed)}
+                        className="hidden lg:flex absolute -right-3 top-10 bg-[#1E2EDE] text-white w-6 h-6 rounded-full items-center justify-center shadow-md hover:bg-[#14C4E7] transition-colors z-50"
                     >
-                        System Settings
+                        {isCollapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
                     </button>
+
+                    {/* Admin Profile Summary */}
+                    <div className={`p-6 border-b border-slate-50 flex items-center transition-all ${isCollapsed ? "justify-center" : "gap-4"}`}>
+                        <div className="shrink-0 w-10 h-10 rounded-xl border-2 border-[#14C4E7] overflow-hidden shadow-sm">
+                            <img src={adminProfileImage} alt="Admin" className="w-full h-full object-cover" />
+                        </div>
+                        {!isCollapsed && (
+                            <div className="overflow-hidden whitespace-nowrap animate-in fade-in slide-in-from-left-2">
+                                <h4 className="font-black text-[#1E2EDE] text-sm leading-tight">{adminName}</h4>
+                                <p className="text-[10px] text-[#14C4E7] font-black uppercase tracking-widest">Super Administrator</p>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Nav Links */}
+                    <nav className="flex-1 overflow-y-auto p-3 space-y-1 custom-scrollbar">
+                        <div className={`mb-2 px-4 py-2 ${isCollapsed ? 'hidden' : 'block'}`}>
+                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Main Menu</p>
+                        </div>
+                        {menuItems.map((item) => {
+                            const isActive = location.pathname === item.path;
+                            return (
+                                <div
+                                    key={item.name}
+                                    onClick={() => {
+                                        navigate(item.path);
+                                        setIsMobileOpen(false);
+                                    }}
+                                    className={`
+                                        flex items-center rounded-xl transition-all duration-200 cursor-pointer group
+                                        ${isActive ? activeClass : inactiveClass}
+                                        ${isCollapsed ? "justify-center p-3" : "px-4 py-3 gap-4"}
+                                    `}
+                                    title={isCollapsed ? item.name : ""}
+                                >
+                                    <span className="shrink-0">{item.icon}</span>
+                                    {!isCollapsed && <span className="font-bold text-sm whitespace-nowrap">{item.name}</span>}
+                                </div>
+                            );
+                        })}
+                    </nav>
+
+                    {/* Footer Section */}
+                    <div className="p-3 border-t border-slate-50 space-y-2">
+                      
+                        <button
+                            onClick={() => setShowConfirm(true)}
+                            className={`
+                                flex items-center text-red-500 font-bold text-sm hover:bg-red-50 rounded-xl transition-all w-full
+                                ${isCollapsed ? "justify-center p-3" : "px-4 py-3 gap-4"}
+                            `}
+                        >
+                            <LogOut size={22} className="shrink-0" />
+                            {!isCollapsed && <span>Sign Out</span>}
+                        </button>
+                    </div>
                 </div>
             </aside>
 
-            {/* 🔹 Logout Confirmation Modal */}
+            {/* Logout Modal */}
             {showConfirm && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-                    <div className="bg-white rounded-2xl p-6 w-[90%] max-w-sm shadow-lg text-center">
-                        <h3 className="text-lg font-semibold text-gray-800 mb-3">
-                            Confirm Logout
-                        </h3>
-                        <p className="text-gray-500 mb-6">
-                            Are you sure you want to log out of the admin panel?
-                        </p>
-                        <div className="flex justify-center gap-4">
+                <div className="fixed inset-0 bg-[#1E2EDE]/20 backdrop-blur-sm flex items-center justify-center z-[100]">
+                    <div className="bg-white rounded-[2.5rem] p-8 w-[90%] max-w-sm shadow-2xl text-center border border-white">
+                        <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <LogOut size={30} className="text-red-500" />
+                        </div>
+                        <h3 className="text-xl font-black text-[#1E2EDE] mb-2">Logout System?</h3>
+                        <p className="text-slate-500 text-sm mb-8 font-medium">Are you sure you want to exit the admin control panel?</p>
+
+                        <div className="flex gap-3">
                             <button
                                 onClick={() => setShowConfirm(false)}
-                                className="px-5 py-2 rounded-full border border-gray-300 text-gray-600 hover:bg-gray-100 transition-all"
+                                className="flex-1 px-6 py-3 rounded-xl border-2 border-slate-100 text-slate-600 font-bold hover:bg-slate-50 transition-all"
                             >
                                 Cancel
                             </button>
                             <button
                                 onClick={handleLogout}
-                                className="px-5 py-2 rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 text-white font-semibold hover:opacity-90 transition-all"
+                                className="flex-1 px-6 py-3 rounded-xl bg-[#1E2EDE] text-[#E6D929] font-bold hover:shadow-lg transition-all"
                             >
-                                Yes, Log Out
+                                Logout
                             </button>
                         </div>
                     </div>

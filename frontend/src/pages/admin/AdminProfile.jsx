@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import ChangePasswordModal from "../../components/auth/ChangePasswordModal";
-import SecurityCard from "../../components/common/SecurityCard";
+import { Camera, Mail, User, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import { PageLoader, ButtonLoader } from "../../components/common/LoadingSpinner";
 import defaultProfileImage from "../../assets/images/default-profile-image.webp";
@@ -96,58 +95,119 @@ const AdminProfile = () => {
     }
 
     return (
-        <div className="flex flex-col min-h-screen bg-gray-50">
-            <div className="flex-1 p-6 md:p-8 overflow-y-auto">
-                {/* Header */}
-                <div className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white p-5 md:p-6 rounded-xl shadow mb-8">
-                    <h2 className="text-xl md:text-2xl font-semibold text-center">Admin Profile</h2>
+        <div className="min-h-screen bg-[#FDFDFD] p-4 md:p-8 lg:p-12">
+            <div className="max-w-4xl mx-auto">
+                {/* Page Header */}
+                <div className="mb-10 text-center md:text-left">
+                    <h2 className="text-3xl font-black text-[#1E2EDE] tracking-tighter uppercase">
+                        Account <span className="text-[#14C4E7]">Profile</span>
+                    </h2>
+                    <p className="text-slate-400 text-[10px] font-black uppercase tracking-[0.25em] mt-1">
+                        Administrator Profile & Security
+                    </p>
+                    <div className="h-1 w-20 bg-[#E6D929] mt-4 rounded-full mx-auto md:mx-0"></div>
                 </div>
 
                 {/* Profile Card */}
-                <div className="bg-white rounded-2xl p-8 max-w-3xl mx-auto shadow-lg relative overflow-hidden border border-gray-100">
-                    {/* Profile Image */}
-                    <div className="flex justify-center mb-10">
-                        <div className="relative group">
-                            <img
-                                src={profileData.profileImage || defaultProfileImage}
-                                alt="Profile"
-                                className="relative w-36 h-36 object-cover rounded-full border-4 border-white shadow-xl group-hover:scale-105 transition-all"
-                                onError={(e) => (e.target.src = defaultProfileImage)}
-                            />
+                <div className="bg-white rounded-[2.5rem] shadow-[0_20px_60px_rgba(30,46,222,0.06)] border border-slate-100 overflow-hidden relative">
+                    {/* Decorative Background Flare */}
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-[#14C4E7]/5 to-transparent rounded-bl-full pointer-events-none"></div>
 
-                            <input
-                                ref={fileInputRef}
-                                type="file"
-                                accept="image/*"
-                                onChange={handleImageChange}
-                                className="hidden"
-                            />
+                    <div className="p-8 md:p-12 relative z-10">
+                        <div className="flex flex-col md:flex-row items-center gap-12">
+                            
+                            {/* Left Side: Profile Image Section */}
+                            <div className="flex-shrink-0">
+                                <div className="relative group">
+                                    <div className="w-44 h-44 rounded-[3rem] p-1.5 bg-gradient-to-tr from-[#1E2EDE] via-[#14C4E7] to-[#E6D929] shadow-2xl">
+                                        <div className="w-full h-full rounded-[2.8rem] overflow-hidden border-4 border-white bg-white">
+                                            <img
+                                                src={profileData.profileImage || defaultProfileImage}
+                                                alt="Profile"
+                                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                                                onError={(e) => (e.target.src = defaultProfileImage)}
+                                            />
+                                        </div>
+                                    </div>
 
-                            <button
-                                onClick={triggerFileInput}
-                                disabled={isUploading}
-                                className={`absolute bottom-3 right-3 w-10 h-10 bg-gradient-to-r from-cyan-500 to-emerald-500 text-white rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-all ${
-                                    isUploading ? "opacity-60 cursor-not-allowed" : "opacity-90"
-                                }`}
-                            >
-                                {isUploading ? <ButtonLoader /> : "📷"}
-                            </button>
+                                    {/* File Input Logic */}
+                                    <input
+                                        ref={fileInputRef}
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={handleImageChange}
+                                        className="hidden"
+                                    />
+
+                                    {/* Camera Button */}
+                                    <button
+                                        onClick={triggerFileInput}
+                                        disabled={isUploading}
+                                        className={`absolute -bottom-2 -right-2 w-14 h-14 bg-white text-[#1E2EDE] rounded-2xl flex items-center justify-center shadow-xl border border-slate-100 hover:bg-[#1E2EDE] hover:text-white transition-all transform active:scale-90 ${
+                                            isUploading ? "opacity-60 cursor-not-allowed" : "opacity-100"
+                                        }`}
+                                        title="Update Profile Photo"
+                                    >
+                                        {isUploading ? (
+                                            <ButtonLoader />
+                                        ) : (
+                                            <Camera size={24} />
+                                        )}
+                                    </button>
+                                </div>
+                                <div className="mt-6 text-center">
+                                    <span className="px-4 py-1.5 bg-[#14C4E7]/10 text-[#14C4E7] rounded-full text-[10px] font-black uppercase tracking-widest">
+                                        System Admin
+                                    </span>
+                                </div>
+                            </div>
+
+                            {/* Right Side: Profile Details */}
+                            <div className="flex-1 w-full space-y-8">
+                                <div className="grid grid-cols-1 gap-8">
+                                    {/* Full Name Field */}
+                                    <div className="space-y-3">
+                                        <label className="flex items-center gap-2 text-[10px] font-black text-[#1E2EDE] uppercase tracking-widest">
+                                            <User size={14} className="text-[#14C4E7]" />
+                                            Administrative Name
+                                        </label>
+                                        <div className="bg-gray-50 border border-slate-100 rounded-2xl px-6 py-4 flex items-center">
+                                            <span className="text-gray-800 font-bold text-lg">
+                                                {profileData.fullName}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    {/* Email Field */}
+                                    <div className="space-y-3">
+                                        <label className="flex items-center gap-2 text-[10px] font-black text-[#1E2EDE] uppercase tracking-widest">
+                                            <Mail size={14} className="text-[#14C4E7]" />
+                                            Primary Email Address
+                                        </label>
+                                        <div className="bg-gray-50 border border-slate-100 rounded-2xl px-6 py-4 flex items-center justify-between group">
+                                            <span className="text-slate-400 font-medium select-none italic">
+                                                {profileData.email}
+                                            </span>
+                                            <div className="text-slate-300">
+                                                <ShieldCheck size={20} />
+                                            </div>
+                                        </div>
+                                        <p className="text-[10px] text-slate-400 font-medium italic ml-2">
+                                            Email changes must be requested through system security.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
-                    {/* Profile Details */}
-                    <div className="space-y-6">
-                        <div>
-                            <label className="block text-sm font-medium text-gray-600 mb-1">Full Name</label>
-                            <div className="bg-gray-100 rounded-lg px-4 py-3 border">{profileData.fullName}</div>
+                    {/* Footer Info Accent */}
+                    <div className="bg-slate-50 px-8 py-4 border-t border-slate-100 flex justify-between items-center">
+                        <div className="flex items-center gap-2">
+                            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                            <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Secure Console Access Active</span>
                         </div>
-
-                        <div>
-                            <label className="block text-sm font-medium text-gray-600 mb-1">Email</label>
-                            <div className="bg-gray-100 rounded-lg px-4 py-3 border text-gray-500 cursor-not-allowed">
-                                {profileData.email}
-                            </div>
-                        </div>
+                        <span className="text-[9px] font-black text-[#1E2EDE] uppercase tracking-widest opacity-40">Portal v2.4.0</span>
                     </div>
                 </div>
             </div>

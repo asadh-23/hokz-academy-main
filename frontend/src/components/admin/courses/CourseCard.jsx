@@ -15,110 +15,67 @@ const CourseCard = ({ course, formatCurrency, navigate }) => {
     return (
         <div 
             onClick={handleManageCourse}
-            className="bg-white rounded-lg shadow-sm border hover:shadow-md transition-all duration-200 overflow-hidden cursor-pointer group"
+            className="bg-[#FDFDFD] rounded-[2rem] shadow-lg shadow-blue-900/5 border border-gray-100 hover:shadow-2xl hover:border-[#14C4E7]/30 transition-all duration-500 overflow-hidden cursor-pointer group"
         >
-            {/* Image */}
-            <div className="relative h-48 bg-gray-100 overflow-hidden">
+            <div className="relative h-56 overflow-hidden">
                 <img
                     src={course.thumbnailUrl || "https://via.placeholder.com/400x250"}
                     alt={course.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+                <div className="absolute inset-0 bg-gradient-to-t from-[#1E2EDE]/80 via-transparent to-transparent"></div>
 
-                {/* Banned Overlay */}
                 {course.isBanned && (
-                    <div className="absolute inset-0 bg-black/70 backdrop-blur-sm flex flex-col items-center justify-center">
-                        <div className="text-center px-4">
-                            <span className="block text-red-500 text-2xl font-bold mb-2">
-                                BANNED
-                            </span>
-                            <span className="block text-white text-sm">
-                                Banned on: {new Date(course.bannedAt).toLocaleDateString('en-US', {
-                                    year: 'numeric',
-                                    month: 'long',
-                                    day: 'numeric'
-                                })}
-                            </span>
+                    <div className="absolute inset-0 bg-gray-900/80 backdrop-blur-sm flex items-center justify-center">
+                        <div className="text-center">
+                            <span className="block text-white text-3xl font-black mb-1 drop-shadow-lg">BANNED</span>
+                            <span className="text-[#E6D929] text-[10px] font-bold uppercase tracking-widest">Administrative Action</span>
                         </div>
                     </div>
                 )}
 
-                {/* Status Badge */}
-                <div className="absolute top-3 left-3">
-                    <span
-                        className={`px-2 py-1 rounded-full text-xs font-medium ${
-                            course.isListed
-                                ? "bg-green-100 text-green-800 border border-green-200"
-                                : "bg-yellow-100 text-yellow-800 border border-yellow-200"
-                        }`}
-                    >
-                        {course.isListed ? "Published" : "Unlisted"}
+                <div className="absolute top-4 left-4">
+                    <span className={`px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider border-2 shadow-lg
+                        ${course.isListed ? "bg-white text-[#14C4E7] border-white" : "bg-[#E6D929] text-[#1E2EDE] border-[#E6D929]"}`}>
+                        {course.isListed ? "● Published" : "○ Draft"}
                     </span>
                 </div>
 
-                {/* Category Badge */}
-                <div className="absolute top-3 right-3">
-                    <span className="px-2 py-1 bg-white/90 backdrop-blur-sm text-gray-700 rounded-full text-xs font-medium">
-                        {course.category?.name || "General"}
-                    </span>
-                </div>
-
-                {/* Tutor Info */}
-                <div className="absolute bottom-3 left-3 flex items-center gap-2">
+                <div className="absolute bottom-4 left-4 flex items-center gap-3">
                     <img
                         src={course.tutor?.profileImage || "https://via.placeholder.com/32"}
-                        alt="Tutor"
-                        className="w-8 h-8 rounded-full border-2 border-white object-cover"
+                        alt=""
+                        className="w-10 h-10 rounded-xl border-2 border-[#14C4E7] object-cover shadow-lg"
                     />
-                    <div className="text-white">
-                        <p className="text-xs font-medium">{formatText(course.tutor?.fullName, 15) || "Unknown"}</p>
-                    </div>
+                    <p className="text-white text-xs font-black drop-shadow-md">{course.tutor?.fullName || "Instructor"}</p>
                 </div>
             </div>
 
-            {/* Content */}
-            <div className="p-5">
-                <h3 className="font-semibold text-gray-900 text-lg mb-2 line-clamp-2 leading-tight">
-                    {formatText(course.title, 34)}
+            <div className="p-6">
+                <div className="mb-2">
+                    <span className="text-[10px] font-black text-[#14C4E7] uppercase tracking-[0.2em]">{course.category?.name || "Uncategorized"}</span>
+                </div>
+                <h3 className="font-bold text-[#1E2EDE] text-xl mb-3 line-clamp-1 group-hover:text-[#14C4E7] transition-colors">
+                    {course.title}
                 </h3>
 
-                <p className="text-sm text-gray-600 mb-4 line-clamp-2 leading-relaxed">
-                    {formatText(course.description, 44 )|| "No description available for this course."}
-                </p>
-
-                {/* Stats */}
-                <div className="flex items-center justify-between mb-4 text-sm text-gray-500">
-                    <div className="flex items-center gap-1">
-                        <Users size={14} />
-                        <span>{course.enrolledCount} students</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                        <Clock size={14} />
-                        <span>{new Date(course.createdAt).toLocaleDateString()}</span>
-                    </div>
+                <div className="flex items-center gap-4 mb-6 text-xs font-bold text-gray-400">
+                    <div className="flex items-center gap-1.5"><Users size={14} className="text-[#14C4E7]"/> {course.enrolledCount}</div>
+                    <div className="flex items-center gap-1.5"><Clock size={14} className="text-[#14C4E7]"/> {new Date(course.createdAt).toLocaleDateString()}</div>
                 </div>
 
-                {/* Price and Action */}
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between pt-4 border-t border-gray-50">
                     <div>
                         {offer > 0 && (
-                            <div className="flex items-center gap-2 mb-1">
-                                <span className="text-sm text-gray-400 line-through">{formatCurrency(originalPrice)}</span>
-                                <span className="text-xs font-medium text-red-600 bg-red-100 px-2 py-0.5 rounded">
-                                    -{offer}%
-                                </span>
-                            </div>
+                            <span className="text-[10px] font-black text-red-500 bg-red-50 px-2 py-1 rounded-lg mr-2">
+                                -{offer}%
+                            </span>
                         )}
-                        <div className="text-xl font-bold text-gray-900">{formatCurrency(sellingPrice)}</div>
+                        <span className="text-2xl font-black text-[#1E2EDE]">{formatCurrency(sellingPrice)}</span>
                     </div>
 
-                    <button 
-                        onClick={handleManageCourse}
-                        className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
-                    >
-                        <Settings size={16} />
-                        Manage
+                    <button className="p-3 bg-[#1E2EDE] text-white rounded-2xl hover:bg-[#14C4E7] transition-all shadow-lg shadow-blue-200">
+                        <Settings size={20} />
                     </button>
                 </div>
             </div>

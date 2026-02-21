@@ -3,7 +3,7 @@ import { toast } from "sonner";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-
+import { User, Phone, Mail, Lock, ShieldCheck, ArrowRight } from "lucide-react";
 import { userRegister, selectUserAuthLoading } from "../../../store/features/auth/userAuthSlice";
 
 import { validateEmail, validatePassword, validatePhone, validateText } from "../../../utils/validation";
@@ -76,82 +76,136 @@ export default function UserRegister() {
 
     return (
         <AuthLayout subtitle="Sign Up" role="user">
-            <h2 className="text-3xl font-bold mb-4 text-gray-900 drop-shadow-md">Create your account</h2>
-
-            <form className="w-full space-y-6" onSubmit={handleSubmit}>
-                {/* Full Name */}
-                <div className="relative">
-                    <input
-                        type="text"
-                        placeholder="Full Name"
-                        className="w-full rounded-full border border-gray-300 px-6 py-3 focus:outline-none focus:ring-4 focus:ring-teal-300 transition"
-                        name="fullName"
-                        value={formData.fullName}
-                        onChange={handleChange}
-                        required
-                    />
+            <form className="w-full space-y-5" onSubmit={handleSubmit}>
+                {/* 1. Full Name Input */}
+                <div className="group">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4 mb-2 block">
+                        Student Name
+                    </label>
+                    <div className="relative">
+                        <div className="absolute left-6 top-1/2 -translate-y-1/2 text-[#14C4E7] group-focus-within:text-[#1E2EDE] transition-colors">
+                            <User size={18} />
+                        </div>
+                        <input
+                            type="text"
+                            name="fullName"
+                            value={formData.fullName}
+                            onChange={handleChange}
+                            required
+                            placeholder="John Doe"
+                            className="w-full bg-slate-50 rounded-2xl border-2 border-transparent px-14 py-4 focus:outline-none focus:border-[#1E2EDE] focus:bg-white transition-all font-bold text-[#1E2EDE] placeholder-slate-300 shadow-sm"
+                        />
+                    </div>
                 </div>
 
-                {/* Phone */}
-                <div className="relative">
-                    <input
-                        type="tel"
-                        placeholder="Phone Number"
-                        className="w-full rounded-full border border-gray-300 px-6 py-3 focus:outline-none focus:ring-4 focus:ring-teal-300 transition"
-                        name="phone"
-                        value={formData.phone}
-                        onChange={handleChange}
-                        required
-                    />
+                {/* 2. Phone Input */}
+                <div className="group">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4 mb-2 block">
+                        Contact Number
+                    </label>
+                    <div className="relative">
+                        <div className="absolute left-6 top-1/2 -translate-y-1/2 text-[#14C4E7] group-focus-within:text-[#1E2EDE] transition-colors">
+                            <Phone size={18} />
+                        </div>
+                        <input
+                            type="tel"
+                            name="phone"
+                            value={formData.phone}
+                            onChange={handleChange}
+                            required
+                            placeholder="+1 234 567 890"
+                            className="w-full bg-slate-50 rounded-2xl border-2 border-transparent px-14 py-4 focus:outline-none focus:border-[#1E2EDE] focus:bg-white transition-all font-bold text-[#1E2EDE] placeholder-slate-300 shadow-sm"
+                        />
+                    </div>
                 </div>
 
-                {/* Email */}
-                <div className="relative">
-                    <input
-                        type="email"
-                        placeholder="Email"
-                        className="w-full rounded-full border border-gray-300 px-6 py-3 focus:outline-none focus:ring-4 focus:ring-teal-300 transition"
-                        name="email"
-                        value={formData.email}
-                        onChange={handleChange}
-                        required
-                    />
+                {/* 3. Email Input */}
+                <div className="group">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4 mb-2 block">
+                        Academy Email
+                    </label>
+                    <div className="relative">
+                        <div className="absolute left-6 top-1/2 -translate-y-1/2 text-[#14C4E7] group-focus-within:text-[#1E2EDE] transition-colors">
+                            <Mail size={18} />
+                        </div>
+                        <input
+                            type="email"
+                            name="email"
+                            value={formData.email}
+                            onChange={handleChange}
+                            required
+                            placeholder="name@email.com"
+                            className="w-full bg-slate-50 rounded-2xl border-2 border-transparent px-14 py-4 focus:outline-none focus:border-[#1E2EDE] focus:bg-white transition-all font-bold text-[#1E2EDE] placeholder-slate-300 shadow-sm"
+                        />
+                    </div>
                 </div>
 
-                {/* Password */}
-                <div className="relative">
-                    <input
-                        type="password"
-                        placeholder="Password"
-                        className="w-full rounded-full border border-gray-300 px-6 py-3 pr-12 focus:outline-none focus:ring-4 focus:ring-teal-300 transition"
-                        name="password"
-                        value={formData.password}
-                        onChange={handleChange}
-                        required
-                    />
+                {/* 4. Password Input */}
+                <div className="group">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4 mb-2 block">
+                        Secret Password
+                    </label>
+                    <div className="relative">
+                        <div className="absolute left-6 top-1/2 -translate-y-1/2 text-[#14C4E7] group-focus-within:text-[#1E2EDE] transition-colors">
+                            <Lock size={18} />
+                        </div>
+                        <input
+                            type="password"
+                            name="password"
+                            value={formData.password}
+                            onChange={handleChange}
+                            required
+                            placeholder="••••••••"
+                            className="w-full bg-slate-50 rounded-2xl border-2 border-transparent px-14 py-4 focus:outline-none focus:border-[#1E2EDE] focus:bg-white transition-all font-bold text-[#1E2EDE] placeholder-slate-300 shadow-sm"
+                        />
+                    </div>
                 </div>
 
-                {/* Confirm Password */}
-                <div className="relative">
-                    <input
-                        type="password"
-                        placeholder="Confirm Password"
-                        className="w-full rounded-full border border-gray-300 px-6 py-3 pr-12 focus:outline-none focus:ring-4 focus:ring-teal-300 transition"
-                        name="confirmPassword"
-                        value={formData.confirmPassword}
-                        onChange={handleChange}
-                        required
-                    />
+                {/* 5. Confirm Password Input */}
+                <div className="group">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4 mb-2 block">
+                        Confirm Password
+                    </label>
+                    <div className="relative">
+                        <div className="absolute left-6 top-1/2 -translate-y-1/2 text-[#14C4E7] group-focus-within:text-[#1E2EDE] transition-colors">
+                            <ShieldCheck size={18} />
+                        </div>
+                        <input
+                            type="password"
+                            name="confirmPassword"
+                            value={formData.confirmPassword}
+                            onChange={handleChange}
+                            required
+                            placeholder="••••••••"
+                            className="w-full bg-slate-50 rounded-2xl border-2 border-transparent px-14 py-4 focus:outline-none focus:border-[#1E2EDE] focus:bg-white transition-all font-bold text-[#1E2EDE] placeholder-slate-300 shadow-sm"
+                        />
+                    </div>
                 </div>
 
                 {/* Register Button */}
-                <button
-                    type="submit"
-                    disabled={loading}
-                    className="w-full bg-teal-400 text-white font-bold text-lg py-3 rounded-full shadow-lg hover:bg-teal-500 transition-all disabled:opacity-50"
-                >
-                    {loading ? "Registering..." : "Register"}
-                </button>
+                <div className="pt-4">
+                    <button
+                        type="submit"
+                        disabled={loading}
+                        className="group w-full bg-[#1E2EDE] text-[#E6D929] font-black text-xs uppercase tracking-[0.2em] py-5 rounded-2xl shadow-xl shadow-blue-200 hover:bg-[#14C4E7] hover:text-white transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
+                    >
+                        {loading ? (
+                            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                        ) : (
+                            <>
+                                Start My Journey{" "}
+                                <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                            </>
+                        )}
+                    </button>
+                </div>
+
+                {/* User Agreement Note */}
+                <p className="text-[10px] text-center text-slate-400 font-bold px-6 leading-relaxed">
+                    By clicking "Start My Journey", you agree to our{" "}
+                    <span className="text-[#14C4E7] underline cursor-pointer">Academic Terms</span> and{" "}
+                    <span className="text-[#14C4E7] underline cursor-pointer">Privacy Policy</span>.
+                </p>
             </form>
         </AuthLayout>
     );

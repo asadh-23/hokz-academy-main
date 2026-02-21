@@ -19,6 +19,7 @@
     "axios": "^1.12.2",
     "buffer": "^6.0.3",
     "canvas-confetti": "^1.9.4",
+    "framer-motion": "^12.34.2",
     "jspdf": "^4.1.0",
     "jspdf-autotable": "^5.0.7",
     "jwt-decode": "^4.0.0",

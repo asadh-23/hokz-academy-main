@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { Users, Eye, Search, X } from "lucide-react";
+import { Users, Search, X, Eye, BadgeCheck, GraduationCap } from 'lucide-react';
 import { userAxios } from "../../api/userAxios";
 import { toast } from "sonner";
 import { PageLoader } from "../../components/common/LoadingSpinner";
@@ -43,7 +43,7 @@ const TutorsListing = () => {
     }, [tutors, searchQuery]);
 
     const handleViewProfile = (tutorId) => {
-        navigate(`/user/tutor/${tutorId}`);
+        navigate(`/user/tutors/${tutorId}`);
     };
 
     const handleClearSearch = () => {
@@ -55,98 +55,111 @@ const TutorsListing = () => {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-6">
-            <div className="max-w-7xl mx-auto">
-                {/* Header */}
-                <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/50 p-8 mb-8">
-                    <div className="flex items-center gap-4 mb-2">
-                        <div className="p-3 bg-gradient-to-br from-teal-500 to-cyan-600 rounded-xl shadow-lg">
-                            <Users className="w-8 h-8 text-white" />
-                        </div>
-                        <div>
-                            <h1 className="text-4xl font-bold bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">
-                                Our Expert Tutors
-                            </h1>
-                            <p className="text-gray-600 mt-1">
-                                Discover and connect with verified instructors
-                            </p>
-                        </div>
-                    </div>
-                    <div className="mt-4 flex items-center gap-2 text-sm text-gray-500">
-                        <span className="px-3 py-1 bg-teal-50 text-teal-700 rounded-full font-medium">
-                            {filteredTutors.length} {searchQuery ? "Result(s)" : "Verified Tutors"}
-                        </span>
-                    </div>
-                </div>
+        <div className="min-h-screen bg-[#FDFDFD]">
+            {/* --- HERO HEADER SECTION --- */}
+            <div className="bg-[#1E2EDE] relative overflow-hidden py-16 md:py-24">
+                {/* Decorative Brand Shapes */}
+                <div className="absolute top-0 right-0 w-64 h-64 bg-[#14C4E7] opacity-10 rounded-full -translate-y-20 translate-x-20"></div>
+                <div className="absolute bottom-0 left-0 w-40 h-40 bg-[#E6D929] opacity-10 rounded-full translate-y-10 -translate-x-10"></div>
 
-                {/* Search Bar */}
-                <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/50 p-6 mb-8">
-                    <div className="relative">
-                        <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <div className="max-w-7xl mx-auto px-4 relative z-10 text-center">
+                    <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md px-4 py-2 rounded-full mb-6 border border-white/20">
+                        <GraduationCap className="text-[#E6D929] w-5 h-5" />
+                        <span className="text-[#FDFDFD] text-[10px] font-black uppercase tracking-[0.2em]">Hokz Academy Faculty</span>
+                    </div>
+                    <h1 className="text-4xl md:text-6xl font-black text-[#FDFDFD] tracking-tight mb-4">
+                        Learn from the <span className="text-[#14C4E7]">Best</span>
+                    </h1>
+                    <p className="text-[#FDFDFD]/70 text-lg font-medium max-w-2xl mx-auto">
+                        Connect with industry-leading experts and verified educators chosen specifically for your growth.
+                    </p>
+                </div>
+            </div>
+
+            {/* --- SEARCHBAR SECTION (FLOATING) --- */}
+            <div className="max-w-4xl mx-auto px-4 -mt-10 relative z-20">
+                <div className="bg-white rounded-[2.5rem] shadow-2xl shadow-blue-900/10 p-4 md:p-6 border border-slate-50">
+                    <div className="relative group">
+                        <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-[#14C4E7] transition-transform group-focus-within:scale-110" size={24} />
                         <input
                             type="text"
-                            placeholder="Search tutors by name..."
+                            placeholder="Find your mentor by name..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full pl-12 pr-12 py-4 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none bg-white shadow-sm text-gray-900 placeholder-gray-400"
+                            className="w-full pl-16 pr-12 py-5 bg-slate-50 border-2 border-transparent focus:border-[#1E2EDE] rounded-3xl outline-none font-bold text-[#1E2EDE] placeholder-slate-400 transition-all text-lg"
                         />
                         {searchQuery && (
                             <button
                                 onClick={handleClearSearch}
-                                className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-red-500 transition-colors"
+                                className="absolute right-6 top-1/2 -translate-y-1/2 text-slate-300 hover:text-red-500 transition-colors"
                             >
-                                <X className="w-5 h-5" />
+                                <X size={24} />
                             </button>
                         )}
                     </div>
                     {searchQuery && (
-                        <div className="mt-3 p-3 bg-gradient-to-r from-teal-50 to-cyan-50 rounded-lg border border-teal-100">
-                            <div className="flex items-center gap-2">
-                                <div className="w-2 h-2 bg-teal-500 rounded-full animate-pulse"></div>
-                                <span className="text-sm font-medium text-teal-800">
-                                    Searching for: "{searchQuery}"
-                                </span>
-                            </div>
+                        <div className="mt-4 px-4 flex items-center gap-2">
+                            <span className="w-2 h-2 bg-[#14C4E7] rounded-full animate-ping"></span>
+                            <p className="text-xs font-black text-[#1E2EDE] uppercase tracking-widest">
+                                Showing results for: <span className="text-[#14C4E7]">{searchQuery}</span>
+                            </p>
                         </div>
                     )}
                 </div>
+            </div>
 
-                {/* Tutors Grid */}
+            {/* --- TUTORS GRID --- */}
+            <div className="max-w-7xl mx-auto px-4 py-20">
+                <div className="flex items-center justify-between mb-12 border-b border-slate-100 pb-6">
+                    <h2 className="text-sm font-black text-[#1E2EDE] uppercase tracking-[0.3em]">
+                        {searchQuery ? "Filtered Results" : "Verified Instructors"}
+                    </h2>
+                    <span className="bg-[#14C4E7]/10 text-[#14C4E7] px-4 py-1.5 rounded-full text-[10px] font-black">
+                        {filteredTutors.length} ACTIVE
+                    </span>
+                </div>
+
                 {filteredTutors.length > 0 ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
                         {filteredTutors.map((tutor) => (
                             <div
                                 key={tutor._id}
-                                className="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-100 hover:border-teal-200 hover:-translate-y-2"
+                                className="group bg-white rounded-[3rem] border border-slate-100 flex flex-col hover:shadow-[0_20px_50px_rgba(30,46,222,0.1)] transition-all duration-500 overflow-hidden relative"
                             >
-                                {/* Profile Image */}
-                                <div className="relative h-48 bg-gradient-to-br from-teal-100 to-cyan-100 overflow-hidden">
+                                {/* Profile Image Container */}
+                                <div className="relative h-64 m-4 overflow-hidden rounded-[2.5rem]">
                                     {tutor.profileImage ? (
                                         <img
                                             src={tutor.profileImage}
                                             alt={tutor.fullName}
-                                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                                            className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700"
                                         />
                                     ) : (
-                                        <div className="w-full h-full flex items-center justify-center">
-                                            <Users className="w-20 h-20 text-teal-300" />
+                                        <div className="w-full h-full bg-slate-100 flex items-center justify-center">
+                                            <Users className="w-16 h-16 text-slate-200" />
                                         </div>
                                     )}
-                                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+                                    
+                                    {/* Verified Badge */}
+                                    <div className="absolute top-4 left-4 bg-[#E6D929] text-[#1E2EDE] p-2 rounded-2xl shadow-lg border-2 border-white">
+                                        <BadgeCheck size={20} fill="white" />
+                                    </div>
+                                    
+                                    <div className="absolute inset-0 bg-gradient-to-t from-[#1E2EDE]/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                                 </div>
 
-                                {/* Tutor Info */}
-                                <div className="p-6">
-                                    <h3 className="text-xl font-bold text-gray-900 mb-4 group-hover:text-teal-600 transition-colors text-center">
+                                {/* Content */}
+                                <div className="px-8 pb-8 text-center">
+                                    <h3 className="text-xl font-bold text-slate-800 mb-6 group-hover:text-[#1E2EDE] transition-colors leading-tight">
                                         {formatText(tutor.fullName, 26)}
                                     </h3>
 
-                                    {/* View Profile Button */}
+                                    {/* Action Button */}
                                     <button
                                         onClick={() => handleViewProfile(tutor._id)}
-                                        className="w-full px-4 py-3 bg-gradient-to-r from-teal-600 to-cyan-600 text-white rounded-xl font-semibold hover:from-teal-700 hover:to-cyan-700 transition-all shadow-md hover:shadow-xl flex items-center justify-center gap-2"
+                                        className="w-full py-4 bg-slate-50 text-[#14C4E7] rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-3 transition-all duration-300 group-hover:bg-[#1E2EDE] group-hover:text-[#E6D929] group-hover:shadow-xl group-hover:shadow-blue-200"
                                     >
-                                        <Eye className="w-5 h-5" />
+                                        <Eye size={18} />
                                         View Profile
                                     </button>
                                 </div>
@@ -154,28 +167,26 @@ const TutorsListing = () => {
                         ))}
                     </div>
                 ) : (
-                    <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/50 p-20 text-center">
-                        <div className="max-w-lg mx-auto">
-                            <div className="w-24 h-24 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
-                                <Users className="text-5xl text-gray-400" />
-                            </div>
-                            <h3 className="text-2xl font-bold text-gray-900 mb-3">
-                                {searchQuery ? "No Tutors Found" : "No Tutors Available"}
-                            </h3>
-                            <p className="text-gray-600 text-lg">
-                                {searchQuery
-                                    ? `No tutors match "${searchQuery}". Try a different search term.`
-                                    : "There are currently no verified tutors available. Please check back later."}
-                            </p>
-                            {searchQuery && (
-                                <button
-                                    onClick={handleClearSearch}
-                                    className="mt-6 px-6 py-3 bg-gradient-to-r from-teal-600 to-cyan-600 text-white rounded-xl font-semibold hover:from-teal-700 hover:to-cyan-700 transition-all shadow-md hover:shadow-xl"
-                                >
-                                    Clear Search
-                                </button>
-                            )}
+                    <div className="py-20 text-center">
+                        <div className="w-32 h-32 bg-slate-50 rounded-[3rem] flex items-center justify-center mx-auto mb-8 border-4 border-dashed border-slate-200">
+                            <Users className="text-slate-300" size={48} />
                         </div>
+                        <h3 className="text-2xl font-black text-[#1E2EDE] mb-3 uppercase tracking-tight">
+                            {searchQuery ? "No Matches Found" : "Academy Empty"}
+                        </h3>
+                        <p className="text-slate-400 font-medium max-w-sm mx-auto mb-8">
+                            {searchQuery
+                                ? `We couldn't find any mentors matching "${searchQuery}". Please try another search.`
+                                : "Our verification team is currently onboarding new experts. Please check back shortly."}
+                        </p>
+                        {searchQuery && (
+                            <button
+                                onClick={handleClearSearch}
+                                className="bg-[#14C4E7] text-white px-8 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-lg hover:bg-[#1E2EDE] transition-all"
+                            >
+                                Reset Search
+                            </button>
+                        )}
                     </div>
                 )}
             </div>

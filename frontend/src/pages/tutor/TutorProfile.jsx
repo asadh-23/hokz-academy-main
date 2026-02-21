@@ -22,79 +22,63 @@ import { patchTutor } from "../../store/features/auth/tutorAuthSlice";
 // ============================================================
 
 function Field({ label, icon, value, isEditing, onChange, placeholder }) {
-    if (!isEditing) {
-        return (
-            <div>
-                <label className="block text-sm text-gray-600 font-medium mb-2 flex items-center gap-2">
-                    {icon && <span>{icon}</span>}
-                    {label}
-                </label>
-                <div className="bg-gray-50 py-3 px-4 rounded-lg text-gray-700 border-2 border-gray-200 min-h-[48px] flex items-center">
-                    {value || <span className="text-gray-400 italic">Not set</span>}
-                </div>
-            </div>
-        );
-    }
-
     return (
-        <div>
-            <label className="block text-sm text-gray-600 font-medium mb-2 flex items-center gap-2">
-                {icon && <span>{icon}</span>}
+        <div className="w-full">
+            <label className="block text-sm font-bold text-[#1e2ede] mb-2 flex items-center gap-2 uppercase tracking-wider">
+                {icon && <span className="text-base">{icon}</span>}
                 {label}
             </label>
-            <input
-                type="text"
-                value={value}
-                onChange={(e) => onChange(e.target.value)}
-                placeholder={placeholder}
-                className="w-full py-3 px-4 bg-white rounded-lg border-2 border-gray-300 
-                focus:border-cyan-500 focus:ring-2 focus:ring-cyan-200 outline-none
-                text-gray-800 transition-all duration-200 hover:border-gray-400"
-            />
+            {!isEditing ? (
+                <div className="bg-[#fdfdfd] py-3.5 px-5 rounded-xl text-gray-700 border border-gray-100 shadow-sm min-h-[52px] flex items-center font-medium">
+                    {value || <span className="text-gray-400 italic font-normal">Not provided</span>}
+                </div>
+            ) : (
+                <input
+                    type="text"
+                    value={value}
+                    onChange={(e) => onChange(e.target.value)}
+                    placeholder={placeholder}
+                    className="w-full py-3.5 px-5 bg-white rounded-xl border-2 border-gray-100 
+                    focus:border-[#14c4e7] focus:ring-4 focus:ring-[#14c4e7]/10 outline-none
+                    text-gray-800 transition-all duration-300 font-medium"
+                />
+            )}
         </div>
     );
 }
 
 function ReadOnlyField({ label, icon, value }) {
     return (
-        <div>
-            <label className="block text-sm text-gray-600 font-medium mb-2 flex items-center gap-2">
+        <div className="w-full opacity-80">
+            <label className="block text-sm font-bold text-gray-500 mb-2 flex items-center gap-2 uppercase tracking-wider">
                 {icon && <span>{icon}</span>}
                 {label}
             </label>
-            <div
-                className="bg-gray-100 py-3 px-4 rounded-lg text-gray-500 border-2 border-gray-200 
-            cursor-not-allowed min-h-[48px] flex items-center"
-            >
-                {value || <span className="text-gray-400 italic">Not set</span>}
+            <div className="bg-gray-50 py-3.5 px-5 rounded-xl text-gray-500 border border-gray-200 cursor-not-allowed min-h-[52px] flex items-center font-medium">
+                {value}
             </div>
         </div>
     );
 }
 
 function TextAreaField({ label, value, isEditing, onChange, rows = 4 }) {
-    if (!isEditing) {
-        return (
-            <div>
-                <label className="block text-sm text-gray-600 font-medium mb-1">{label}</label>
-                <div className="bg-gray-50 py-3 px-4 rounded-lg text-gray-700 border-2 border-gray-200 min-h-[100px] whitespace-pre-wrap">
-                    {value || <span className="text-gray-400 italic">Not set</span>}
-                </div>
-            </div>
-        );
-    }
-
     return (
-        <div>
-            <label className="block text-sm text-gray-600 font-medium mb-1">{label}</label>
-            <textarea
-                value={value}
-                onChange={(e) => onChange(e.target.value)}
-                rows={rows}
-                className="w-full py-2.5 px-4 bg-white rounded-lg border border-gray-300 
-                focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none 
-                text-gray-800 resize-none transition duration-150 ease-in-out"
-            />
+        <div className="w-full">
+            <label className="block text-sm font-bold text-[#1e2ede] mb-2 uppercase tracking-wider">{label}</label>
+            {!isEditing ? (
+                <div className="bg-[#fdfdfd] py-4 px-5 rounded-xl text-gray-700 border border-gray-100 shadow-sm min-h-[120px] whitespace-pre-wrap leading-relaxed font-medium">
+                    {value || <span className="text-gray-400 italic font-normal">No bio added yet...</span>}
+                </div>
+            ) : (
+                <textarea
+                    value={value}
+                    onChange={(e) => onChange(e.target.value)}
+                    rows={rows}
+                    className="w-full py-4 px-5 bg-white rounded-xl border-2 border-gray-100 
+                    focus:border-[#14c4e7] focus:ring-4 focus:ring-[#14c4e7]/10 outline-none 
+                    text-gray-800 resize-none transition-all duration-300 font-medium"
+                />
+            )}
         </div>
     );
 }
@@ -110,63 +94,51 @@ function SubjectsField({ label, subjects, isEditing, onAdd, onRemove }) {
         }
     };
 
-    if (!isEditing) {
-        return (
-            <div>
-                <label className="block text-gray-700 font-medium mb-2">{label}</label>
-                <div className="bg-gray-50 py-3 px-4 rounded-lg border-2 border-gray-200 min-h-[60px] flex flex-wrap gap-2">
-                    {subjects && subjects.length > 0 ? (
-                        subjects.map((subject, index) => (
-                            <span
-                                key={index}
-                                className="bg-gradient-to-r from-cyan-100 to-emerald-100 text-cyan-800 text-sm font-medium px-3 py-1.5 rounded-full border border-cyan-200"
-                            >
-                                {subject}
-                            </span>
-                        ))
-                    ) : (
-                        <span className="text-gray-400 italic">No subjects added</span>
-                    )}
-                </div>
-            </div>
-        );
-    }
-
     return (
-        <div>
-            <label className="block text-gray-700 font-medium mb-2">{label}</label>
-            <div className="space-y-3">
-                <input
-                    type="text"
-                    value={inputValue}
-                    onChange={(e) => setInputValue(e.target.value)}
-                    onKeyDown={handleKeyDown}
-                    placeholder="Type a subject and press Enter to add"
-                    className="w-full py-2.5 px-4 bg-white rounded-lg border border-gray-300 
-                    focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none 
-                    text-gray-800 transition duration-150 ease-in-out"
-                />
-                <div className="bg-gray-50 py-3 px-4 rounded-lg border border-gray-200 min-h-[60px] flex flex-wrap gap-2">
+        <div className="w-full">
+            <label className="block text-sm font-bold text-[#1e2ede] mb-2 uppercase tracking-wider">{label}</label>
+            <div className="space-y-4">
+                {isEditing && (
+                    <div className="relative">
+                        <input
+                            type="text"
+                            value={inputValue}
+                            onChange={(e) => setInputValue(e.target.value)}
+                            onKeyDown={handleKeyDown}
+                            placeholder="Type a subject and press Enter"
+                            className="w-full py-3.5 px-5 bg-white rounded-xl border-2 border-gray-100 
+                            focus:border-[#14c4e7] focus:ring-4 focus:ring-[#14c4e7]/10 outline-none 
+                            text-gray-800 transition-all duration-300 font-medium"
+                        />
+                        <div className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-bold text-gray-400 hidden md:block">
+                            PRESS ENTER ↵
+                        </div>
+                    </div>
+                )}
+                <div
+                    className={`flex flex-wrap gap-2 p-4 rounded-xl border border-gray-100 ${!isEditing ? "bg-[#fdfdfd]" : "bg-gray-50/50"}`}
+                >
                     {subjects && subjects.length > 0 ? (
                         subjects.map((subject, index) => (
                             <span
                                 key={index}
-                                className="bg-gradient-to-r from-cyan-100 to-emerald-100 text-cyan-800 text-sm font-medium px-3 py-1.5 rounded-full border border-cyan-200 flex items-center gap-2 group hover:from-cyan-200 hover:to-emerald-200 transition-all"
+                                className="bg-gradient-to-r from-[#1e2ede] to-[#14c4e7] text-white text-xs font-bold px-4 py-2 rounded-full shadow-sm flex items-center gap-2 group transition-all"
                             >
                                 {subject}
-                                <button
-                                    onClick={() => onRemove(index)}
-                                    className="hover:bg-red-100 rounded-full p-0.5 transition-colors"
-                                >
-                                    <X className="w-3.5 h-3.5 text-red-600" />
-                                </button>
+                                {isEditing && (
+                                    <button
+                                        onClick={() => onRemove(index)}
+                                        className="bg-white/20 hover:bg-white/40 rounded-full p-0.5 transition-colors"
+                                    >
+                                        <X className="w-3 h-3" />
+                                    </button>
+                                )}
                             </span>
                         ))
                     ) : (
-                        <span className="text-gray-400 italic">No subjects added yet</span>
+                        <span className="text-gray-400 italic text-sm">No subjects listed</span>
                     )}
                 </div>
-                <p className="text-xs text-gray-500 italic">Press Enter after typing each subject to add it</p>
             </div>
         </div>
     );
@@ -174,38 +146,30 @@ function SubjectsField({ label, subjects, isEditing, onAdd, onRemove }) {
 
 function ProfileButtons({ isEditing, isSaving, onEdit, onSave, onCancel }) {
     return (
-        <div className="flex flex-col sm:flex-row justify-center items-center gap-3 md:gap-4 mt-8 md:mt-10">
+        <div className="flex flex-col sm:flex-row justify-center items-center gap-4 mt-12">
             {!isEditing ? (
                 <button
                     onClick={onEdit}
-                    className="w-full sm:w-auto bg-gradient-to-r from-cyan-500 to-emerald-600 
-                    text-white py-2.5 px-10 rounded-full font-semibold hover:from-cyan-600 
-                    hover:to-emerald-700 transition-all transform hover:scale-105 hover:shadow-lg"
+                    className="w-full sm:w-auto bg-[#1e2ede] text-white py-4 px-12 rounded-2xl font-bold hover:bg-[#14c4e7] transition-all duration-300 shadow-lg hover:shadow-[#14c4e7]/30 transform hover:-translate-y-1"
                 >
-                    Edit Profile
+                    Edit Profile Details
                 </button>
             ) : (
                 <>
                     <button
                         onClick={onSave}
                         disabled={isSaving}
-                        className={`w-full sm:w-auto bg-gradient-to-r from-cyan-500 to-emerald-600 
-                        text-white py-2.5 px-8 rounded-full font-semibold transition-all 
-                        ${
-                            isSaving
-                                ? "opacity-50 cursor-not-allowed"
-                                : "hover:from-cyan-600 hover:to-emerald-700 hover:scale-105 hover:shadow-lg"
-                        }`}
+                        className={`w-full sm:w-auto bg-gradient-to-r from-[#1e2ede] to-[#14c4e7] 
+                        text-white py-4 px-10 rounded-2xl font-bold transition-all duration-300 shadow-lg
+                        ${isSaving ? "opacity-50 cursor-not-allowed" : "hover:shadow-xl hover:-translate-y-1"}`}
                     >
-                        {isSaving ? "Saving..." : "Save Changes"}
+                        {isSaving ? "Saving Changes..." : "Save All Changes"}
                     </button>
 
                     <button
                         onClick={onCancel}
                         disabled={isSaving}
-                        className={`w-full sm:w-auto bg-gray-200 text-gray-700 py-2.5 px-8 rounded-full 
-                        font-semibold hover:bg-gray-300 transition-all
-                        ${isSaving ? "opacity-50 cursor-not-allowed" : ""}`}
+                        className="w-full sm:w-auto bg-gray-100 text-gray-600 py-4 px-10 rounded-2xl font-bold hover:bg-gray-200 transition-all duration-300"
                     >
                         Cancel
                     </button>
@@ -412,58 +376,67 @@ const TutorProfile = () => {
     // UI
     // ============================================================
     return (
-        <div className="flex-1 p-6 md:p-8 overflow-y-auto">
-            <div className="mb-8">
-                <div className="bg-gradient-to-r from-cyan-500 to-emerald-600 text-white p-5 md:p-6 rounded-t-xl md:rounded-t-2xl shadow">
-                    <h2 className="text-xl md:text-2xl font-semibold text-center">Tutor Profile</h2>
+        <div className="flex-1 min-h-screen bg-[#fdfdfd] p-4 md:p-8 overflow-y-auto">
+            {/* HEADER SECTION */}
+            <div className="max-w-4xl mx-auto mb-8">
+                <div className="bg-gradient-to-r from-[#1e2ede] to-[#14c4e7] p-6 md:p-10 rounded-3xl shadow-lg relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 blur-3xl"></div>
+                    <h2 className="text-2xl md:text-3xl font-extrabold text-white text-center tracking-tight">
+                        Tutor Profile
+                    </h2>
+                    <p className="text-white/80 text-center mt-2 text-sm md:text-base">Manage your professional presence</p>
                 </div>
             </div>
 
             {/* PROFILE CARD */}
-            <div className="bg-white rounded-xl md:rounded-2xl p-6 md:p-8 max-w-4xl mx-auto shadow-xl border border-gray-100 relative overflow-hidden">
-                {/* IMAGE */}
-                <div className="flex justify-center mb-8 md:mb-10">
+            <div className="bg-white rounded-3xl p-6 md:p-10 max-w-4xl mx-auto shadow-[0_10px_40px_rgba(30,46,222,0.08)] border border-gray-100 relative mb-10">
+                {/* IMAGE SECTION */}
+                <div className="flex justify-center mb-10">
                     <div className="relative group">
-                        <div className="absolute inset-0 bg-gradient-to-r from-cyan-400 to-emerald-500 rounded-full animate-pulse opacity-20 group-hover:opacity-30"></div>
+                        <div className="absolute inset-0 bg-gradient-to-tr from-[#1e2ede] to-[#14c4e7] rounded-full blur-md opacity-20 group-hover:opacity-40 transition-opacity"></div>
 
-                        <img
-                            src={profileData.profileImage || defaultProfileImage}
-                            alt="Profile"
-                            onError={(e) => (e.target.src = defaultProfileImage)}
-                            className="relative w-28 h-28 md:w-36 md:h-36 object-cover rounded-full border-4 border-white shadow-xl group-hover:scale-105 transition-all"
-                        />
+                        <div className="relative">
+                            <img
+                                src={profileData.profileImage || defaultProfileImage}
+                                alt="Profile"
+                                onError={(e) => (e.target.src = defaultProfileImage)}
+                                className="w-32 h-32 md:w-40 md:h-40 object-cover rounded-full border-4 border-white shadow-2xl transition-transform duration-500 group-hover:scale-[1.02]"
+                            />
 
-                        <input
-                            type="file"
-                            ref={fileInputRef}
-                            onChange={handleImageChange}
-                            accept="image/*"
-                            className="hidden"
-                        />
+                            <input
+                                type="file"
+                                ref={fileInputRef}
+                                onChange={handleImageChange}
+                                accept="image/*"
+                                className="hidden"
+                            />
 
-                        <button
-                            onClick={triggerFileInput}
-                            disabled={isUploading}
-                            className={`absolute bottom-2 right-2 w-10 h-10 bg-gradient-to-r from-cyan-500 to-emerald-500 text-white rounded-full flex items-center justify-center shadow-lg transition-all
-                ${isUploading ? "opacity-50 cursor-not-allowed" : "opacity-0 group-hover:opacity-100"}`}
-                        >
-                            📷
-                        </button>
+                            <button
+                                onClick={triggerFileInput}
+                                disabled={isUploading}
+                                className={`absolute bottom-2 right-2 w-11 h-11 bg-[#1e2ede] text-white rounded-full flex items-center justify-center shadow-xl border-2 border-white transition-all duration-300 hover:bg-[#14c4e7]
+                            ${isUploading ? "opacity-50 cursor-not-allowed" : "opacity-100 md:opacity-0 md:group-hover:opacity-100"}`}
+                            >
+                                <span className="text-lg">📷</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
 
-                {/* FIELDS */}
-                <div className="space-y-5 md:space-y-6">
-                    <Field
-                        label="Full Name"
-                        value={profileData.fullName}
-                        isEditing={isEditing}
-                        onChange={(v) => handleInputChange("fullName", v)}
-                        placeholder="Enter your full name"
-                        icon="👤"
-                    />
+                {/* FIELDS GRID */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="md:col-span-2">
+                        <Field
+                            label="Full Name"
+                            value={profileData.fullName}
+                            isEditing={isEditing}
+                            onChange={(v) => handleInputChange("fullName", v)}
+                            placeholder="Enter your full name"
+                            icon="👤"
+                        />
+                    </div>
 
-                    <ReadOnlyField label="Email" value={profileData.email} icon="📧" />
+                    <ReadOnlyField label="Email Address" value={profileData.email} icon="📧" />
 
                     <Field
                         label="Phone Number"
@@ -473,23 +446,27 @@ const TutorProfile = () => {
                         icon="📱"
                     />
 
-                    <SubjectsField
-                        label="Teaching Subjects"
-                        subjects={profileData.teachingSubjects}
-                        isEditing={isEditing}
-                        onAdd={handleAddSubject}
-                        onRemove={handleRemoveSubject}
-                    />
+                    <div className="md:col-span-2">
+                        <SubjectsField
+                            label="Teaching Subjects"
+                            subjects={profileData.teachingSubjects}
+                            isEditing={isEditing}
+                            onAdd={handleAddSubject}
+                            onRemove={handleRemoveSubject}
+                        />
+                    </div>
 
-                    <TextAreaField
-                        label="Bio"
-                        value={profileData.bio}
-                        isEditing={isEditing}
-                        onChange={(v) => handleInputChange("bio", v)}
-                    />
+                    <div className="md:col-span-2">
+                        <TextAreaField
+                            label="Bio"
+                            value={profileData.bio}
+                            isEditing={isEditing}
+                            onChange={(v) => handleInputChange("bio", v)}
+                        />
+                    </div>
                 </div>
 
-                {/* BUTTONS */}
+                {/* ACTION BUTTONS */}
                 <ProfileButtons
                     isEditing={isEditing}
                     isSaving={isSaving}
@@ -499,12 +476,15 @@ const TutorProfile = () => {
                 />
             </div>
 
-            {/* SECURITY CARD */}
-            <SecurityCard
-                onEmailChange={() => setIsChangeEmailOpen(true)}
-                onPasswordChange={() => setIsChangePasswordOpen(true)}
-            />
+            {/* SECURITY SECTION */}
+            <div className="max-w-4xl mx-auto mb-10">
+                <SecurityCard
+                    onEmailChange={() => setIsChangeEmailOpen(true)}
+                    onPasswordChange={() => setIsChangePasswordOpen(true)}
+                />
+            </div>
 
+            {/* MODALS (Kept original logic) */}
             {isChangeEmailOpen && (
                 <ChangeEmailModal
                     isOpen={isChangeEmailOpen}
@@ -513,7 +493,6 @@ const TutorProfile = () => {
                     role="tutor"
                 />
             )}
-
             {isChangePasswordOpen && (
                 <ChangePasswordModal
                     isOpen={isChangePasswordOpen}
