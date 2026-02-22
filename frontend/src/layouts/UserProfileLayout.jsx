@@ -83,7 +83,6 @@ const ProfileLayout = () => {
                         {!isCollapsed && (
                             <div className="overflow-hidden whitespace-nowrap animate-in fade-in slide-in-from-left-2">
                                 <h4 className="font-black text-[#1E2EDE] text-sm">{user.fullName}</h4>
-                               
                             </div>
                         )}
                     </div>
@@ -126,26 +125,6 @@ const ProfileLayout = () => {
             {/* --- MAIN CONTENT --- */}
             <main className="flex-1 flex flex-col min-w-0 bg-[#FDFDFD]">
                 <div className="p-4 md:p-8 lg:p-10 w-full max-w-7xl mx-auto">
-                    {/* Breadcrumb / Page Title Bar */}
-                    <div className="mb-8 flex items-center justify-between">
-                        <div>
-                            <h2 className="text-2xl font-black text-[#1E2EDE] tracking-tight">
-                                My <span className="text-[#14C4E7]">Workspace</span>
-                            </h2>
-                            <p className="text-slate-400 text-xs font-bold uppercase tracking-widest mt-1">
-                                Account &gt; Dashboard
-                            </p>
-                        </div>
-
-                        {/* Quick Status Badges */}
-                        <div className="hidden sm:flex gap-4">
-                            <div className="bg-white px-4 py-2 rounded-2xl border border-slate-100 flex items-center gap-2 shadow-sm">
-                                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                                <span className="text-[10px] font-black text-slate-500 uppercase">System Online</span>
-                            </div>
-                        </div>
-                    </div>
-
                     {/* Content Container */}
                     <div className="bg-white rounded-[2.5rem] shadow-xl shadow-blue-900/5 border border-slate-100 min-h-[70vh] relative overflow-hidden">
                         {/* Decorative element */}
