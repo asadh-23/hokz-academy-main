@@ -14,7 +14,7 @@ import {
 } from "../../store/features/admin/adminCategorySlice";
 import AddCategoryModal from "../../components/admin/categories/AddCategoryModal";
 import EditCategoryModal from "../../components/admin/categories/EditCategoryModal";
-import CategoryList from "../../components/admin/Categories/CategoryList";
+import CategoryList from "../../components/admin/categories/CategoryList";
 import StatsCards from "../../components/common/StatsCards";
 import Pagination from "../../components/common/Pagination";
 
