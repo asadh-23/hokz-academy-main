@@ -1,6 +1,6 @@
 import React from "react";
 import {  useNavigate } from "react-router-dom";
-import TutorLoginSectionImage from "../../assets/images/TutorLoginSection.avif"
+import TutorLoginSectionImage from "../../assets/images/tutorLoginSection.avif"
 export const TutorLoginSection = () => {
   const navigate = useNavigate();
     return (
