@@ -21,34 +21,30 @@ const TutorLayout = () => {
             <div className="flex flex-1 relative">
                 {/* --- SIDEBAR GUTTER CONTAINER --- */}
                 {/* This div preserves the space on the left so content starts correctly at 0 distance */}
-                <div className={`shrink-0 transition-all duration-300 w-[64px] lg:w-20`}>
+               <div className={`shrink-0 transition-all duration-300 ${isCollapsed ? "w-0 lg:w-20" : "w-0 lg:w-72"}`}>
                     <TutorSidebar
                         isCollapsed={isCollapsed}
                         setIsCollapsed={setIsCollapsed}
-                        isMobileOpen={isMobileOpen}
-                        setIsMobileOpen={setIsMobileOpen}
                     />
                 </div>
 
                 {/* --- MAIN CONTENT --- */}
                 <main className="flex-1 flex flex-col min-w-0 bg-[#FDFDFD]">
-                    <div className="p-4 md:p-8 lg:p-10 w-full max-w-7xl mx-auto">
-                        {/* Content Card Container */}
-                        <div className="bg-white rounded-[2rem] md:rounded-[2.5rem] shadow-[0_20px_50px_rgba(30,46,222,0.05)] border border-slate-100 min-h-[70vh] relative overflow-hidden">
-                            {/* Decorative Background Flare */}
+                    <div className="p-0 md:p-8 lg:p-10 w-full lg:max-w-full mx-auto">
+                        <div className="bg-white rounded-none md:rounded-[2.5rem] shadow-none md:shadow-xl border-none md:border border-slate-100 min-h-[calc(100vh-80px)] relative overflow-hidden">
+                            
+                            {/* Decorative Backgrounds */}
                             <div className="absolute top-0 right-0 w-48 h-48 bg-gradient-to-br from-[#14C4E7]/5 to-transparent rounded-bl-full pointer-events-none"></div>
-                            <div className="absolute bottom-0 left-0 w-32 h-32 bg-gradient-to-tr from-[#E6D929]/5 to-transparent rounded-tr-full pointer-events-none"></div>
 
-                            {/* Injected Content */}
+                            {/* Injected Content - p-0 on mobile */}
                             <div
-                            onClick={()=> setIsCollapsed(true)}
-                            className="p-5 md:p-8 lg:p-10 relative z-10">
+                                onClick={() => setIsCollapsed(true)}
+                                className="p-0 md:p-8 lg:p-10 relative z-10 h-full">
                                 <Outlet />
                             </div>
                         </div>
                     </div>
 
-                    {/* Inner Footer spacing helper */}
                     <div className="mt-auto">
                         <TutorFooter />
                     </div>

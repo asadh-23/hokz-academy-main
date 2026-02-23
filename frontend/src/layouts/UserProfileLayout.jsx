@@ -50,20 +50,23 @@ const ProfileLayout = () => {
         <div className="flex min-h-[calc(100vh-80px)] bg-[#FDFDFD] relative">
             {/* --- SIDEBAR CONTAINER --- */}
             {/* This div preserves the space on the left so content starts correctly */}
-            <div className={`shrink-0 transition-all duration-300 w-[64px] lg:w-20`}>
+            <div className={`shrink-0 transition-all duration-300 ${isCollapsed ? "w-0 lg:w-20" : "w-0 lg:w-72"}`}>
                 <aside
                     className={`
-                        fixed top-20 left-0 z-50 h-[calc(100vh-80px)] bg-white border-r border-slate-100 transition-all duration-300 ease-in-out shadow-xl
-                        ${isCollapsed ? "w-[64px] lg:w-20" : "w-72"}
-                    `}
+            fixed top-20 z-50 h-[calc(100vh-80px)] bg-white border-r border-slate-100 transition-all duration-300 ease-in-out shadow-xl
+            ${isCollapsed ? "-left-20 lg:left-0 w-[64px] lg:w-20" : "left-0 w-72"}
+        `}
                 >
                     <div className="flex flex-col h-full relative">
                         {/* Toggle Button (Arrow icon for both Mobile and Desktop) */}
                         <button
                             onClick={() => setIsCollapsed(!isCollapsed)}
-                            className="absolute -right-3 top-8 bg-[#14C4E7] text-white w-6 h-6 rounded-full flex items-center justify-center shadow-md hover:bg-[#1E2EDE] transition-colors z-[60]"
+                            className={`
+        absolute top-8 bg-[#14C4E7] text-white w-8 h-8 rounded-r-xl flex items-center justify-center shadow-md hover:bg-[#1E2EDE] transition-all z-[60]
+        ${isCollapsed ? "left-[100%] lg:-right-3 lg:rounded-full lg:w-6 lg:h-6" : "-right-3 w-6 h-6 rounded-full"}
+    `}
                         >
-                            {isCollapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
+                            {isCollapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
                         </button>
 
                         {/* User Profile Summary */}
@@ -121,13 +124,16 @@ const ProfileLayout = () => {
                         </nav>
 
                         {/* Logout Section */}
-                        <div className="p-2 lg:p-3 border-t border-slate-50">
+                        <div className="p-2 lg:p-4 border-t border-slate-100 bg-white sticky bottom-0">
                             <button
-                                onClick={() => setShowConfirm(true)}
+                                onClick={() => {
+                                    setIsCollapsed(true);
+                                    setShowConfirm(true);
+                                }}
                                 className={`
-                                    flex items-center text-red-500 font-bold text-xs lg:text-sm hover:bg-red-50 rounded-xl transition-all w-full
-                                    ${isCollapsed ? "justify-center p-3" : "px-4 py-3.5 gap-4"}
-                                `}
+                flex items-center text-red-500 font-bold text-xs lg:text-sm hover:bg-red-50 rounded-xl transition-all w-full
+                ${isCollapsed ? "justify-center p-3" : "px-4 py-3.5 gap-4"}
+            `}
                             >
                                 <LogOut size={window.innerWidth < 1024 ? 18 : 22} className="shrink-0" />
                                 {!isCollapsed && <span>Sign Out</span>}
@@ -137,13 +143,12 @@ const ProfileLayout = () => {
                 </aside>
             </div>
 
-            {/* --- MAIN CONTENT --- */}
-            {/* min-w-0 prevents flex items from overflowing */}
             <main className="flex-1 flex flex-col min-w-0 bg-[#FDFDFD]">
-                <div className="p-4 md:p-8 lg:p-10 w-full max-w-7xl mx-auto">
-                    <div className="bg-white rounded-[2rem] md:rounded-[2.5rem] shadow-xl shadow-blue-900/5 border border-slate-100 min-h-[70vh] relative overflow-hidden">
+                <div className="p-0 md:p-8 lg:p-10 w-full lg:max-w-full mx-auto">
+                    <div className="bg-white rounded-none md:rounded-[2.5rem] shadow-none md:shadow-xl border-none md:border border-slate-100 min-h-[calc(100vh-80px)] relative overflow-hidden">
                         <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-[#E6D929]/10 to-transparent rounded-bl-full pointer-events-none"></div>
-                        <div onClick={() => setIsCollapsed(true)} className="p-5 md:p-10">
+
+                        <div onClick={() => setIsCollapsed(true)} className="p-0 md:p-10 h-full">
                             <Outlet />
                         </div>
                     </div>

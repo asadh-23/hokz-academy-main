@@ -13,6 +13,7 @@ import AdminRoute from "./routes/AdminRoute";
 import NotFound from "./pages/error/NotFound";
 import { publicAxios } from "./api/publicAxios";
 import NotificationListener from "./components/common/NotificationListener";
+import { PageLoader } from "./components/common/LoadingSpinner";
 
 function App() {
     const dispatch = useDispatch();
@@ -44,12 +45,7 @@ function App() {
 
     if (isInitializing) {
         return (
-            <div className="flex justify-center items-center min-h-screen bg-gray-100">
-                <div className="text-center">
-                    <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-cyan-600 mb-4"></div>
-                    <h1 className="text-2xl font-semibold text-cyan-600">Loading Hokz Academy...</h1>
-                </div>
-            </div>
+            <PageLoader text="Loading Hokz Academy" />
         );
     }
 

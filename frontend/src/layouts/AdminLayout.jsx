@@ -21,7 +21,7 @@ const AdminLayout = () => {
             <div className="flex flex-1 relative">
                 {/* --- SIDEBAR GUTTER CONTAINER --- */}
                 {/* This preserves the space on the left so content starts at 0 distance and never shrinks */}
-                <div className={`shrink-0 transition-all duration-300 w-[64px] lg:w-20`}>
+               <div className={`shrink-0 transition-all duration-300 ${isCollapsed ? "w-0 lg:w-20" : "w-0 lg:w-72"}`}>
                     <AdminSidebar
                         isCollapsed={isCollapsed}
                         setIsCollapsed={setIsCollapsed}
@@ -32,25 +32,24 @@ const AdminLayout = () => {
 
                 {/* --- MAIN CONTENT --- */}
                 <main className="flex-1 flex flex-col min-w-0 bg-[#FDFDFD]">
-                    <div className="p-4 md:p-8 lg:p-10 w-full max-w-7xl mx-auto">
-                        {/* Content Card Container */}
-                        <div className="bg-white rounded-[3rem] shadow-[0_20px_60px_rgba(30,46,222,0.06)] border border-slate-100 min-h-[75vh] relative overflow-hidden">
-                            {/* Decorative Background Accents */}
-                            <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-[#14C4E7]/5 to-transparent rounded-bl-full pointer-events-none"></div>
-                            <div className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-[#E6D929]/5 to-transparent rounded-tr-full pointer-events-none"></div>
+                    <div className="p-0 md:p-8 lg:p-10 w-full lg:max-w-full mx-auto">
+                        <div className="bg-white rounded-none md:rounded-[2.5rem] shadow-none md:shadow-xl border-none md:border border-slate-100 min-h-[calc(100vh-80px)] relative overflow-hidden">
+                            
+                            {/* Decorative Backgrounds */}
+                            <div className="absolute top-0 right-0 w-48 h-48 bg-gradient-to-br from-[#14C4E7]/5 to-transparent rounded-bl-full pointer-events-none"></div>
 
-                            {/* The Injected Page Content */}
+                            {/* Injected Content */}
                             <div
-                            onClick={()=> setIsCollapsed(true)}
-                            className="p-6 md:p-10 lg:p-12 relative z-10">
+                                onClick={() => setIsCollapsed(true)}
+                                className="p-0 md:p-8 lg:p-10 relative z-10 h-full">
                                 <Outlet />
                             </div>
                         </div>
                     </div>
 
-                    {/* Integrated Footer */}
+                    
                     <div className="mt-auto">
-                        <AdminFooter />
+                        <AdminFooter /> 
                     </div>
                 </main>
 
