@@ -324,11 +324,11 @@ const CourseLearning = () => {
                         </div>
                     ) : (
                         <div className="border-2 border-dashed border-gray-300 rounded-3xl p-10 text-center bg-white/50 backdrop-blur-sm">
-                            <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-100 rounded-full mb-4">
+                            {hasExam ? <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-100 rounded-full mb-4">
                                 <Lock size={28} className="text-gray-400" />
-                            </div>
+                            </div> : <span></span>}
                             <p className="text-gray-500 font-medium text-lg">
-                                Complete all lessons to unlock the final section
+                                {hasExam ? "Complete all lessons to unlock the final section" : "No exam is available for this course at the moment."}
                             </p>
                         </div>
                     )}
@@ -402,7 +402,7 @@ const CourseLearning = () => {
                         );
                     })}
 
-                    <div
+{hasExam ? <div
                         className={`p-4 flex items-center gap-4 border-b border-gray-100 ${
                             isAllCompleted ? "bg-indigo-50" : "opacity-50"
                         }`}
@@ -413,6 +413,8 @@ const CourseLearning = () => {
                             <p className="text-xs text-gray-500">Unlock after all lessons</p>
                         </div>
                     </div>
+                    : ""}
+                    
                 </div>
             </div>
         </div>

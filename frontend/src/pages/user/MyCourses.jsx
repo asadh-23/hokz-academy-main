@@ -193,9 +193,9 @@ const MyCourses = () => {
                                     <section>
                                         <div className="flex items-center justify-between mb-8 border-l-4 border-[#E6D929] pl-5">
                                             <div>
-                                                <h2 className="text-2xl font-black text-[#1E2EDE]">Completed Milestones</h2>
+                                                <h2 className="text-2xl font-black text-[#1E2EDE]">Completed Courses</h2>
                                                 <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mt-1">
-                                                    {completed.length} Certificates Earned
+                                                    Total {completed.length} courses completed
                                                 </p>
                                             </div>
                                             <Award className="text-[#E6D929]" size={32} />

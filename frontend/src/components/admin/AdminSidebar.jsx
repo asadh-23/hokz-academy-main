@@ -61,18 +61,18 @@ const AdminSidebar = ({ isCollapsed, setIsCollapsed, isMobileOpen, setIsMobileOp
         <>
             <aside
                 className={`
-        fixed top-[70px] z-50 h-[calc(100vh-70px)] bg-white border-r border-slate-100 transition-all duration-300 ease-in-out shadow-xl
-        ${isCollapsed ? "-left-20 lg:left-0 w-[64px] lg:w-20" : "left-0 w-72"}
-    `}
+                fixed top-[70px] z-50 h-[calc(100vh-70px)] bg-white border-r border-slate-100 transition-all duration-300 ease-in-out shadow-xl
+                ${isCollapsed ? "-left-20 lg:left-0 w-[64px] lg:w-20" : "left-0 w-72"}
+            `}
             >
                 <div className="flex flex-col h-full relative">
-                    {/* Toggle Button (Now visible on all screen sizes) */}
+                    {/* Toggle Button - FIXED: Changed top-10 to top-24 to move it downward */}
                     <button
                         onClick={() => setIsCollapsed(!isCollapsed)}
                         className={`
-                absolute top-10 bg-[#14C4E7] text-white w-8 h-8 rounded-r-xl flex items-center justify-center shadow-md hover:bg-[#1E2EDE] transition-all z-[60]
-                ${isCollapsed ? "left-[110%] lg:-right-3 lg:rounded-full lg:w-6 lg:h-6" : "-right-3 w-6 h-6 rounded-full"}
-            `}
+                        absolute top-24 bg-[#14C4E7] text-white w-8 h-8 rounded-r-xl flex items-center justify-center shadow-md hover:bg-[#1E2EDE] transition-all z-[60]
+                        ${isCollapsed ? "left-[110%] lg:-right-3 lg:rounded-full lg:w-6 lg:h-6" : "-right-3 w-6 h-6 rounded-full"}
+                    `}
                     >
                         {isCollapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
                     </button>
@@ -116,10 +116,10 @@ const AdminSidebar = ({ isCollapsed, setIsCollapsed, isMobileOpen, setIsMobileOp
                                         navigate(item.path);
                                     }}
                                     className={`
-                                        flex items-center rounded-xl transition-all duration-200 cursor-pointer group
-                                        ${isActive ? activeClass : inactiveClass}
-                                        ${isCollapsed ? "justify-center p-3" : "px-4 py-3 gap-4"}
-                                    `}
+                                    flex items-center rounded-xl transition-all duration-200 cursor-pointer group
+                                    ${isActive ? activeClass : inactiveClass}
+                                    ${isCollapsed ? "justify-center p-3" : "px-4 py-3 gap-4"}
+                                `}
                                     title={isCollapsed ? item.name : ""}
                                 >
                                     <span className="shrink-0">
@@ -144,9 +144,9 @@ const AdminSidebar = ({ isCollapsed, setIsCollapsed, isMobileOpen, setIsMobileOp
                                 setShowConfirm(true);
                             }}
                             className={`
-                    flex items-center text-red-500 font-bold text-xs lg:text-sm hover:bg-red-50 rounded-xl transition-all w-full
-                    ${isCollapsed ? "justify-center p-3" : "px-4 py-3.5 gap-4"}
-                `}
+                flex items-center text-red-500 font-bold text-xs lg:text-sm hover:bg-red-50 rounded-xl transition-all w-full
+                ${isCollapsed ? "justify-center p-3" : "px-4 py-3.5 gap-4"}
+            `}
                         >
                             <LogOut size={window.innerWidth < 1024 ? 18 : 22} className="shrink-0" />
                             {!isCollapsed && <span>Sign Out</span>}

@@ -46,11 +46,12 @@ const ProfileLayout = () => {
     const activeClass = "bg-[#1E2EDE] text-[#E6D929] shadow-lg shadow-blue-100";
     const inactiveClass = "text-slate-600 hover:bg-slate-50 hover:text-[#1E2EDE]";
 
-    return (
+   return (
         <div className="flex min-h-[calc(100vh-80px)] bg-[#FDFDFD] relative">
             {/* --- SIDEBAR CONTAINER --- */}
-            {/* This div preserves the space on the left so content starts correctly */}
-            <div className={`shrink-0 transition-all duration-300 ${isCollapsed ? "w-0 lg:w-20" : "w-0 lg:w-72"}`}>
+            {/* FIXED: The gutter width is now constant on desktop (lg:w-20) 
+                so that when the fixed aside expands to w-72, it overlays rather than pushes content */}
+            <div className="shrink-0 w-0 lg:w-20">
                 <aside
                     className={`
             fixed top-20 z-50 h-[calc(100vh-80px)] bg-white border-r border-slate-100 transition-all duration-300 ease-in-out shadow-xl
@@ -58,11 +59,11 @@ const ProfileLayout = () => {
         `}
                 >
                     <div className="flex flex-col h-full relative">
-                        {/* Toggle Button (Arrow icon for both Mobile and Desktop) */}
+                        {/* Toggle Button (Arrow icon) - FIXED: Moved from top-8 to top-20 */}
                         <button
                             onClick={() => setIsCollapsed(!isCollapsed)}
                             className={`
-        absolute top-8 bg-[#14C4E7] text-white w-8 h-8 rounded-r-xl flex items-center justify-center shadow-md hover:bg-[#1E2EDE] transition-all z-[60]
+        absolute top-20 bg-[#14C4E7] text-white w-8 h-8 rounded-r-xl flex items-center justify-center shadow-md hover:bg-[#1E2EDE] transition-all z-[60]
         ${isCollapsed ? "left-[110%] lg:-right-3 lg:rounded-full lg:w-6 lg:h-6" : "-right-3 w-6 h-6 rounded-full"}
     `}
                         >
@@ -75,7 +76,7 @@ const ProfileLayout = () => {
                         >
                             <div
                                 onClick={() => setIsCollapsed(!isCollapsed)}
-                                className="shrink-0 w-8 h-8 lg:w-10 lg:h-10 rounded-full border-2 border-[#14C4E7] overflow-hidden"
+                                className="shrink-0 w-8 h-8 lg:w-10 lg:h-10 rounded-full border-2 border-[#14C4E7] overflow-hidden cursor-pointer"
                             >
                                 {user.profileImage ? (
                                     <img
@@ -155,9 +156,9 @@ const ProfileLayout = () => {
                 </div>
             </main>
 
-            {/* Overlay Backdrop - Only visible when sidebar is expanded on small screens */}
+            {/* Overlay Backdrop - FIXED: Removed lg:hidden to enable overlay behavior on all screens */}
             {!isCollapsed && (
-                <div className="fixed inset-0 bg-black/5 z-40 lg:hidden" onClick={() => setIsCollapsed(true)} />
+                <div className="fixed inset-0 bg-black/5 z-40" onClick={() => setIsCollapsed(true)} />
             )}
 
             {/* Logout Modal */}
@@ -174,13 +175,13 @@ const ProfileLayout = () => {
                         <div className="flex gap-3">
                             <button
                                 onClick={() => setShowConfirm(false)}
-                                className="flex-1 px-6 py-3 rounded-xl border-2 border-slate-100 text-slate-600 font-bold"
+                                className="flex-1 px-6 py-3 rounded-xl border-2 border-slate-100 text-slate-600 font-bold hover:bg-slate-50 transition-all"
                             >
                                 No, Stay
                             </button>
                             <button
                                 onClick={handleLogout}
-                                className="flex-1 px-6 py-3 rounded-xl bg-[#1E2EDE] text-[#E6D929] font-bold"
+                                className="flex-1 px-6 py-3 rounded-xl bg-[#1E2EDE] text-[#E6D929] font-bold hover:shadow-lg transition-all"
                             >
                                 Yes, Logout
                             </button>

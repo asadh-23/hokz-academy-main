@@ -176,7 +176,7 @@ const AdminWallet = () => {
             <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
                 <div className="px-6 py-5 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
                     <h3 className="font-bold text-gray-800 flex items-center gap-2">
-                        <History size={18} className="text-gray-500" /> Recent Distributions
+                        <History size={18} className="text-gray-500" /> Recent Transactions
                     </h3>
                     <span className="text-xs bg-indigo-50 text-indigo-600 px-2.5 py-1 rounded-full font-medium">
                         Last 10 Entries

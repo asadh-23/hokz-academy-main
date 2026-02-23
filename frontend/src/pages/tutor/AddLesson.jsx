@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { FiPlay, FiImage, FiEdit2 } from "react-icons/fi";
+import { FiPlay, FiImage, FiEdit2, FiArrowLeft } from "react-icons/fi";
 import { tutorAxios } from "../../api/tutorAxios";
 import { toast } from "sonner";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
@@ -305,6 +305,17 @@ const AddLesson = () => {
 
     return (
         <div className="min-h-screen bg-[#FDFDFD] bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-[#14C4E7]/10 via-[#FDFDFD] to-[#1E2EDE]/5 p-4 md:p-8">
+            <div className="mb-6">
+                <button 
+                    onClick={() => navigate(-1)}
+                    className="group flex items-center gap-2 text-gray-500 hover:text-[#1E2EDE] transition-all duration-300 font-bold text-sm uppercase tracking-widest"
+                >
+                    <div className="p-2 bg-white rounded-xl shadow-sm border border-gray-100 group-hover:bg-[#1E2EDE] group-hover:text-white transition-all duration-300">
+                        <FiArrowLeft size={18} />
+                    </div>
+                    <span>Back to <span className="text-gray-400 group-hover:text-[#1E2EDE]/70">{courseTitle || 'Course'}</span></span>
+                </button>
+            </div>
             <div className="max-w-6xl mx-auto">
                 {/* Header Section */}
                 <div className="text-center mb-12">
@@ -538,7 +549,7 @@ const AddLesson = () => {
                         <h2 className="text-2xl font-black text-gray-800 uppercase tracking-tight">Current Curriculum</h2>
                         <div className="h-1 flex-1 bg-gradient-to-r from-gray-200 to-transparent rounded-full"></div>
                     </div>
-                    <div className="bg-white/50 backdrop-blur-sm rounded-[2rem] p-2 border border-gray-100">
+                   <div className="bg-white/50 backdrop-blur-sm rounded-[2rem] p-0 md:p-2 border border-gray-100">
                         <LessonsList
                             lessons={lessons}
                             onEditLesson={handleEditLesson}

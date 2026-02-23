@@ -6,18 +6,22 @@ const LessonsList = ({ lessons, onEditLesson, onRemoveLesson }) => {
   if (lessons.length === 0) return null;
 
   return (
-    <div className="bg-white rounded-2xl shadow-lg p-8">
-      <h2 className="text-2xl font-bold text-gray-800 mb-6">Lessons</h2>
+    // Mobile-il padding kuraykkuka (p-4 instead of p-8)
+    <div className="bg-white rounded-2xl shadow-lg p-4 md:p-8">
+      <h2 className="text-xl md:text-2xl font-bold text-gray-800 mb-6 uppercase tracking-tight">
+        Lessons
+      </h2>
 
       <div className="space-y-4">
         {lessons.map((lesson, index) => (
           <div
             key={lesson.id}
-            className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow"
+            // flex-col for mobile, flex-row for desktop
+            className="flex flex-col md:flex-row md:items-center justify-between p-4 border border-gray-100 rounded-2xl hover:shadow-md transition-all bg-white group"
           >
-            <div className="flex items-center gap-4">
-              {/* Thumbnail */}
-              <div className="w-20 h-14 bg-gray-800 rounded flex items-center justify-center overflow-hidden">
+            <div className="flex items-center gap-4 mb-4 md:mb-0">
+              {/* Thumbnail: Mobile-il size kurachu koodi balancing aakkuka */}
+              <div className="w-16 h-12 md:w-20 md:h-14 bg-gray-900 rounded-xl flex items-center justify-center overflow-hidden shrink-0 shadow-inner">
                 {lesson.thumbnailUrl ? (
                   <img
                     src={lesson.thumbnailUrl}
@@ -25,41 +29,42 @@ const LessonsList = ({ lessons, onEditLesson, onRemoveLesson }) => {
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <FiPlay className="text-white text-2xl" />
+                  <FiPlay className="text-white text-lg md:text-2xl" />
                 )}
               </div>
 
               {/* Lesson Info */}
-              <div>
-                <h3 className="font-semibold text-gray-800">{lesson.title}</h3>
-                <p className="text-sm text-gray-500">
-                  {(lesson.description || '').substring(0, 50)}...
+              <div className="min-w-0 flex-1">
+                <h3 className="font-bold text-gray-800 text-sm md:text-base truncate">
+                  {lesson.title}
+                </h3>
+                <p className="text-xs text-gray-500 line-clamp-1">
+                  {lesson.description || 'No description available'}
                 </p>
               </div>
             </div>
 
-            {/* Actions */}
-            <div className="flex items-center gap-3">
+            {/* Actions: Mobile-il full width buttons */}
+            <div className="flex items-center gap-2 md:gap-3 border-t md:border-t-0 pt-3 md:pt-0">
               <button
                 onClick={() => onRemoveLesson(lesson.id)}
-                className="px-4 py-1.5 bg-red-100 text-red-600 rounded text-sm font-medium hover:bg-red-200 transition-colors flex items-center gap-1"
+                className="flex-1 md:flex-none justify-center px-4 py-2 bg-red-50 text-red-600 rounded-xl text-xs font-bold hover:bg-red-100 transition-colors flex items-center gap-2"
               >
-                <FiTrash2 className="text-sm" />
-                Remove
+                <FiTrash2 />
+                <span>Remove</span>
               </button>
 
               <button
                 onClick={() => onEditLesson(lesson)}
-                className="px-4 py-1.5 bg-teal-100 text-teal-600 rounded text-sm font-medium hover:bg-teal-200 transition-colors flex items-center gap-1"
+                className="flex-1 md:flex-none justify-center px-4 py-2 bg-[#14C4E7]/10 text-[#14C4E7] rounded-xl text-xs font-bold hover:bg-[#14C4E7]/20 transition-colors flex items-center gap-2"
               >
-                <FiEdit2 className="text-sm" />
-                Edit Lesson
+                <FiEdit2 />
+                <span>Edit</span>
               </button>
             </div>
           </div>
         ))}
       </div>
-      
     </div>
   );
 };

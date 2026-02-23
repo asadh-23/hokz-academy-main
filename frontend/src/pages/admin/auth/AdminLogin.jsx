@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import AuthLayout from "../../../components/auth/AuthLayout";
 import { toast } from "sonner";
 import { validateEmail, validatePassword } from "../../../utils/validation";
-import { Mail, Lock, EyeOff, ArrowRight, ShieldCheck } from "lucide-react";
+import { Mail, Lock, EyeOff, ArrowRight, ShieldCheck, Eye } from "lucide-react";
 import { Link } from "react-router-dom";
 
 import { useDispatch, useSelector } from "react-redux";
@@ -14,6 +14,7 @@ export default function AdminLogin() {
         email: "",
         password: "",
     });
+    const [showPassword, setShowPassword] = useState(false);
 
     const navigate = useNavigate();
     const dispatch = useDispatch();
@@ -97,23 +98,26 @@ export default function AdminLogin() {
                             <Lock size={18} />
                         </div>
                         <input
-                            type="password"
+                            type={showPassword ? "text" : "password"}
                             required
                             name="password"
                             placeholder="••••••••"
-                            className="w-full bg-slate-50 rounded-2xl border-2 border-transparent px-14 py-4 focus:outline-none focus:border-[#1E2EDE] focus:bg-white transition-all font-bold text-[#1E2EDE] placeholder-slate-300 shadow-sm"
+                            className="w-full bg-slate-50 rounded-2xl border-2 border-transparent px-14 pr-16 py-4 focus:outline-none focus:border-[#1E2EDE] focus:bg-white transition-all font-bold text-[#1E2EDE] placeholder-slate-300 shadow-sm"
                             value={formData.password}
                             onChange={handleChange}
                         />
                         {/* Visual Eye Icon (Matches the Register style) */}
-                        <div className="absolute right-6 top-1/2 -translate-y-1/2 text-slate-300 cursor-pointer hover:text-[#1E2EDE] transition-colors">
-                            <EyeOff size={18} />
-                        </div>
+                        <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute right-6 top-1/2 -translate-y-1/2 text-slate-300 hover:text-[#1E2EDE] transition-colors focus:outline-none p-1"
+                        >
+                            {showPassword ? <Eye size={18} /> : <EyeOff size={18} />}
+                        </button>
                     </div>
                 </div>
 
                 {/* 3. Forgot Password Link */}
-              
 
                 {/* 4. Login Button */}
                 <div className="pt-4">
@@ -140,6 +144,12 @@ export default function AdminLogin() {
                     <div className="h-px w-8 bg-slate-100"></div>
                 </div>
             </form>
+            <style jsx="true">{`
+                input::-ms-reveal,
+                input::-ms-clear {
+                    display: none;
+                }
+            `}</style>
         </AuthLayout>
     );
 }

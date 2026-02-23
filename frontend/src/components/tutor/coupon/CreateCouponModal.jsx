@@ -189,7 +189,7 @@ const CreateCouponModal = ({ isOpen, onClose, editData = null }) => {
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+       <div className="fixed top-[80px] left-0 right-0 bottom-0 bg-black/60 backdrop-blur-sm z-[20] flex items-center justify-center p-4 overflow-y-auto">
             <div className="bg-white rounded-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto">
                 {/* Header */}
                 <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between rounded-t-2xl">
@@ -382,7 +382,7 @@ const CreateCouponModal = ({ isOpen, onClose, editData = null }) => {
                                 name="totalUsageLimit"
                                 value={formData.totalUsageLimit}
                                 onChange={handleChange}
-                                placeholder="Unlimited"
+                                placeholder="0"
                                 min="1"
                                 className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                             />

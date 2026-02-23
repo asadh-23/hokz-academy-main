@@ -157,37 +157,48 @@ const AdminDashboardHeader = () => {
     };
 
     return (
-        <div className="mb-8">
-            <div className="flex items-center justify-between">
-                <div className="mb-10 text-center md:text-left">
-                    <h2 className="text-3xl font-black text-[#1E2EDE] tracking-tighter uppercase">
-                        Admin <span className="text-[#14C4E7]">Dashboard</span>
-                    </h2>
-                    <p className="text-slate-400 text-[10px] font-black uppercase tracking-[0.25em] mt-1">
+        <div className="mb-8 w-full">
+            {/* Main Header Container: Stacks on mobile, side-by-side on md+ */}
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+                {/* Title Section */}
+                <div className="text-center md:text-left flex-1">
+                    <div className="inline-block">
+                        <h2 className="text-2xl md:text-3xl lg:text-4xl font-black text-[#1E2EDE] tracking-tighter uppercase leading-none">
+                            Admin <span className="text-[#14C4E7]">Dashboard</span>
+                        </h2>
+                        {/* Decorative bar - centered on mobile, left-aligned on md */}
+                        <div className="h-1.5 w-12 md:w-20 bg-[#E6D929] mt-2 rounded-full mx-auto md:mx-0"></div>
+                    </div>
+
+                    <p className="text-slate-400 text-[10px] md:text-xs font-black uppercase tracking-[0.2em] md:tracking-[0.25em] mt-3">
                         Platform-wide sales and financial reports.
                     </p>
-                    <div className="h-1 w-20 bg-[#E6D929] mt-4 rounded-full mx-auto md:mx-0"></div>
                 </div>
-                <div className="flex items-center gap-3">
+
+                {/* Action Buttons Group: Full width on mobile, auto width on md */}
+                <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
                     <button
                         onClick={downloadPDF}
                         disabled={downloading}
-                        className="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-600 rounded-xl border border-red-200 hover:bg-red-100 disabled:opacity-50"
+                        className="flex items-center justify-center gap-2 w-full sm:w-auto px-5 py-2.5 bg-red-50 text-red-600 rounded-xl border border-red-100 hover:bg-red-100 active:scale-95 transition-all duration-200 disabled:opacity-50 disabled:pointer-events-none shadow-sm"
                     >
                         <FileText className="w-4 h-4" />
-                        <span>PDF Report</span>
+                        <span className="font-bold text-xs uppercase tracking-wider">PDF Report</span>
                     </button>
 
                     <button
                         onClick={downloadExcel}
                         disabled={downloading}
-                        className="flex items-center gap-2 px-4 py-2 bg-green-50 text-green-600 rounded-xl border border-green-200 hover:bg-green-100 disabled:opacity-50"
+                        className="flex items-center justify-center gap-2 w-full sm:w-auto px-5 py-2.5 bg-green-50 text-green-600 rounded-xl border border-green-100 hover:bg-green-100 active:scale-95 transition-all duration-200 disabled:opacity-50 disabled:pointer-events-none shadow-sm"
                     >
                         <FileSpreadsheet className="w-4 h-4" />
-                        <span>Excel Export</span>
+                        <span className="font-bold text-xs uppercase tracking-wider">Excel Export</span>
                     </button>
                 </div>
             </div>
+
+            {/* Optional: Thin separator line for better visual structure */}
+            <div className="w-full h-px bg-slate-100 mt-8"></div>
         </div>
     );
 };

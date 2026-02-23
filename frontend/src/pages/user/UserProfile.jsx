@@ -306,7 +306,7 @@ const UserProfile = () => {
                                         type="tel"
                                         value={profileData.phone}
                                         onChange={(e) => handleInputChange("phone", e.target.value)}
-                                        placeholder="Ex: +1 234 567 890"
+                                        placeholder="Ex:  6234567890"
                                         className="w-full py-4 px-6 bg-slate-50 rounded-2xl border-2 border-transparent focus:border-[#1E2EDE] focus:bg-white transition-all outline-none font-bold text-slate-700 shadow-inner"
                                     />
                                 ) : (

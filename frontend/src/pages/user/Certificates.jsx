@@ -258,7 +258,7 @@ const Certificates = () => {
                                 Complete your active modules and pass final assessments to unlock your credentials.
                             </p>
                             <button
-                                onClick={() => navigate("/user/my-courses")}
+                                onClick={() => navigate("/user/courses/my-courses")}
                                 className="mt-10 inline-flex items-center gap-3 px-10 py-4 bg-[#1E2EDE] text-[#E6D929] font-black rounded-2xl shadow-xl shadow-blue-100 uppercase text-[10px] tracking-widest hover:bg-[#14C4E7] transition-all transform hover:scale-105"
                             >
                                 <BookOpen size={20} />

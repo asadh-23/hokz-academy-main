@@ -4,11 +4,12 @@ import { toast } from "sonner";
 import { adminAxios } from "../../api/adminAxios";
 import AnimatedChart from "../../components/common/AnimatedChart";
 import AdminDashboardHeader from "../../components/admin/dashboard/DashboardHeader";
+import { useNavigate } from "react-router-dom";
 
 const AdminDashboard = () => {
     const [dashboardData, setDashboardData] = useState(null);
     const [loading, setLoading] = useState(true);
-
+const navigte = useNavigate();
     // 1. Fetch Real Data from Backend
     useEffect(() => {
         const fetchStats = async () => {
@@ -176,7 +177,9 @@ const AdminDashboard = () => {
                             </div>
                         )}
 
-                        <button className="w-full mt-4 flex items-center justify-center gap-2 text-indigo-600 text-sm font-medium hover:bg-indigo-50 py-2.5 rounded-xl transition-colors">
+                        <button
+                        onClick={()=> navigte("/admin/orders")}
+                        className="w-full mt-4 flex items-center justify-center gap-2 text-indigo-600 text-sm font-medium hover:bg-indigo-50 py-2.5 rounded-xl transition-colors">
                             View All Transactions <ArrowRight size={14} />
                         </button>
                     </div>

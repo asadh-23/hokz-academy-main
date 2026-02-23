@@ -3,7 +3,7 @@ import { toast } from "sonner";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { User, Phone, Mail, Lock, ShieldCheck, ArrowRight } from "lucide-react";
+import { User, Phone, Mail, Lock, ShieldCheck, ArrowRight, Eye, EyeOff } from "lucide-react";
 
 import { validateEmail, validatePassword, validatePhone, validateText } from "../../../utils/validation";
 
@@ -13,6 +13,7 @@ export default function TutorRegister() {
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const loading = useSelector(selectTutorAuthLoading);
+    const [showPassword, setShowPassword] = useState(false);
 
     const [formData, setFormData] = useState({
         fullName: "",
@@ -113,7 +114,7 @@ export default function TutorRegister() {
                             value={formData.phone}
                             onChange={handleChange}
                             required
-                            placeholder="+1 234 567 890"
+                            placeholder="e.g- 6234567890"
                             className="w-full bg-slate-50 rounded-2xl border-2 border-transparent px-14 py-4 focus:outline-none focus:border-[#1E2EDE] focus:bg-white transition-all font-bold text-[#1E2EDE] placeholder-slate-300 shadow-sm"
                         />
                     </div>
@@ -134,7 +135,7 @@ export default function TutorRegister() {
                             value={formData.email}
                             onChange={handleChange}
                             required
-                            placeholder="name@email.com"
+                            placeholder="your@email.com"
                             className="w-full bg-slate-50 rounded-2xl border-2 border-transparent px-14 py-4 focus:outline-none focus:border-[#1E2EDE] focus:bg-white transition-all font-bold text-[#1E2EDE] placeholder-slate-300 shadow-sm"
                         />
                     </div>
@@ -150,14 +151,21 @@ export default function TutorRegister() {
                             <Lock size={18} />
                         </div>
                         <input
-                            type="password"
+                            type={showPassword ? "text" : "password"}
                             name="password"
                             value={formData.password}
                             onChange={handleChange}
                             required
                             placeholder="••••••••"
-                            className="w-full bg-slate-50 rounded-2xl border-2 border-transparent px-14 py-4 focus:outline-none focus:border-[#1E2EDE] focus:bg-white transition-all font-bold text-[#1E2EDE] placeholder-slate-300 shadow-sm"
+                            className="w-full bg-slate-50 rounded-2xl border-2 border-transparent px-14 pr-16 py-4 focus:outline-none focus:border-[#1E2EDE] focus:bg-white transition-all font-bold text-[#1E2EDE] placeholder-slate-300 shadow-sm"
                         />
+                        <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute right-6 top-1/2 -translate-y-1/2 text-slate-300 hover:text-[#1E2EDE] transition-colors focus:outline-none p-1"
+                        >
+                            {showPassword ? <Eye size={18} /> : <EyeOff size={18} />}
+                        </button>
                     </div>
                 </div>
 
@@ -207,6 +215,12 @@ export default function TutorRegister() {
                     <span className="text-[#14C4E7] underline cursor-pointer">Privacy Policy</span>.
                 </p>
             </form>
+            <style jsx="true">{`
+                input::-ms-reveal,
+                input::-ms-clear {
+                    display: none;
+                }
+            `}</style>
         </AuthLayout>
     );
 }

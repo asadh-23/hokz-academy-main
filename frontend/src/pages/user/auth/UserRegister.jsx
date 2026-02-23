@@ -3,7 +3,7 @@ import { toast } from "sonner";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { User, Phone, Mail, Lock, ShieldCheck, ArrowRight } from "lucide-react";
+import { User, Phone, Mail, Lock, ShieldCheck, ArrowRight, Eye, EyeOff } from "lucide-react";
 import { userRegister } from "../../../store/features/auth/userAuthSlice";
 
 import { validateEmail, validatePassword, validatePhone, validateText } from "../../../utils/validation";
@@ -11,6 +11,7 @@ import { validateEmail, validatePassword, validatePhone, validateText } from "..
 export default function UserRegister() {
     const dispatch = useDispatch();
     const navigate = useNavigate();
+    const [showPassword, setShowPassword] = useState(false);
 
     const [loading, setLoading] = useState(false);
 
@@ -25,7 +26,6 @@ export default function UserRegister() {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-       
         // ----------------------------
         // VALIDATIONS
         // ----------------------------
@@ -60,7 +60,7 @@ export default function UserRegister() {
             email: emailValidation.value,
             password: passwordValidation.value,
         };
-         setLoading(true);
+        setLoading(true);
         try {
             const result = await dispatch(userRegister(cleanData)).unwrap();
 
@@ -82,13 +82,13 @@ export default function UserRegister() {
     return (
         <AuthLayout subtitle="Sign Up" role="user">
             {loading && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/80 backdrop-blur-sm">
-                <div className="flex flex-col items-center gap-3">
-                    <div className="w-12 h-12 border-4 border-[#1E2EDE] border-t-transparent rounded-full animate-spin"></div>
-                    <p className="text-[#1E2EDE] font-bold animate-pulse">Sending OTP...</p>
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/80 backdrop-blur-sm">
+                    <div className="flex flex-col items-center gap-3">
+                        <div className="w-12 h-12 border-4 border-[#1E2EDE] border-t-transparent rounded-full animate-spin"></div>
+                        <p className="text-[#1E2EDE] font-bold animate-pulse">Sending OTP...</p>
+                    </div>
                 </div>
-            </div>
-        )}
+            )}
             <form className="w-full space-y-5" onSubmit={handleSubmit}>
                 {/* 1. Full Name Input */}
                 <div className="group">
@@ -126,7 +126,7 @@ export default function UserRegister() {
                             value={formData.phone}
                             onChange={handleChange}
                             required
-                            placeholder="6234567890"
+                            placeholder="e.g- 6234567890"
                             className="w-full bg-slate-50 rounded-2xl border-2 border-transparent px-14 py-4 focus:outline-none focus:border-[#1E2EDE] focus:bg-white transition-all font-bold text-[#1E2EDE] placeholder-slate-300 shadow-sm"
                         />
                     </div>
@@ -163,14 +163,21 @@ export default function UserRegister() {
                             <Lock size={18} />
                         </div>
                         <input
-                            type="password"
+                            type={showPassword ? "text" : "password"}
                             name="password"
                             value={formData.password}
                             onChange={handleChange}
                             required
                             placeholder="••••••••"
-                            className="w-full bg-slate-50 rounded-2xl border-2 border-transparent px-14 py-4 focus:outline-none focus:border-[#1E2EDE] focus:bg-white transition-all font-bold text-[#1E2EDE] placeholder-slate-300 shadow-sm"
+                            className="w-full bg-slate-50 rounded-2xl border-2 border-transparent px-14 pr-16 py-4 focus:outline-none focus:border-[#1E2EDE] focus:bg-white transition-all font-bold text-[#1E2EDE] placeholder-slate-300 shadow-sm"
                         />
+                        <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute right-6 top-1/2 -translate-y-1/2 text-slate-300 hover:text-[#1E2EDE] transition-colors focus:outline-none p-1"
+                        >
+                            {showPassword ? <Eye size={18} /> : <EyeOff size={18} />}
+                        </button>
                     </div>
                 </div>
 
@@ -220,6 +227,12 @@ export default function UserRegister() {
                     <span className="text-[#14C4E7] underline cursor-pointer">Privacy Policy</span>.
                 </p>
             </form>
+            <style jsx="true">{`
+                input::-ms-reveal,
+                input::-ms-clear {
+                    display: none;
+                }
+            `}</style>
         </AuthLayout>
     );
 }

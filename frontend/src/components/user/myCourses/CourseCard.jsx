@@ -21,7 +21,7 @@ const CourseCard = ({ course, viewMode = "grid" }) => {
                 navigate(`/user/learn/${course._id}`);
             }
         } else {
-            navigate("/user/certificates");
+            navigate(`/user/learn/${course._id}`);
         }
     };
 
