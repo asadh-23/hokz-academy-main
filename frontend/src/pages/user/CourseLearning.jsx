@@ -153,10 +153,11 @@ const CourseLearning = () => {
                         src={activeLesson.videoUrl}
                         controls
                         autoPlay={shouldAutoPlay.current}
+                        playsInline
                         onEnded={handleVideoEnded}
                         controlsList="nodownload"
                         className="w-full h-full"
-                        style={{ maxHeight: "100%" }}
+                        style={{ maxHeight: "100%" , backgroundColor: 'black' }}
                     >
                         Your browser does not support the video tag.
                     </video>
