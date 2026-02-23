@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { User, Phone, Mail, Lock, ShieldCheck, ArrowRight } from "lucide-react";
-import { userRegister, selectUserAuthLoading } from "../../../store/features/auth/userAuthSlice";
+import { userRegister } from "../../../store/features/auth/userAuthSlice";
 
 import { validateEmail, validatePassword, validatePhone, validateText } from "../../../utils/validation";
 
@@ -12,7 +12,7 @@ export default function UserRegister() {
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
-    const loading = useSelector(selectUserAuthLoading);
+    const [loading, setLoading] = useState(false);
 
     const [formData, setFormData] = useState({
         fullName: "",
@@ -25,6 +25,7 @@ export default function UserRegister() {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
+       
         // ----------------------------
         // VALIDATIONS
         // ----------------------------
@@ -59,14 +60,18 @@ export default function UserRegister() {
             email: emailValidation.value,
             password: passwordValidation.value,
         };
+         setLoading(true);
         try {
             const result = await dispatch(userRegister(cleanData)).unwrap();
 
-            toast.success(result.message || "Registration successful! Verify your email.");
-            navigate("/user/verify-otp", { state: { email: cleanData.email, role: "user" }, replace: true });
+            if (result.success) {
+                toast.success(result.message || "Registration successful! Verify your email.");
+                navigate("/user/verify-otp", { state: { email: cleanData.email, role: "user" }, replace: true });
+            }
         } catch (error) {
             toast.error(error || "Registration failed");
             console.log(error || "User registration failed");
+            setLoading(false);
         }
     };
 
@@ -76,6 +81,14 @@ export default function UserRegister() {
 
     return (
         <AuthLayout subtitle="Sign Up" role="user">
+            {loading && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/80 backdrop-blur-sm">
+                <div className="flex flex-col items-center gap-3">
+                    <div className="w-12 h-12 border-4 border-[#1E2EDE] border-t-transparent rounded-full animate-spin"></div>
+                    <p className="text-[#1E2EDE] font-bold animate-pulse">Sending OTP...</p>
+                </div>
+            </div>
+        )}
             <form className="w-full space-y-5" onSubmit={handleSubmit}>
                 {/* 1. Full Name Input */}
                 <div className="group">
@@ -113,7 +126,7 @@ export default function UserRegister() {
                             value={formData.phone}
                             onChange={handleChange}
                             required
-                            placeholder="+1 234 567 890"
+                            placeholder="6234567890"
                             className="w-full bg-slate-50 rounded-2xl border-2 border-transparent px-14 py-4 focus:outline-none focus:border-[#1E2EDE] focus:bg-white transition-all font-bold text-[#1E2EDE] placeholder-slate-300 shadow-sm"
                         />
                     </div>
@@ -134,7 +147,7 @@ export default function UserRegister() {
                             value={formData.email}
                             onChange={handleChange}
                             required
-                            placeholder="name@email.com"
+                            placeholder="your@email.com"
                             className="w-full bg-slate-50 rounded-2xl border-2 border-transparent px-14 py-4 focus:outline-none focus:border-[#1E2EDE] focus:bg-white transition-all font-bold text-[#1E2EDE] placeholder-slate-300 shadow-sm"
                         />
                     </div>

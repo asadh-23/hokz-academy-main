@@ -176,7 +176,7 @@ export const sendMessageTutor = async (req, res) => {
             fileUrl,
             fileType,
             isRead: false,
-            isDelivered: isReceiverOnline, // 🔥 Correct Logic
+            isDelivered: isReceiverOnline,
         });
 
         // 5. Update Chat (Increment Student's Unread Count)

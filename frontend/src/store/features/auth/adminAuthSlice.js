@@ -78,7 +78,7 @@ const adminAuthSlice = createSlice({
             })
             .addCase(adminLogin.fulfilled, (state, action) => {
                 state.loading = false;
-                state.admin = action.payload.user;
+                state.admin = action.payload.admin;
                 state.token = action.payload.accessToken;
                 state.isAuthenticated = true;
             })

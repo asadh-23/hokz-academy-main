@@ -169,17 +169,6 @@ const Courses = () => {
 
     return (
         <div className="min-h-screen bg-[#FDFDFD]">
-            {/* --- TOP NAVIGATION BREADCRUMB --- */}
-            <div className="bg-white border-b border-slate-100">
-                <div className="max-w-7xl mx-auto px-4 py-4 flex items-center text-[10px] font-black uppercase tracking-widest text-slate-400">
-                    <Link to="/" className="hover:text-[#1E2EDE]">
-                        Home
-                    </Link>
-                    <span className="mx-2 text-[#14C4E7]">/</span>
-                    <span className="text-[#1E2EDE]">Courses</span>
-                </div>
-            </div>
-
             {/* --- SEARCH & DISCOVER HEADER --- */}
             <section className="py-12 px-4">
                 <div className="max-w-7xl mx-auto">

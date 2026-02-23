@@ -26,7 +26,7 @@ const createSuperAdmin = async () => {
     }
 
     await Admin.create({
-      fullName: 'Super Admin',
+      fullName: 'AZADH',
       email: SUPER_ADMIN_EMAIL,
       password: SUPER_ADMIN_PASSWORD,
       isVerified: true,

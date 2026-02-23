@@ -248,7 +248,7 @@ export const getOrderDetails = async (req, res) => {
                 name: order.user?.fullName || "Unknown Student",
                 email: order.user?.email || order.email,
                 phone: order.user?.phone || "N/A",
-                image: order.user?.profileImage || "https://via.placeholder.com/150",
+                image: order.user?.profileImage || null,
             },
 
             items: myItems.map((item) => ({

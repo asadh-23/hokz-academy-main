@@ -7,7 +7,7 @@ import { publicAxios } from "../../../api/publicAxios";
 
 export const fetchListedCategories = createAsyncThunk(
   "categories/fetchCategories",
-  async (role, { rejectWithValue }) => {
+  async (_, { rejectWithValue }) => {
     try {
       
 

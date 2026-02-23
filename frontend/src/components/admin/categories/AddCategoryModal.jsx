@@ -39,7 +39,7 @@ const AddCategoryModal = ({ isOpen, onClose, onSuccess }) => {
         if (!nameValidation.isValid) {
             return toast.error(nameValidation.message || "Enter a valid Category name");
         }
-        const descriptionValidation = validateText(formData.description, 3, 200, "Category Description");
+        const descriptionValidation = validateText(formData.description, 3, 300, "Category Description");
         if (!descriptionValidation.isValid) {
             return toast.error(descriptionValidation.message || "Enter a valid Category name");
         }

@@ -475,11 +475,20 @@ const CourseDetails = () => {
                                 >
                                     <div className="flex items-center gap-4">
                                         <div className="relative">
+                                            <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-white shadow-sm ring-2 ring-[#14C4E7]/20 relative">
+                                        {student.profileImage ? (
                                             <img
-                                                src={student.profileImage || defaultProfileImage}
-                                                alt=""
-                                                className="w-14 h-14 rounded-2xl object-cover border-2 border-white shadow-md"
+                                                src={student.profileImage}
+                                                alt={student.fullName || "User"}
+                                                className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
                                             />
+                                        ) : (
+                                            /* Fallback: Name initial with Blue Gradient */
+                                            <div className="w-full h-full bg-gradient-to-br from-[#1E2EDE] to-[#14C4E7] flex items-center justify-center text-white text-xl font-black">
+                                                {student.fullName ? student.fullName.charAt(0).toUpperCase() : "U"}
+                                            </div>
+                                        )}
+                                    </div>
                                             <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-[#14C4E7] rounded-full border-2 border-white"></div>
                                         </div>
                                         <div className="flex-1 min-w-0">

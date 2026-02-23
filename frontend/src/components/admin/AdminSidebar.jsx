@@ -44,14 +44,14 @@ const AdminSidebar = ({ isCollapsed, setIsCollapsed, isMobileOpen, setIsMobileOp
     const adminProfileImage = admin?.profileImage || defaultProfileImage;
 
     const menuItems = [
-        { name: "Dashboard", icon: <LayoutDashboard size={22} />, path: "/admin/dashboard" },
-        { name: "Profile", icon: <User size={22} />, path: "/admin/profile" },
-        { name: "Category", icon: <Layers size={22} />, path: "/admin/categories" },
-        { name: "Students", icon: <GraduationCap size={22} />, path: "/admin/users" },
-        { name: "Tutors", icon: <Users size={22} />, path: "/admin/tutors" },
-        { name: "Orders", icon: <ClipboardList size={22} />, path: "/admin/orders" },
-        { name: "Wallet", icon: <Wallet size={22} />, path: "/admin/Wallet" },
-        { name: "Courses", icon: <BookOpen size={22} />, path: "/admin/courses" },
+        { name: "Dashboard", icon: <LayoutDashboard />, path: "/admin/dashboard" },
+        { name: "Profile", icon: <User />, path: "/admin/profile" },
+        { name: "Category", icon: <Layers />, path: "/admin/categories" },
+        { name: "Students", icon: <GraduationCap />, path: "/admin/users" },
+        { name: "Tutors", icon: <Users />, path: "/admin/tutors" },
+        { name: "Orders", icon: <ClipboardList />, path: "/admin/orders" },
+        { name: "Wallet", icon: <Wallet />, path: "/admin/Wallet" },
+        { name: "Courses", icon: <BookOpen />, path: "/admin/courses" },
     ];
 
     const activeClass = "bg-[#1E2EDE] text-[#E6D929] shadow-lg shadow-blue-900/20";
@@ -61,46 +61,55 @@ const AdminSidebar = ({ isCollapsed, setIsCollapsed, isMobileOpen, setIsMobileOp
         <>
             <aside
                 className={`
-                   fixed lg:sticky top-[70px] left-0 z-40 h-[calc(100vh-70px)] bg-white border-r border-slate-100 transition-all duration-300 ease-in-out
-                    ${isMobileOpen ? "translate-x-0 w-72" : "-translate-x-full lg:translate-x-0"}
-                    ${isCollapsed ? "lg:w-20" : "lg:w-72"}
+                   fixed top-[70px] left-0 z-50 h-[calc(100vh-70px)] bg-white border-r border-slate-100 transition-all duration-300 ease-in-out shadow-xl
+                    ${isCollapsed ? "w-[64px] lg:w-20" : "w-72"}
                 `}
             >
-                <div className="flex flex-col h-full">
-                    {/* Desktop Collapse Toggle */}
+                <div className="flex flex-col h-full relative">
+                    {/* Toggle Button (Now visible on all screen sizes) */}
                     <button
                         onClick={() => setIsCollapsed(!isCollapsed)}
-                        className="hidden lg:flex absolute -right-3 top-10 bg-[#1E2EDE] text-white w-6 h-6 rounded-full items-center justify-center shadow-md hover:bg-[#14C4E7] transition-colors z-50"
+                        className="absolute -right-3 top-10 bg-[#1E2EDE] text-white w-6 h-6 rounded-full flex items-center justify-center shadow-md hover:bg-[#14C4E7] transition-colors z-[60]"
                     >
                         {isCollapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
                     </button>
 
                     {/* Admin Profile Summary */}
-                    <div className={`p-6 border-b border-slate-50 flex items-center transition-all ${isCollapsed ? "justify-center" : "gap-4"}`}>
-                        <div className="shrink-0 w-10 h-10 rounded-xl border-2 border-[#14C4E7] overflow-hidden shadow-sm">
+                    <div
+                        className={`p-4 lg:p-6 border-b border-slate-50 flex items-center transition-all ${isCollapsed ? "justify-center" : "gap-4"}`}
+                    >
+                        <div
+                        onClick={()=> setIsCollapsed(!isCollapsed)}
+                        className="shrink-0 w-8 h-8 lg:w-10 lg:h-10 rounded-xl border-2 border-[#14C4E7] overflow-hidden shadow-sm">
                             <img src={adminProfileImage} alt="Admin" className="w-full h-full object-cover" />
                         </div>
                         {!isCollapsed && (
-                            <div className="overflow-hidden whitespace-nowrap animate-in fade-in slide-in-from-left-2">
-                                <h4 className="font-black text-[#1E2EDE] text-sm leading-tight">{adminName}</h4>
-                                <p className="text-[10px] text-[#14C4E7] font-black uppercase tracking-widest">Super Administrator</p>
+                            <div className="overflow-hidden whitespace-nowrap animate-in fade-in duration-300">
+                                <h4 className="font-black text-[#1E2EDE] text-xs lg:text-sm leading-tight">{adminName}</h4>
+                                <p className="text-[9px] lg:text-[10px] text-[#14C4E7] font-black uppercase tracking-widest">
+                                    Super Admin
+                                </p>
                             </div>
                         )}
                     </div>
 
                     {/* Nav Links */}
-                    <nav className="flex-1 overflow-y-auto p-3 space-y-1 custom-scrollbar">
-                        <div className={`mb-2 px-4 py-2 ${isCollapsed ? 'hidden' : 'block'}`}>
-                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Main Menu</p>
-                        </div>
+                    <nav className="flex-1 overflow-y-auto p-2 lg:p-3 space-y-1 custom-scrollbar">
+                        {!isCollapsed && (
+                            <div className="mb-2 px-4 py-2">
+                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
+                                    Main Menu
+                                </p>
+                            </div>
+                        )}
                         {menuItems.map((item) => {
                             const isActive = location.pathname === item.path;
                             return (
                                 <div
                                     key={item.name}
                                     onClick={() => {
+                                        setIsCollapsed(true)
                                         navigate(item.path);
-                                        setIsMobileOpen(false);
                                     }}
                                     className={`
                                         flex items-center rounded-xl transition-all duration-200 cursor-pointer group
@@ -109,24 +118,30 @@ const AdminSidebar = ({ isCollapsed, setIsCollapsed, isMobileOpen, setIsMobileOp
                                     `}
                                     title={isCollapsed ? item.name : ""}
                                 >
-                                    <span className="shrink-0">{item.icon}</span>
-                                    {!isCollapsed && <span className="font-bold text-sm whitespace-nowrap">{item.name}</span>}
+                                    <span className="shrink-0">
+                                        {/* Dynamic Icon Size: 18px on Mobile, 22px on Desktop */}
+                                        {React.cloneElement(item.icon, {
+                                            size: window.innerWidth < 1024 ? 18 : 22,
+                                        })}
+                                    </span>
+                                    {!isCollapsed && (
+                                        <span className="font-bold text-xs lg:text-sm whitespace-nowrap">{item.name}</span>
+                                    )}
                                 </div>
                             );
                         })}
                     </nav>
 
                     {/* Footer Section */}
-                    <div className="p-3 border-t border-slate-50 space-y-2">
-                      
+                    <div className="p-2 lg:p-3 border-t border-slate-50 space-y-2">
                         <button
                             onClick={() => setShowConfirm(true)}
                             className={`
-                                flex items-center text-red-500 font-bold text-sm hover:bg-red-50 rounded-xl transition-all w-full
+                                flex items-center text-red-500 font-bold text-xs lg:text-sm hover:bg-red-50 rounded-xl transition-all w-full
                                 ${isCollapsed ? "justify-center p-3" : "px-4 py-3 gap-4"}
                             `}
                         >
-                            <LogOut size={22} className="shrink-0" />
+                            <LogOut size={window.innerWidth < 1024 ? 18 : 22} className="shrink-0" />
                             {!isCollapsed && <span>Sign Out</span>}
                         </button>
                     </div>
@@ -141,7 +156,9 @@ const AdminSidebar = ({ isCollapsed, setIsCollapsed, isMobileOpen, setIsMobileOp
                             <LogOut size={30} className="text-red-500" />
                         </div>
                         <h3 className="text-xl font-black text-[#1E2EDE] mb-2">Logout System?</h3>
-                        <p className="text-slate-500 text-sm mb-8 font-medium">Are you sure you want to exit the admin control panel?</p>
+                        <p className="text-slate-500 text-sm mb-8 font-medium">
+                            Are you sure you want to exit the admin control panel?
+                        </p>
 
                         <div className="flex gap-3">
                             <button

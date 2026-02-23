@@ -1,12 +1,14 @@
 import React from 'react';
 import { Star, Users, ArrowRight, Tag } from 'lucide-react';
 import { formatText } from '../../../utils/formatText';
+import { useNavigate } from 'react-router-dom';
 
 const CourseCard = ({ course, index, formatCurrency }) => {
   
   // 1. Price Calculation Logic (Safe & Accurate)
   const originalPrice = course?.price || 0;
   const offerPercentage = course?.offerPercentage || 0;
+  const navigate = useNavigate();
   
   const sellingPrice = offerPercentage > 0 
     ? Math.round(originalPrice - (originalPrice * offerPercentage) / 100) 
@@ -26,7 +28,9 @@ const CourseCard = ({ course, index, formatCurrency }) => {
     <div className="group bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 flex flex-col h-full overflow-hidden">
       
       {/* --- Image Section --- */}
-      <div className="relative h-44 overflow-hidden bg-gray-100">
+      <div
+      onClick={() => navigate(`/tutor/courses/${course._id}`)}
+      className="relative h-44 overflow-hidden bg-gray-100">
         <img 
           src={course.thumbnail || course.thumbnailUrl || "https://via.placeholder.com/400x200?text=Course"} 
           alt={formatText(course.title, 20)} 

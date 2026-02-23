@@ -209,29 +209,44 @@ const Checkout = () => {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 py-8">
+        <div className="min-h-screen bg-slate-50/50 py-6 md:py-12">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    <div className="lg:col-span-2 space-y-6">
-                        <StudentDetailsForm user={user} />
-                        <CoursesList courses={courses} />
+                {/* Page Header */}
+                <div className="mb-8">
+                    <h1 className="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight">Checkout</h1>
+                    <p className="text-slate-500 mt-2">Please review your details and complete the secure payment.</p>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                    {/* Left Column: Details */}
+                    <div className="lg:col-span-8 space-y-8">
+                        <section className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                            <StudentDetailsForm user={user} />
+                        </section>
+
+                        <section className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+                            <CoursesList courses={courses} />
+                        </section>
                     </div>
 
-                    <div className="lg:col-span-1 space-y-6">
-                        <PaymentSummary
-                            totalMrp={totalMrp}
-                            subtotal={initialSubTotal}
-                            totalDiscount={discountAmount}
-                            tax={finalTax}
-                            total={finalTotalAmount}
-                            onCompletePayment={handleCompletePayment}
-                            updateDiscountAmount={updateDiscountAmount}
-                            isProcessing={isProcessing}
-                            tutors={tutors}
-                            appliedCoupons={appliedCoupons}
-                            onToggleCoupon={toggleCoupon}
-                            courses={courses}
-                        />
+                    {/* Right Column: Sticky Summary */}
+                    <div className="lg:col-span-4 lg:sticky lg:top-24">
+                        <section className="animate-in fade-in slide-in-from-right-4 duration-500">
+                            <PaymentSummary
+                                totalMrp={totalMrp}
+                                subtotal={initialSubTotal}
+                                totalDiscount={discountAmount}
+                                tax={finalTax}
+                                total={finalTotalAmount}
+                                onCompletePayment={handleCompletePayment}
+                                updateDiscountAmount={updateDiscountAmount}
+                                isProcessing={isProcessing}
+                                tutors={tutors}
+                                appliedCoupons={appliedCoupons}
+                                onToggleCoupon={toggleCoupon}
+                                courses={courses}
+                            />
+                        </section>
                     </div>
                 </div>
             </div>

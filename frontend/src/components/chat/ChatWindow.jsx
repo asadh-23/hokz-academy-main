@@ -119,11 +119,20 @@ const ChatWindow = () => {
                         <ArrowLeftIcon className="w-5 h-5" />
                     </button>
                     <div className="relative shrink-0">
-                        <img
-                            src={selectedChat.profileImage || "/default-avatar.png"}
-                            className="w-12 h-12 rounded-2xl object-cover border-2 border-[#14C4E7]/20"
-                            alt=""
-                        />
+                        <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-white shadow-sm ring-2 ring-[#14C4E7]/20 relative">
+                            {selectedChat.profileImage ? (
+                                <img
+                                    src={selectedChat.profileImage}
+                                    alt={selectedChat.fullName || "User"}
+                                    className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+                                />
+                            ) : (
+                                /* Fallback: Name initial with Blue Gradient */
+                                <div className="w-full h-full bg-gradient-to-br from-[#1E2EDE] to-[#14C4E7] flex items-center justify-center text-white text-xl font-black">
+                                    {selectedChat.fullName ? selectedChat.fullName.charAt(0).toUpperCase() : "U"}
+                                </div>
+                            )}
+                        </div>
                         {isOnline && (
                             <span className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-2 border-white rounded-full scale-75"></span>
                         )}
@@ -177,9 +186,6 @@ const ChatWindow = () => {
                                                     <p className="text-sm font-bold text-[#1E2EDE] truncate">
                                                         {enrollment.course?.title}
                                                     </p>
-                                                    <span className="text-[9px] font-black text-[#14C4E7] uppercase tracking-tighter">
-                                                        View Lesson Details
-                                                    </span>
                                                 </div>
                                             </div>
                                         ))

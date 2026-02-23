@@ -29,7 +29,7 @@ const TutorSidebar = ({ isCollapsed, setIsCollapsed, isMobileOpen, setIsMobileOp
 
     const tutor = useSelector(selectTutor);
     const tutorName = tutor?.fullName || "Tutor";
-    const tutorProfileImage = tutor?.profileImage || defaultProfileImage;
+    const tutorProfileImage = tutor?.profileImage || null;
 
     const handleLogout = async () => {
         const res = await dispatch(logoutTutor());
@@ -42,13 +42,13 @@ const TutorSidebar = ({ isCollapsed, setIsCollapsed, isMobileOpen, setIsMobileOp
     };
 
     const menuItems = [
-        { name: "Overview", icon: <LayoutDashboard size={22} />, path: "/tutor/dashboard" },
-        { name: "Profile", icon: <User size={22} />, path: "/tutor/profile" },
-        { name: "Courses", icon: <BookOpen size={22} />, path: "/tutor/courses" },
-        { name: "Coupons", icon: <Ticket size={22} />, path: "/tutor/coupons" },
-        { name: "Orders", icon: <BarChart3 size={22} />, path: "/tutor/orders" },
-        { name: "Wallet", icon: <Wallet size={22} />, path: "/tutor/wallet" },
-        { name: "Chat & Video", icon: <MessageSquare size={22} />, path: "/tutor/chat" },
+        { name: "Overview", icon: <LayoutDashboard />, path: "/tutor/dashboard" },
+        { name: "Profile", icon: <User />, path: "/tutor/profile" },
+        { name: "Courses", icon: <BookOpen />, path: "/tutor/courses" },
+        { name: "Coupons", icon: <Ticket />, path: "/tutor/coupons" },
+        { name: "Orders", icon: <BarChart3 />, path: "/tutor/orders" },
+        { name: "Wallet", icon: <Wallet />, path: "/tutor/wallet" },
+        { name: "Chat & Video", icon: <MessageSquare />, path: "/tutor/chat" },
     ];
 
     const activeClass = "bg-[#1E2EDE] text-[#E6D929] shadow-lg shadow-blue-900/20";
@@ -58,43 +58,59 @@ const TutorSidebar = ({ isCollapsed, setIsCollapsed, isMobileOpen, setIsMobileOp
         <>
             <aside
                 className={`
-                    fixed lg:sticky top-[70px] left-0 z-40 h-[calc(100vh-70px)] bg-white border-r border-slate-100 transition-all duration-300 ease-in-out
-                    ${isMobileOpen ? "translate-x-0 w-72" : "-translate-x-full lg:translate-x-0"}
-                    ${isCollapsed ? "lg:w-20" : "lg:w-72"}
+                    fixed top-[70px] left-0 z-50 h-[calc(100vh-70px)] bg-white border-r border-slate-100 transition-all duration-300 ease-in-out shadow-xl
+                    ${isCollapsed ? "w-[64px] lg:w-20" : "w-72"}
                 `}
             >
-                <div className="flex flex-col h-full">
-                    {/* Desktop Collapse Toggle */}
+                <div className="flex flex-col h-full relative">
+                    {/* Toggle Button (Arrow icon for both Mobile and Desktop) */}
                     <button
                         onClick={() => setIsCollapsed(!isCollapsed)}
-                        className="hidden lg:flex absolute -right-3 top-10 bg-[#14C4E7] text-white w-6 h-6 rounded-full items-center justify-center shadow-md hover:bg-[#1E2EDE] transition-colors z-50"
+                        className="absolute -right-3 top-10 bg-[#14C4E7] text-white w-6 h-6 rounded-full flex items-center justify-center shadow-md hover:bg-[#1E2EDE] transition-colors z-[60]"
                     >
                         {isCollapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
                     </button>
 
                     {/* Tutor Profile Header */}
-                    <div className={`p-6 border-b border-slate-50 flex items-center transition-all ${isCollapsed ? "justify-center" : "gap-4"}`}>
-                        <div className="shrink-0 w-10 h-10 rounded-xl border-2 border-[#E6D929] overflow-hidden shadow-sm">
-                            <img src={tutorProfileImage} alt="Tutor" className="w-full h-full object-cover" />
+                    <div
+                        className={`p-4 lg:p-6 border-b border-slate-50 flex items-center transition-all ${isCollapsed ? "justify-center" : "gap-4"}`}
+                    >
+                        <div
+                            onClick={() => setIsCollapsed(!isCollapsed)}
+                            className="shrink-0 w-8 h-8 lg:w-10 lg:h-10 rounded-xl border-2 border-[#14C4E7] overflow-hidden"
+                        >
+                            {tutorProfileImage ? (
+                                <img
+                                    src={tutorProfileImage}
+                                    alt={tutorName || "User"}
+                                    className="w-full h-full object-cover"
+                                />
+                            ) : (
+                                <div className="w-full h-full bg-[#1E2EDE] flex items-center justify-center text-white font-bold text-xs lg:text-sm">
+                                    {tutorName?.charAt(0)?.toUpperCase() || "T"}
+                                </div>
+                            )}
                         </div>
                         {!isCollapsed && (
-                            <div className="overflow-hidden whitespace-nowrap animate-in fade-in slide-in-from-left-2">
-                                <h4 className="font-black text-[#1E2EDE] text-sm">{formatText(tutorName)}</h4>
-                                <p className="text-[10px] text-[#14C4E7] font-black uppercase tracking-widest">Verified Instructor</p>
+                            <div className="overflow-hidden whitespace-nowrap animate-in fade-in duration-300">
+                                <h4 className="font-black text-[#1E2EDE] text-xs lg:text-sm">{formatText(tutorName)}</h4>
+                                <p className="text-[9px] lg:text-[10px] text-[#14C4E7] font-black uppercase tracking-widest">
+                                    Verified
+                                </p>
                             </div>
                         )}
                     </div>
 
                     {/* Navigation Links */}
-                    <nav className="flex-1 overflow-y-auto p-3 space-y-2 custom-scrollbar">
+                    <nav className="flex-1 overflow-y-auto p-2 lg:p-3 space-y-2 custom-scrollbar">
                         {menuItems.map((item) => {
                             const isActive = location.pathname === item.path;
                             return (
                                 <div
                                     key={item.name}
                                     onClick={() => {
+                                        setIsCollapsed(true);
                                         navigate(item.path);
-                                        setIsMobileOpen(false);
                                     }}
                                     className={`
                                         flex items-center rounded-xl transition-all duration-200 cursor-pointer group
@@ -103,23 +119,30 @@ const TutorSidebar = ({ isCollapsed, setIsCollapsed, isMobileOpen, setIsMobileOp
                                     `}
                                     title={isCollapsed ? item.name : ""}
                                 >
-                                    <span className="shrink-0">{item.icon}</span>
-                                    {!isCollapsed && <span className="font-bold text-sm whitespace-nowrap">{item.name}</span>}
+                                    <span className="shrink-0">
+                                        {/* Dynamic Icon Size: 18px on Mobile, 22px on Desktop */}
+                                        {React.cloneElement(item.icon, {
+                                            size: window.innerWidth < 1024 ? 18 : 22,
+                                        })}
+                                    </span>
+                                    {!isCollapsed && (
+                                        <span className="font-bold text-xs lg:text-sm whitespace-nowrap">{item.name}</span>
+                                    )}
                                 </div>
                             );
                         })}
                     </nav>
 
                     {/* Sign Out Button */}
-                    <div className="p-3 border-t border-slate-50">
+                    <div className="p-2 lg:p-3 border-t border-slate-50">
                         <button
                             onClick={() => setShowConfirm(true)}
                             className={`
-                                flex items-center text-red-500 font-bold text-sm hover:bg-red-50 rounded-xl transition-all w-full
+                                flex items-center text-red-500 font-bold text-xs lg:text-sm hover:bg-red-50 rounded-xl transition-all w-full
                                 ${isCollapsed ? "justify-center p-3" : "px-4 py-3.5 gap-4"}
                             `}
                         >
-                            <LogOut size={22} className="shrink-0" />
+                            <LogOut size={window.innerWidth < 1024 ? 18 : 22} className="shrink-0" />
                             {!isCollapsed && <span>Sign Out</span>}
                         </button>
                     </div>
@@ -134,7 +157,9 @@ const TutorSidebar = ({ isCollapsed, setIsCollapsed, isMobileOpen, setIsMobileOp
                             <LogOut size={30} className="text-red-500" />
                         </div>
                         <h3 className="text-xl font-black text-[#1E2EDE] mb-2">End Session?</h3>
-                        <p className="text-slate-500 text-sm mb-8 font-medium">Are you sure you want to log out from the tutor portal?</p>
+                        <p className="text-slate-500 text-sm mb-8 font-medium">
+                            Are you sure you want to log out from the tutor portal?
+                        </p>
 
                         <div className="flex gap-3">
                             <button

@@ -12,7 +12,7 @@ const TutorHeader = () => {
     const tutor = useSelector(selectTutor);
 
     const tutorName = tutor?.fullName || "tutor";
-    const tutorProfileImage = tutor?.profileImage || defaultProfileImage;
+    const tutorProfileImage = tutor?.profileImage || null;
 
     return (
         <header className="flex justify-between items-center px-6 py-3 bg-white border-b border-gray-200 h-[70px] sticky top-0 z-30 shadow-sm">
@@ -49,17 +49,14 @@ const TutorHeader = () => {
                     </div>
 
                     {/* Avatar */}
-                    <div className="relative">
-                        <img
-                            src={tutorProfileImage}
-                            alt="Admin Profile"
-                            className="w-10 h-10 rounded-full border-2 border-gray-100 transition-all group-hover:border-cyan-500 object-cover shadow-sm"
-                            onError={(e) => {
-                                e.target.onerror = null;
-                                e.target.src = defaultProfileImage;
-                            }}
-                        />
-                        <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 border-2 border-white rounded-full"></span>
+                    <div className="shrink-0 w-8 h-8 lg:w-10 lg:h-10 rounded-full border-2 border-[#14C4E7] overflow-hidden">
+                        {tutorProfileImage ? (
+                            <img src={tutorProfileImage} alt={tutorName || "User"} className="w-full h-full object-cover" />
+                        ) : (
+                            <div className="w-full h-full bg-[#1E2EDE] flex items-center justify-center text-white font-bold text-xs lg:text-sm">
+                                {tutorName?.charAt(0)?.toUpperCase() || "T"}
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>

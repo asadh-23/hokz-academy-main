@@ -6,6 +6,7 @@ import { PageLoader } from "../../components/common/LoadingSpinner";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
+
 const MyCourses = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();

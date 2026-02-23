@@ -270,17 +270,22 @@ const TutorOrders = () => {
                                         {/* 2. Student */}
                                         <td className="px-6 py-4">
                                             <div className="flex items-center gap-3">
-                                                {order.student?.image ? (
-                                                    <img
-                                                        src={order.student.image}
-                                                        alt=""
-                                                        className="w-8 h-8 rounded-full object-cover border border-gray-200"
-                                                    />
-                                                ) : (
-                                                    <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 border border-gray-200">
-                                                        <User size={14} />
-                                                    </div>
-                                                )}
+                                                <div className="w-10 h-10 rounded-full overflow-hidden shrink-0 border border-gray-100 shadow-sm">
+                                                    {order.student?.image ? (
+                                                        <img
+                                                            src={order.student?.image}
+                                                            alt={order.student?.name || "User"}
+                                                            className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
+                                                        />
+                                                    ) : (
+                                                        /* Fallback: Name initial with Blue Gradient */
+                                                        <div className="w-full h-full bg-gradient-to-br from-[#1E2EDE] to-[#14C4E7] flex items-center justify-center text-white text-xs font-black">
+                                                            {order.student?.name
+                                                                ? order.student?.name.charAt(0).toUpperCase()
+                                                                : "U"}
+                                                        </div>
+                                                    )}
+                                                </div>
                                                 <div>
                                                     <p className="text-sm font-medium text-gray-900 line-clamp-1">
                                                         {formatText(order.student?.name, 15)}

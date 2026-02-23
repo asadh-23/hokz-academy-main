@@ -201,22 +201,30 @@ const TutorWallet = () => {
                                         {/* 2. Student Info */}
                                         <td className="px-6 py-4">
                                             <div className="flex items-center gap-3">
-                                                {txn.student.image ? (
-                                                    <img
-                                                        src={txn.student.image}
-                                                        alt=""
-                                                        className="w-8 h-8 rounded-full object-cover border border-gray-200"
-                                                    />
-                                                ) : (
-                                                    <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 text-xs border border-gray-200 font-bold">
-                                                        {txn.student.name?.[0]}
-                                                    </div>
-                                                )}
+                                                {/* Profile Image Container - Fixed Size & Rounding */}
+                                                <div className="w-10 h-10 rounded-full overflow-hidden shrink-0 border border-gray-100 shadow-sm">
+                                                    {txn.student?.image ? (
+                                                        <img
+                                                            src={txn.student?.image}
+                                                            alt={txn.student?.name || "User"}
+                                                            className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
+                                                        />
+                                                    ) : (
+                                                        /* Fallback: Name initial with Blue Gradient */
+                                                        <div className="w-full h-full bg-gradient-to-br from-[#1E2EDE] to-[#14C4E7] flex items-center justify-center text-white text-xs font-black">
+                                                            {txn.student?.name
+                                                                ? txn.student?.name.charAt(0).toUpperCase()
+                                                                : "U"}
+                                                        </div>
+                                                    )}
+                                                </div>
+
+                                                {/* Text Info */}
                                                 <div className="max-w-[150px]">
-                                                    <p className="text-sm font-medium text-gray-900 truncate">
-                                                        {formatText(txn.student.name, 15)}
+                                                    <p className="text-sm font-bold text-gray-900 truncate">
+                                                        {txn.student?.name || "Unknown"}
                                                     </p>
-                                                    <p className="text-xs text-gray-500 truncate">{txn.student.email}</p>
+                                                    <p className="text-xs text-gray-500 truncate">{txn.student?.email}</p>
                                                 </div>
                                             </div>
                                         </td>

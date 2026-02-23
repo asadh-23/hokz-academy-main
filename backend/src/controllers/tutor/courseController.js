@@ -152,7 +152,7 @@ export const getTutorCourses = async (req, res) => {
         // PAGINATION QUERY
         // ----------------------------
         const courses = await Course.find(filter)
-            .select("title shortSummary description price offerPercentage thumbnailUrl isListed isBanned bannedAt enrolledCount exam createdAt")
+            .select("title shortSummary description price offerPercentage thumbnailUrl isListed isBanned bannedAt enrolledCount lessonsCount exam createdAt")
             .sort({ createdAt: -1 })
             .skip(skip)
             .limit(limit)

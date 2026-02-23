@@ -81,14 +81,14 @@ const ManageCourses = () => {
             <div className="max-w-[1800px] mx-auto">
                 {/* Header Section */}
                 <div className="mb-10 text-center md:text-left">
-                        <h2 className="text-3xl font-black text-[#1E2EDE] tracking-tighter uppercase">
-                            Course <span className="text-[#14C4E7]">Management</span>
-                        </h2>
-                        <p className="text-slate-400 text-[10px] font-black uppercase tracking-[0.25em] mt-1">
-                            Manage youre all courses
-                        </p>
-                        <div className="h-1 w-20 bg-[#E6D929] mt-4 rounded-full mx-auto md:mx-0"></div>
-                    </div>
+                    <h2 className="text-3xl font-black text-[#1E2EDE] tracking-tighter uppercase">
+                        Course <span className="text-[#14C4E7]">Management</span>
+                    </h2>
+                    <p className="text-slate-400 text-[10px] font-black uppercase tracking-[0.25em] mt-1">
+                        Manage youre all courses
+                    </p>
+                    <div className="h-1 w-20 bg-[#E6D929] mt-4 rounded-full mx-auto md:mx-0"></div>
+                </div>
                 <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/50 p-6 mb-8">
                     <div className="flex flex-wrap items-center justify-between gap-4">
                         <StatsCards stats={stats} label={"Courses"} />

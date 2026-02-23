@@ -70,210 +70,97 @@ const CouponBrowseModal = ({ isOpen, onClose, tutorId, tutorName, totalAmount, o
 
     if (!isOpen) return null;
 
-    return (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden">
+       return (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-300" onClick={onClose} />
+            <div className="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-lg max-h-[85vh] overflow-hidden relative z-10 animate-in zoom-in-95 duration-300">
                 {/* Header */}
-                <div className="flex items-center justify-between p-6 border-b border-gray-200">
+                <div className="p-8 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
                     <div>
-                        <h2 className="text-xl font-bold text-gray-900">Available Coupons</h2>
-                        <p className="text-sm text-gray-500 mt-1">Coupons from {tutorName}</p>
+                        <h2 className="text-2xl font-black text-slate-900">Best Offers</h2>
+                        <p className="text-slate-500 text-sm mt-1">Available coupons for <span className="font-bold text-indigo-600">{tutorName}</span></p>
                     </div>
-                    <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
-                        <X className="w-5 h-5 text-gray-500" />
+                    <button onClick={onClose} className="p-2.5 bg-white border border-slate-200 hover:bg-slate-50 rounded-full transition-all">
+                        <X className="w-5 h-5 text-slate-500" />
                     </button>
                 </div>
 
                 {/* Content */}
-                <div className="p-6 overflow-y-auto max-h-[calc(90vh-140px)]">
+                <div className="p-8 overflow-y-auto max-h-[calc(85vh-160px)] custom-scrollbar">
                     {loading ? (
-                        <div className="flex items-center justify-center py-12">
-                            <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
-                            <span className="ml-3 text-gray-600">Loading coupons...</span>
+                        <div className="flex flex-col items-center justify-center py-20 gap-4">
+                            <div className="w-12 h-12 border-4 border-indigo-50 border-t-indigo-600 rounded-full animate-spin"></div>
+                            <span className="text-slate-400 font-bold uppercase text-xs tracking-widest">Searching...</span>
                         </div>
                     ) : coupons.length === 0 ? (
-                        <div className="text-center py-12">
-                            <TicketPercent className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                            <h3 className="text-lg font-medium text-gray-900 mb-2">No Coupons Available</h3>
-                            <p className="text-gray-500">This tutor hasn't created any active coupons yet.</p>
+                        <div className="text-center py-20">
+                            <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                                <TicketPercent className="w-10 h-10 text-slate-200" />
+                            </div>
+                            <h3 className="text-lg font-bold text-slate-900">No offers found</h3>
+                            <p className="text-slate-500 text-sm">Check back later for seasonal promotions.</p>
                         </div>
                     ) : (
                         <div className="space-y-4">
                             {coupons.map((coupon) => {
-                                const discountAmount = calculateDiscount(coupon);
                                 const isEligible = totalAmount >= coupon.minPurchaseAmount;
-
-                                // ✅ Logic uses 'isCouponApplied'
-                                const isCouponApplied = currentTutorAppliedCoupons.some(
-                                    (c) => c.code.toUpperCase() === coupon.code.toUpperCase()
-                                );
-
-                                const isApplyingThis = applying === coupon._id;
-
+                                const isCouponApplied = currentTutorAppliedCoupons.some(c => c.code.toUpperCase() === coupon.code.toUpperCase());
+                                
                                 return (
-                                    <div
+                                    <div 
                                         key={coupon._id}
-                                        // ✅ FIXED: Using 'isCouponApplied' everywhere below
-                                        className={`border rounded-xl p-4 transition-all ${
-                                            isCouponApplied
-                                                ? "border-yellow-200 bg-yellow-50/30"
-                                                : isEligible
-                                                ? "border-indigo-200 bg-indigo-50/30 hover:bg-indigo-50/50"
-                                                : "border-gray-200 bg-gray-50/50"
+                                        className={`group relative p-5 rounded-2xl border-2 transition-all duration-300 ${
+                                            isCouponApplied ? "border-emerald-500 bg-emerald-50/20" : 
+                                            isEligible ? "border-slate-100 bg-white hover:border-indigo-500 hover:shadow-xl hover:shadow-indigo-500/5" : 
+                                            "border-slate-50 bg-slate-50/30 opacity-70"
                                         }`}
                                     >
-                                        <div className="flex items-start justify-between">
-                                            <div className="flex-1">
-                                                {/* Coupon Header */}
-                                                <div className="flex items-center gap-3 mb-3">
-                                                    <div
-                                                        className={`p-2 rounded-lg ${
-                                                            isEligible
-                                                                ? "bg-indigo-100 text-indigo-600"
-                                                                : "bg-gray-100 text-gray-400"
-                                                        }`}
-                                                    >
-                                                        <TicketPercent className="w-5 h-5" />
-                                                    </div>
-                                                    <div>
-                                                        <div className="flex items-center gap-2">
-                                                            <span
-                                                                className={`font-bold text-lg ${
-                                                                    isCouponApplied
-                                                                        ? "text-yellow-700"
-                                                                        : isEligible
-                                                                        ? "text-indigo-900"
-                                                                        : "text-gray-500"
-                                                                }`}
-                                                            >
-                                                                {coupon.code}
-                                                            </span>
-                                                            <span
-                                                                className={`px-2 py-1 rounded-full text-xs font-medium ${
-                                                                    isCouponApplied
-                                                                        ? "bg-yellow-100 text-yellow-700"
-                                                                        : isEligible
-                                                                        ? "bg-green-100 text-green-700"
-                                                                        : "bg-gray-100 text-gray-500"
-                                                                }`}
-                                                            >
-                                                                {isCouponApplied
-                                                                    ? "Already Applied"
-                                                                    : isEligible
-                                                                    ? "Eligible"
-                                                                    : "Not Eligible"}
-                                                            </span>
-                                                        </div>
-                                                        <h3
-                                                            className={`font-semibold ${
-                                                                isEligible ? "text-gray-900" : "text-gray-500"
-                                                            }`}
-                                                        >
-                                                            {coupon.title}
-                                                        </h3>
-                                                    </div>
+                                        <div className="flex justify-between items-start gap-4">
+                                            <div className="space-y-3">
+                                                <div className="flex items-center gap-2">
+                                                    <span className={`text-lg font-black tracking-tighter ${isEligible ? "text-slate-900" : "text-slate-400"}`}>
+                                                        {coupon.code}
+                                                    </span>
+                                                    {isCouponApplied && <span className="bg-emerald-500 text-white text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest">Active</span>}
+                                                </div>
+                                                
+                                                <div className="space-y-1">
+                                                    <h4 className="text-sm font-bold text-slate-700">{coupon.title}</h4>
+                                                    <p className="text-xs text-slate-500 leading-relaxed">{coupon.description}</p>
                                                 </div>
 
-                                                {/* Coupon Details */}
-                                                <div className="grid grid-cols-2 gap-4 mb-3">
-                                                    <div className="flex items-center gap-2 text-sm">
-                                                        {coupon.discountType === "percentage" ? (
-                                                            <Percent className="w-4 h-4 text-gray-400" />
-                                                        ) : (
-                                                            <IndianRupee className="w-4 h-4 text-gray-400" />
-                                                        )}
-                                                        <span className="text-gray-600">
-                                                            {coupon.discountType === "percentage"
-                                                                ? `${coupon.discountValue}% off`
-                                                                : `₹${coupon.discountValue} off`}
-                                                            {coupon.maxDiscountAmount &&
-                                                                coupon.discountType === "percentage" && (
-                                                                    <span className="text-xs text-gray-500">
-                                                                        {" "}
-                                                                        (max ₹{coupon.maxDiscountAmount})
-                                                                    </span>
-                                                                )}
-                                                        </span>
+                                                <div className="flex items-center gap-3 pt-2">
+                                                    <div className="flex items-center gap-1 text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-1 rounded-md">
+                                                        <Percent className="w-3 h-3" />
+                                                        {coupon.discountType === 'percentage' ? `${coupon.discountValue}% OFF` : `₹${coupon.discountValue} OFF`}
                                                     </div>
-                                                    <div className="flex items-center gap-2 text-sm">
-                                                        <Calendar className="w-4 h-4 text-gray-400" />
-                                                        <span className="text-gray-600">
-                                                            Valid till {formatDate(coupon.expiryDate)}
-                                                        </span>
+                                                    <div className="flex items-center gap-1 text-[10px] font-bold text-slate-400">
+                                                        <Calendar className="w-3 h-3" />
+                                                        {formatDate(coupon.expiryDate)}
                                                     </div>
                                                 </div>
-
-                                                {coupon.description && (
-                                                    <p className="text-sm text-gray-600 mb-3">{coupon.description}</p>
-                                                )}
-
-                                                {coupon.minPurchaseAmount > 0 && (
-                                                    <div className="flex items-center gap-2 text-xs text-gray-500 mb-3">
-                                                        <Info className="w-3 h-3" />
-                                                        <span>Minimum purchase: ₹{coupon.minPurchaseAmount}</span>
-                                                    </div>
-                                                )}
-
-                                                {/* Savings Display */}
-                                                {isEligible && !isCouponApplied && (
-                                                    <div className="bg-green-50 border border-green-200 rounded-lg p-3 mb-3">
-                                                        <div className="flex items-center justify-between">
-                                                            <span className="text-sm font-medium text-green-800">
-                                                                You'll save:
-                                                            </span>
-                                                            <span className="text-lg font-bold text-green-600">
-                                                                ₹{discountAmount}
-                                                            </span>
-                                                        </div>
-                                                    </div>
-                                                )}
-
-                                                {/* Already Applied Message */}
-                                                {isCouponApplied && (
-                                                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-3">
-                                                        <span className="text-sm text-yellow-700 font-medium">
-                                                            This coupon is already applied in your order
-                                                        </span>
-                                                    </div>
-                                                )}
-
-                                                {/* Not Eligible Message */}
-                                                {!isCouponApplied && !isEligible && (
-                                                    <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 mb-3">
-                                                        <span className="text-sm text-gray-600">
-                                                            Add ₹{coupon.minPurchaseAmount - totalAmount} more to use this
-                                                            coupon
-                                                        </span>
-                                                    </div>
-                                                )}
                                             </div>
 
-                                            {/* Apply Button */}
-                                            <div className="ml-4">
-                                                <button
-                                                    onClick={() => handleApplyClick(coupon)}
-                                                    disabled={!isEligible || isApplyingThis || isCouponApplied}
-                                                    className={`px-4 py-2 rounded-lg font-medium text-sm transition-all ${
-                                                        isCouponApplied
-                                                            ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                                                            : isEligible
-                                                            ? "bg-indigo-600 hover:bg-indigo-700 text-white"
-                                                            : "bg-gray-200 text-gray-400 cursor-not-allowed"
-                                                    }`}
-                                                >
-                                                    {isApplyingThis ? (
-                                                        <div className="flex items-center gap-2">
-                                                            <Loader2 className="w-4 h-4 animate-spin" />
-                                                            Applying...
-                                                        </div>
-                                                    ) : isCouponApplied ? (
-                                                        "Applied"
-                                                    ) : (
-                                                        "Apply"
-                                                    )}
-                                                </button>
-                                            </div>
+                                            <button
+                                                onClick={() => handleApplyClick(coupon)}
+                                                disabled={!isEligible || applying === coupon._id || isCouponApplied}
+                                                className={`shrink-0 px-5 py-2.5 rounded-xl font-black text-xs transition-all ${
+                                                    isCouponApplied ? "bg-emerald-100 text-emerald-600 cursor-default" :
+                                                    isEligible ? "bg-slate-900 text-white hover:bg-indigo-600 active:scale-95 shadow-lg shadow-slate-200" :
+                                                    "bg-slate-200 text-slate-400 cursor-not-allowed"
+                                                }`}
+                                            >
+                                                {applying === coupon._id ? "..." : isCouponApplied ? "APPLIED" : "APPLY"}
+                                            </button>
                                         </div>
+
+                                        {!isEligible && (
+                                            <div className="mt-4 pt-4 border-t border-dashed border-slate-100">
+                                                <p className="text-[10px] font-bold text-rose-500 uppercase tracking-tighter">
+                                                    Spend ₹{coupon.minPurchaseAmount - totalAmount} more to unlock
+                                                </p>
+                                            </div>
+                                        )}
                                     </div>
                                 );
                             })}

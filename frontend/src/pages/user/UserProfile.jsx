@@ -18,16 +18,7 @@ import {
 } from "../../store/features/user/userProfileSlice";
 import { patchUser } from "../../store/features/auth/userAuthSlice";
 import { formatText } from "../../utils/formatText";
-import { 
-  User, 
-  Mail, 
-  Phone, 
-  Camera, 
-  ShieldCheck, 
-  Edit3, 
-  X as CloseIcon, 
-  Check 
-} from "lucide-react";
+import { User, Mail, Phone, Camera, ShieldCheck, Edit3, X as CloseIcon, Check } from "lucide-react";
 
 const UserProfile = () => {
     const [isEditing, setIsEditing] = useState(false);
@@ -198,10 +189,10 @@ const UserProfile = () => {
             <div className="bg-[#1E2EDE] h-48 md:h-64 relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-20 translate-x-20"></div>
                 <div className="absolute bottom-0 left-0 w-40 h-40 bg-[#14C4E7]/20 rounded-full translate-y-10 -translate-x-10"></div>
-                
-                <div className="max-w-4xl mx-auto h-full flex flex-col justify-center px-6">
+
+                <div className="max-w-4xl mx-auto h-full flex flex-col justify-start pt-10 px-6">
                     <h2 className="text-3xl md:text-4xl font-black text-[#FDFDFD] tracking-tight">
-                        Account <span className="text-[#E6D929]">Settings</span>
+                        Account <span className="text-[#E6D929]">Profile</span>
                     </h2>
                     <p className="text-[#FDFDFD]/70 text-sm mt-2 font-bold uppercase tracking-widest flex items-center gap-2">
                         <ShieldCheck size={16} /> Verified Profile
@@ -212,25 +203,26 @@ const UserProfile = () => {
             {/* Profile Card Container */}
             <div className="max-w-4xl mx-auto px-4 -mt-16 md:-mt-24 relative z-10">
                 <div className="bg-white rounded-[2.5rem] shadow-2xl shadow-blue-900/10 border border-slate-100 overflow-hidden">
-                    
                     <div className="p-8 md:p-12">
                         {/* Profile Image Section */}
                         <div className="flex flex-col items-center mb-10">
                             <div className="relative group">
-                                <div className="w-32 h-32 md:w-40 md:h-40 rounded-full border-4 border-white shadow-xl overflow-hidden ring-4 ring-[#14C4E7]/30 transition-all duration-300 group-hover:ring-[#E6D929]">
-                                    <img
-                                        src={profileData.profileImage || defaultProfileImage}
-                                        alt="Profile"
-                                        onError={(e) => {
-                                            e.target.onerror = null;
-                                            e.target.src = defaultProfileImage;
-                                        }}
-                                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                                    />
-                                    
+                                <div className="relative w-32 h-32 md:w-40 md:h-40 rounded-full border-4 border-white shadow-xl overflow-hidden ring-4 ring-[#14C4E7]/30 transition-all duration-300 group-hover:ring-[#E6D929]">
+                                    {profileData?.profileImage ? (
+                                        <img
+                                            src={profileData.profileImage}
+                                            alt={profileData.fullName || "User"}
+                                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                                        />
+                                    ) : (
+                                        <div className="w-full h-full bg-gradient-to-br from-[#1E2EDE] to-[#14C4E7] flex items-center justify-center text-white text-4xl md:text-5xl font-black">
+                                            {profileData?.fullName?.charAt(0)?.toUpperCase() || "U"}
+                                        </div>
+                                    )}
+
                                     {/* Loading Overlay */}
                                     {isUploading && (
-                                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center backdrop-blur-sm">
                                             <ButtonLoader />
                                         </div>
                                     )}
@@ -255,7 +247,9 @@ const UserProfile = () => {
                                     <Camera size={20} />
                                 </button>
                             </div>
-                            <p className="mt-4 text-[10px] font-black uppercase tracking-widest text-slate-400">Student ID: #HKZ-9921</p>
+                            <p className="mt-4 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                                Student ID: #HKZ-9921
+                            </p>
                         </div>
 
                         {/* Form Fields Grid */}
@@ -277,7 +271,11 @@ const UserProfile = () => {
                                 ) : (
                                     <div className="group bg-slate-50/50 py-4 px-6 rounded-2xl border border-slate-100 min-h-[56px] flex items-center justify-between">
                                         <span className="font-bold text-slate-700">
-                                            {profileData.fullName || <span className="text-slate-300 font-medium italic tracking-normal">Name not provided</span>}
+                                            {profileData.fullName || (
+                                                <span className="text-slate-300 font-medium italic tracking-normal">
+                                                    Name not provided
+                                                </span>
+                                            )}
                                         </span>
                                     </div>
                                 )}
@@ -292,7 +290,9 @@ const UserProfile = () => {
                                 <div className="bg-slate-100 py-4 px-6 rounded-2xl text-slate-400 border border-slate-200 cursor-not-allowed min-h-[56px] flex items-center font-bold">
                                     {profileData.email}
                                 </div>
-                                <p className="text-[10px] text-slate-400 mt-2 px-1 italic">* Email is used for account verification.</p>
+                                <p className="text-[10px] text-slate-400 mt-2 px-1 italic">
+                                    * Email is used for account verification.
+                                </p>
                             </div>
 
                             {/* Phone */}
@@ -312,7 +312,11 @@ const UserProfile = () => {
                                 ) : (
                                     <div className="bg-slate-50/50 py-4 px-6 rounded-2xl border border-slate-100 min-h-[56px] flex items-center">
                                         <span className="font-bold text-slate-700">
-                                            {profileData.phone || <span className="text-slate-300 font-medium italic tracking-normal">Phone not set</span>}
+                                            {profileData.phone || (
+                                                <span className="text-slate-300 font-medium italic tracking-normal">
+                                                    Phone not set
+                                                </span>
+                                            )}
                                         </span>
                                     </div>
                                 )}

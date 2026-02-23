@@ -1,12 +1,13 @@
 import { useSelector } from "react-redux";
 import { Navigate, Outlet } from "react-router-dom";
+import { PageLoader } from "../../components/common/LoadingSpinner";
 
 const AdminPublicRoute = () => {
     const { isAuthenticated, token, loading } = useSelector((state) => state.adminAuth);
 
     // Wait for auth state to be determined
     if (loading) {
-        return null;
+        return <PageLoader text='Authenticating'/>
     }
 
     // If authenticated with valid token, redirect to dashboard

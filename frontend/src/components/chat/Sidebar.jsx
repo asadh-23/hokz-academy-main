@@ -7,6 +7,8 @@ import { setSelectedChat } from "../../store/features/chat/chatSlice";
 import { selectOnlineUsers } from "../../store/features/socket/socketSlice";
 import { formatText } from "../../utils/formatText";
 import { AcademicCapIcon } from "@heroicons/react/24/solid";
+import { selectUser } from "../../store/features/auth/userAuthSlice";
+import { selectTutor } from "../../store/features/auth/tutorAuthSlice";
 
 const Sidebar = () => {
     const dispatch = useDispatch();
@@ -17,6 +19,10 @@ const Sidebar = () => {
     const onlineUsers = useSelector(selectOnlineUsers);
     // 2. Local State for Search
     const [searchTerm, setSearchTerm] = useState("");
+
+    const user = useSelector(selectUser);
+    const tutor = useSelector(selectTutor);
+    const role = user?.role || tutor?.role;
 
     // 3. Filter Conversations based on Search
     const filteredConversations = conversations.filter((chat) =>
@@ -54,6 +60,22 @@ const Sidebar = () => {
                     <div className="flex flex-col items-center justify-center py-20 opacity-20">
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#1E2EDE]"></div>
                     </div>
+                ) : filteredConversations.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center text-center px-6 py-20">
+                        <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mb-4">
+                            <AcademicCapIcon className="w-8 h-8 text-slate-300" />
+                        </div>
+
+                        <h3 className="text-sm font-black text-slate-700 mb-2">No Conversations Yet</h3>
+
+                        <p className="text-xs text-slate-400 font-medium max-w-xs">
+                            {conversations.length === 0
+                                ? role === "user"
+                                    ? "Enroll in a course to start chatting with tutors."
+                                    : "Students will appear here once they enroll in your course."
+                                : "No results found for your search."}
+                        </p>
+                    </div>
                 ) : (
                     filteredConversations.map((chat) => {
                         const isSelected = selectedChat?._id === chat._id;
@@ -69,13 +91,25 @@ const Sidebar = () => {
                                 )}
 
                                 <div className="relative shrink-0">
-                                    <img
-                                        src={chat.profileImage || "/default-avatar.png"}
-                                        className="w-14 h-14 rounded-2xl object-cover border-2 border-white shadow-sm"
-                                        alt=""
-                                    />
+                                   
+                                    <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-white shadow-sm ring-2 ring-[#14C4E7]/20 relative">
+                                        {chat.profileImage ? (
+                                            <img
+                                                src={chat.profileImage}
+                                                alt={chat.fullName || "User"}
+                                                className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+                                            />
+                                        ) : (
+                                            /* Fallback: Name initial with Blue Gradient */
+                                            <div className="w-full h-full bg-gradient-to-br from-[#1E2EDE] to-[#14C4E7] flex items-center justify-center text-white text-xl font-black">
+                                                {chat.fullName ? chat.fullName.charAt(0).toUpperCase() : "U"}
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Online Status Indicator */}
                                     {isUserOnline(chat._id) && (
-                                        <span className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-2 border-white rounded-full"></span>
+                                        <span className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-green-500 border-2 border-white rounded-full z-10"></span>
                                     )}
                                 </div>
 

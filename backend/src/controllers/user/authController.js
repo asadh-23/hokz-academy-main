@@ -13,7 +13,6 @@ const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 export const registerUser = async (req, res) => {
     try {
         const { fullName, phone, email, password } = req.body;
-
         const nameValidation = validateText(fullName, 2, 50, "Name");
         if (!nameValidation.isValid) {
             return res.status(400).json({ success: false, message: nameValidation.message || "Enter a valid Full Name" });
@@ -43,7 +42,6 @@ export const registerUser = async (req, res) => {
         const existingUser = await User.findOne({ email: trimmedEmail }).lean();
         const existingTutor = await Tutor.findOne({ email: trimmedEmail }).lean();
         const existingAdmin = await Admin.findOne({ email: trimmedEmail }).lean();
-
         if ((existingUser && existingUser.isVerified) || existingTutor || existingAdmin) {
             return res
                 .status(400)

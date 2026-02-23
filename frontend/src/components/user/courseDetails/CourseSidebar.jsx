@@ -209,7 +209,6 @@ const CourseSidebar = ({
                         </h4>
                         <ul className="space-y-5">
                             {[
-                                { icon: <Clock />, text: `${hours}h ${minutes}m Content` },
                                 { icon: <FileText />, text: `${totalLessons} Lessons` },
                                 { icon: <Infinity />, text: "Lifetime Access" },
                                 { icon: <Smartphone />, text: "Mobile Compatible" },

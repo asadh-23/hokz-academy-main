@@ -109,15 +109,6 @@ const MyOrders = () => {
     return (
         <div className="min-h-screen bg-[#f8fafc] py-8 px-4 sm:px-6 lg:px-8">
             <div className="max-w-5xl mx-auto">
-                {/* Breadcrumb & Navigation */}
-                <nav className="flex items-center gap-2 text-sm text-gray-500 mb-6">
-                    <Link to="/" className="hover:text-blue-600 transition-colors">
-                        Home
-                    </Link>
-                    <ChevronRight className="w-4 h-4" />
-                    <span className="text-gray-900 font-medium">My Orders</span>
-                </nav>
-
                 {/* Header Section */}
                 <div className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
                     <div>

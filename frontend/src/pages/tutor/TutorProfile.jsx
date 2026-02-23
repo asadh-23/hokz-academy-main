@@ -376,132 +376,147 @@ const TutorProfile = () => {
     // UI
     // ============================================================
     return (
-        <div className="flex-1 min-h-screen bg-[#fdfdfd] p-4 md:p-8 overflow-y-auto">
-            {/* HEADER SECTION */}
-            <div className="max-w-4xl mx-auto mb-8">
-                <div className="bg-gradient-to-r from-[#1e2ede] to-[#14c4e7] p-6 md:p-10 rounded-3xl shadow-lg relative overflow-hidden">
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 blur-3xl"></div>
-                    <h2 className="text-2xl md:text-3xl font-extrabold text-white text-center tracking-tight">
-                        Tutor Profile
-                    </h2>
-                    <p className="text-white/80 text-center mt-2 text-sm md:text-base">Manage your professional presence</p>
-                </div>
+    <div className="flex-1 min-h-screen bg-[#fdfdfd] p-4 md:p-8 overflow-y-auto">
+        {/* HEADER SECTION */}
+        <div className="max-w-4xl mx-auto mb-8">
+            <div className="bg-gradient-to-r from-[#1e2ede] to-[#14c4e7] p-6 md:p-10 rounded-3xl shadow-lg relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 blur-3xl"></div>
+                <h2 className="text-2xl md:text-3xl font-extrabold text-white text-center tracking-tight">
+                    Tutor Profile
+                </h2>
+                <p className="text-white/80 text-center mt-2 text-sm md:text-base">Manage your professional presence</p>
             </div>
+        </div>
 
-            {/* PROFILE CARD */}
-            <div className="bg-white rounded-3xl p-6 md:p-10 max-w-4xl mx-auto shadow-[0_10px_40px_rgba(30,46,222,0.08)] border border-gray-100 relative mb-10">
-                {/* IMAGE SECTION */}
-                <div className="flex justify-center mb-10">
-                    <div className="relative group">
-                        <div className="absolute inset-0 bg-gradient-to-tr from-[#1e2ede] to-[#14c4e7] rounded-full blur-md opacity-20 group-hover:opacity-40 transition-opacity"></div>
+        {/* PROFILE CARD */}
+        <div className="bg-white rounded-3xl p-6 md:p-10 max-w-4xl mx-auto shadow-[0_10px_40px_rgba(30,46,222,0.08)] border border-gray-100 relative mb-10">
+            {/* IMAGE SECTION */}
+            <div className="flex justify-center mb-10">
+                <div className="relative group">
+                    <div className="absolute inset-0 bg-gradient-to-tr from-[#1e2ede] to-[#14c4e7] rounded-full blur-md opacity-20 group-hover:opacity-40 transition-opacity"></div>
 
-                        <div className="relative">
+                    <div className="relative">
+                        {/* Conditional Rendering: Image or First Letter Placeholder */}
+                        {profileData.profileImage ? (
                             <img
-                                src={profileData.profileImage || defaultProfileImage}
+                                src={profileData.profileImage}
                                 alt="Profile"
-                                onError={(e) => (e.target.src = defaultProfileImage)}
+                                onError={(e) => {
+                                    // Fallback to null if image fails to load to show the Letter placeholder
+                                    handleInputChange("profileImage", null);
+                                }}
                                 className="w-32 h-32 md:w-40 md:h-40 object-cover rounded-full border-4 border-white shadow-2xl transition-transform duration-500 group-hover:scale-[1.02]"
                             />
+                        ) : (
+                            <div className="w-32 h-32 md:w-40 md:h-40 bg-[#1e2ede] rounded-full border-4 border-white shadow-2xl flex items-center justify-center text-white text-5xl md:text-6xl font-black transition-transform duration-500 group-hover:scale-[1.02]">
+                                {profileData.fullName?.charAt(0).toUpperCase() || "T"}
+                            </div>
+                        )}
 
-                            <input
-                                type="file"
-                                ref={fileInputRef}
-                                onChange={handleImageChange}
-                                accept="image/*"
-                                className="hidden"
-                            />
+                        <input
+                            type="file"
+                            ref={fileInputRef}
+                            onChange={handleImageChange}
+                            accept="image/*"
+                            className="hidden"
+                        />
 
-                            <button
-                                onClick={triggerFileInput}
-                                disabled={isUploading}
-                                className={`absolute bottom-2 right-2 w-11 h-11 bg-[#1e2ede] text-white rounded-full flex items-center justify-center shadow-xl border-2 border-white transition-all duration-300 hover:bg-[#14c4e7]
+                        {/* Fixed Mobile Button: Added z-index and removed MD-only restriction for interaction */}
+                        <button
+                            type="button"
+                            onClick={(e) => {
+                                e.preventDefault();
+                                triggerFileInput();
+                            }}
+                            disabled={isUploading}
+                            className={`absolute bottom-1 right-1 md:bottom-2 md:right-2 w-11 h-11 bg-[#1e2ede] text-white rounded-full flex items-center justify-center shadow-xl border-2 border-white transition-all duration-300 hover:bg-[#14c4e7] z-10 active:scale-90
                             ${isUploading ? "opacity-50 cursor-not-allowed" : "opacity-100 md:opacity-0 md:group-hover:opacity-100"}`}
-                            >
-                                <span className="text-lg">📷</span>
-                            </button>
-                        </div>
+                        >
+                            <span className="text-lg">📷</span>
+                        </button>
                     </div>
                 </div>
+            </div>
 
-                {/* FIELDS GRID */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="md:col-span-2">
-                        <Field
-                            label="Full Name"
-                            value={profileData.fullName}
-                            isEditing={isEditing}
-                            onChange={(v) => handleInputChange("fullName", v)}
-                            placeholder="Enter your full name"
-                            icon="👤"
-                        />
-                    </div>
-
-                    <ReadOnlyField label="Email Address" value={profileData.email} icon="📧" />
-
+            {/* FIELDS GRID */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="md:col-span-2">
                     <Field
-                        label="Phone Number"
-                        value={profileData.phone}
+                        label="Full Name"
+                        value={profileData.fullName}
                         isEditing={isEditing}
-                        onChange={(v) => handleInputChange("phone", v)}
-                        icon="📱"
+                        onChange={(v) => handleInputChange("fullName", v)}
+                        placeholder="Enter your full name"
+                        icon="👤"
                     />
-
-                    <div className="md:col-span-2">
-                        <SubjectsField
-                            label="Teaching Subjects"
-                            subjects={profileData.teachingSubjects}
-                            isEditing={isEditing}
-                            onAdd={handleAddSubject}
-                            onRemove={handleRemoveSubject}
-                        />
-                    </div>
-
-                    <div className="md:col-span-2">
-                        <TextAreaField
-                            label="Bio"
-                            value={profileData.bio}
-                            isEditing={isEditing}
-                            onChange={(v) => handleInputChange("bio", v)}
-                        />
-                    </div>
                 </div>
 
-                {/* ACTION BUTTONS */}
-                <ProfileButtons
+                <ReadOnlyField label="Email Address" value={profileData.email} icon="📧" />
+
+                <Field
+                    label="Phone Number"
+                    value={profileData.phone}
                     isEditing={isEditing}
-                    isSaving={isSaving}
-                    onEdit={() => setIsEditing(true)}
-                    onCancel={handleCancel}
-                    onSave={handleSaveChanges}
+                    onChange={(v) => handleInputChange("phone", v)}
+                    icon="📱"
                 />
+
+                <div className="md:col-span-2">
+                    <SubjectsField
+                        label="Teaching Subjects"
+                        subjects={profileData.teachingSubjects}
+                        isEditing={isEditing}
+                        onAdd={handleAddSubject}
+                        onRemove={handleRemoveSubject}
+                    />
+                </div>
+
+                <div className="md:col-span-2">
+                    <TextAreaField
+                        label="Bio"
+                        value={profileData.bio}
+                        isEditing={isEditing}
+                        onChange={(v) => handleInputChange("bio", v)}
+                    />
+                </div>
             </div>
 
-            {/* SECURITY SECTION */}
-            <div className="max-w-4xl mx-auto mb-10">
-                <SecurityCard
-                    onEmailChange={() => setIsChangeEmailOpen(true)}
-                    onPasswordChange={() => setIsChangePasswordOpen(true)}
-                />
-            </div>
-
-            {/* MODALS (Kept original logic) */}
-            {isChangeEmailOpen && (
-                <ChangeEmailModal
-                    isOpen={isChangeEmailOpen}
-                    onClose={() => setIsChangeEmailOpen(false)}
-                    currentEmail={profileData.email}
-                    role="tutor"
-                />
-            )}
-            {isChangePasswordOpen && (
-                <ChangePasswordModal
-                    isOpen={isChangePasswordOpen}
-                    onClose={() => setIsChangePasswordOpen(false)}
-                    role="tutor"
-                />
-            )}
+            {/* ACTION BUTTONS */}
+            <ProfileButtons
+                isEditing={isEditing}
+                isSaving={isSaving}
+                onEdit={() => setIsEditing(true)}
+                onCancel={handleCancel}
+                onSave={handleSaveChanges}
+            />
         </div>
-    );
+
+        {/* SECURITY SECTION */}
+        <div className="max-w-4xl mx-auto mb-10">
+            <SecurityCard
+                onEmailChange={() => setIsChangeEmailOpen(true)}
+                onPasswordChange={() => setIsChangePasswordOpen(true)}
+            />
+        </div>
+
+        {/* MODALS */}
+        {isChangeEmailOpen && (
+            <ChangeEmailModal
+                isOpen={isChangeEmailOpen}
+                onClose={() => setIsChangeEmailOpen(false)}
+                currentEmail={profileData.email}
+                role="tutor"
+            />
+        )}
+        {isChangePasswordOpen && (
+            <ChangePasswordModal
+                isOpen={isChangePasswordOpen}
+                onClose={() => setIsChangePasswordOpen(false)}
+                role="tutor"
+            />
+        )}
+    </div>
+);
 };
 
 export default TutorProfile;
