@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -30,6 +30,7 @@ import {
 } from "../../store/features/user/courseProgressSlice";
 
 import LoadingSpinner from "../../components/common/LoadingSpinner";
+import { fetchSignedLessonUrl, selectActiveVideoUrl } from "../../store/features/public/signedUrlSlice";
 
 const CourseLearning = () => {
     const { courseId } = useParams();
@@ -37,6 +38,8 @@ const CourseLearning = () => {
     const navigate = useNavigate();
     const videoRef = useRef(null);
     const shouldAutoPlay = useRef(false);
+
+    const activeLessonUrl = useSelector(selectActiveVideoUrl);
 
     const learningCourse = useSelector(selectLearningCourse);
     const lessons = useSelector(selectCourseLessons);
@@ -56,6 +59,16 @@ const CourseLearning = () => {
             dispatch(resetCourseState());
         };
     }, [courseId, dispatch, navigate]);
+
+    useEffect(() => {
+        if (activeLesson?._id) {
+            dispatch(fetchSignedLessonUrl(activeLesson._id))
+                .unwrap()
+                .catch(() => {
+                    toast.error("Failed to secure video stream.");
+                });
+        }
+    }, [activeLesson, dispatch]);
 
     const navigateToNextLesson = () => {
         const currentIndex = lessons.findIndex((l) => l._id === activeLesson._id);
@@ -147,21 +160,28 @@ const CourseLearning = () => {
         <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 flex flex-col lg:flex-row">
             <div className="flex-1 overflow-y-auto pb-12">
                 <div className="bg-black aspect-video w-full shadow-2xl relative z-10 flex items-center justify-center">
-                    <video
-                        ref={videoRef}
-                        key={activeLesson._id}
-                        src={activeLesson.videoUrl}
-                        controls
-                        autoPlay={shouldAutoPlay.current}
-                        playsInline
-                        onEnded={handleVideoEnded}
-                        controlsList="nodownload"
-                        onContextMenu={(e) => e.preventDefault()}
-                        className="w-full h-full"
-                        style={{ maxHeight: "100%" , backgroundColor: 'black' }}
-                    >
-                        Your browser does not support the video tag.
-                    </video>
+                    {!activeLessonUrl ? (
+                        <div className="text-white flex flex-col items-center gap-2">
+                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+                            <p className="text-xs font-bold uppercase tracking-widest">Securing Stream...</p>
+                        </div>
+                    ) : (
+                        <video
+                            ref={videoRef}
+                            key={activeLesson._id}
+                            src={activeLessonUrl}
+                            controls
+                            autoPlay={shouldAutoPlay.current}
+                            playsInline
+                            onEnded={handleVideoEnded}
+                            controlsList="nodownload"
+                            onContextMenu={(e) => e.preventDefault()}
+                            className="w-full h-full"
+                            style={{ maxHeight: "100%", backgroundColor: "black" }}
+                        >
+                            Your browser does not support the video tag.
+                        </video>
+                    )}
                 </div>
 
                 <div className="max-w-5xl mx-auto p-6 md:p-10">
@@ -326,11 +346,17 @@ const CourseLearning = () => {
                         </div>
                     ) : (
                         <div className="border-2 border-dashed border-gray-300 rounded-3xl p-10 text-center bg-white/50 backdrop-blur-sm">
-                            {hasExam ? <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-100 rounded-full mb-4">
-                                <Lock size={28} className="text-gray-400" />
-                            </div> : <span></span>}
+                            {hasExam ? (
+                                <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-100 rounded-full mb-4">
+                                    <Lock size={28} className="text-gray-400" />
+                                </div>
+                            ) : (
+                                <span></span>
+                            )}
                             <p className="text-gray-500 font-medium text-lg">
-                                {hasExam ? "Complete all lessons to unlock the final section" : "No exam is available for this course at the moment."}
+                                {hasExam
+                                    ? "Complete all lessons to unlock the final section"
+                                    : "No exam is available for this course at the moment."}
                             </p>
                         </div>
                     )}
@@ -404,19 +430,21 @@ const CourseLearning = () => {
                         );
                     })}
 
-{hasExam ? <div
-                        className={`p-4 flex items-center gap-4 border-b border-gray-100 ${
-                            isAllCompleted ? "bg-indigo-50" : "opacity-50"
-                        }`}
-                    >
-                        <Lock size={22} className={isAllCompleted ? "text-indigo-600" : "text-gray-300"} />
-                        <div>
-                            <h4 className="text-sm font-bold text-gray-700">Final Exam</h4>
-                            <p className="text-xs text-gray-500">Unlock after all lessons</p>
+                    {hasExam ? (
+                        <div
+                            className={`p-4 flex items-center gap-4 border-b border-gray-100 ${
+                                isAllCompleted ? "bg-indigo-50" : "opacity-50"
+                            }`}
+                        >
+                            <Lock size={22} className={isAllCompleted ? "text-indigo-600" : "text-gray-300"} />
+                            <div>
+                                <h4 className="text-sm font-bold text-gray-700">Final Exam</h4>
+                                <p className="text-xs text-gray-500">Unlock after all lessons</p>
+                            </div>
                         </div>
-                    </div>
-                    : ""}
-                    
+                    ) : (
+                        ""
+                    )}
                 </div>
             </div>
         </div>

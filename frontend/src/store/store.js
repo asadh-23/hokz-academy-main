@@ -37,6 +37,7 @@ import categoryReducer from './features/public/categorySlice';
 import socketReducer from './features/socket/socketSlice'
 import chatReducer from './features/chat/chatSlice';
 import notificationReducer from './features/notification/notificationSlice'
+import signedUrlReducer from './features/public/signedUrlSlice';
 // ======================================================
 // STORE CONFIG
 // ======================================================
@@ -80,6 +81,7 @@ export const store = configureStore({
     socket: socketReducer,
     chat: chatReducer,
     notifications: notificationReducer,
+    signedUrl: signedUrlReducer,
 
   },
 

@@ -1,5 +1,5 @@
 import { PlayCircle, Lock, FileText, Play } from "lucide-react";
-import { toast } from "sonner"; // Toast message കാണിക്കാൻ
+import { toast } from "sonner";
 
 // Helper to format seconds
 const formatDuration = (seconds) => {

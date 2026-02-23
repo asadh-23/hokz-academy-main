@@ -39,7 +39,6 @@ const CourseSidebar = ({
 
     // ✅ 2. Use the prop first, fallback to courseData if needed
     const isUserEnrolled = isEnrolled || courseData.isEnrolled || false;
-    console.log(isEnrolled, "truuuuuuuuuuuuuuuuuuuuu");
 
     const handleEnrollNow = () => {
         // Redirect to login if not authenticated

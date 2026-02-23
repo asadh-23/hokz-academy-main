@@ -2,6 +2,7 @@ import express from "express";
 
 import { verifyToken, isAdmin } from "../../middlewares/authMiddleware.js";
 import { getAllCourses, getAllCategories, getCourseDetails, toggleBlockCourse, toggleBlockLesson, getLessonDetails } from "../../controllers/admin/courseController.js";
+import { getLessonSecureUrl } from "../../controllers/public/lessonSignedUrlController.js";
 
 const adminRouter = express.Router();
 
@@ -13,5 +14,7 @@ adminRouter.get("/:courseId", getCourseDetails);
 adminRouter.patch("/:courseId/toggle-block", toggleBlockCourse);
 adminRouter.get("/lessons/:lessonId", getLessonDetails);
 adminRouter.patch("/lessons/:lessonId/toggle-block", toggleBlockLesson);
+adminRouter.get("/lesson-url/:lessonId", getLessonSecureUrl);
+
 
 export default adminRouter;

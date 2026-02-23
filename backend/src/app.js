@@ -86,6 +86,7 @@ app.use('/api/admin/orders', adminOrderRoutes);
 app.use('/api/admin/dashboard', adminDashboardRoutes);
 app.use('/api/admin/wallet', adminWalletRoutes);
 app.use('/api/admin/notifications', adminNotificationRoutes);
+app.use('/api/admin/course', adminCourseRoutes)
 
 app.use('/api/tutor/auth', tutorAuthRoutes);
 app.use('/api/tutor/profile', tutorProfileRoutes);
@@ -98,6 +99,8 @@ app.use("/api/tutor/orders", tutorOrderRoutes);
 app.use("/api/tutor/dashboard", tutorDashboardRoutes);
 app.use("/api/tutor/chat", tutorChatRoutes);
 app.use("/api/tutor/notifications", tutorNotificationRoutes);
+app.use('/api/tutor/course', tutorLessonRoutes)
+
 
 app.use('/api/user/auth', userAuthRoutes);
 app.use("/api/user/profile", userProfileRoutes);
@@ -111,6 +114,8 @@ app.use("/api/user/chat", userChatRoutes);
 app.use("/api/user/notifications", userNotificationRoutes);
 app.use("/api/user/tutors", userTutorRoutes);
 app.use("/api/user/dashboard", userDashboardRoutes);
+app.use('/api/user/course', userCourseProgress)
+
 
 app.use("/api/categories", publicRoutes);
 

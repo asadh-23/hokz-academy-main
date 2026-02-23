@@ -1,5 +1,4 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-// User & Tutor Axios instances import ചെയ്യുക
 import { userAxios } from "../../../api/userAxios";
 import { tutorAxios } from "../../../api/tutorAxios";
 
@@ -7,12 +6,8 @@ import { tutorAxios } from "../../../api/tutorAxios";
 // HELPER: Select Axios based on who is logged in
 // ======================================================
 const getAxiosInstance = (state) => {
-    if (state.userAuth?.user) {
-        return userAxios;
-    }
-    if (state.tutorAuth?.tutor) {
-        return tutorAxios;
-    }
+   if (state.userAuth?.user) return userAxios;
+    if (state.tutorAuth?.tutor) return tutorAxios;
 
     throw new Error("No active chat session found");
 };

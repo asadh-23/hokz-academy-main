@@ -9,10 +9,12 @@ import { formatText } from "../../utils/formatText";
 import { AcademicCapIcon } from "@heroicons/react/24/solid";
 import { selectUser } from "../../store/features/auth/userAuthSlice";
 import { selectTutor } from "../../store/features/auth/tutorAuthSlice";
+import { ArrowLeftIcon } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const Sidebar = () => {
     const dispatch = useDispatch();
-
+    const navigate = useNavigate();
     // 1. Redux State
     const { conversations = [], selectedChat, loading } = useSelector((state) => state.chat);
 
@@ -36,7 +38,15 @@ const Sidebar = () => {
         <div className="flex flex-col h-full bg-white">
             <div className="p-6 bg-[#1E2EDE] relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-[#14C4E7] opacity-10 rounded-full -translate-y-16 translate-x-16"></div>
+
                 <h2 className="text-2xl font-black text-white mb-5 tracking-tight uppercase flex items-center gap-3">
+                    <button
+                        onClick={() => navigate(-1)}
+                        className="p-2 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-all backdrop-blur-md active:scale-95 group"
+                        title="Go Back"
+                    >
+                        <ArrowLeftIcon className="w-5 h-5 transition-transform group-hover:-translate-x-1" />
+                    </button>
                     <div className="bg-[#E6D929] p-1.5 rounded-lg">
                         <AcademicCapIcon className="w-5 h-5 text-[#1E2EDE]" />
                     </div>
@@ -91,7 +101,6 @@ const Sidebar = () => {
                                 )}
 
                                 <div className="relative shrink-0">
-                                   
                                     <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-white shadow-sm ring-2 ring-[#14C4E7]/20 relative">
                                         {chat.profileImage ? (
                                             <img

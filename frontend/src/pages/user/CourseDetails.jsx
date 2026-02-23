@@ -131,7 +131,7 @@ const CourseDetails = () => {
         }
     };
 
-    if (loading || !courseData) {
+    if (loading || !courseData || !course) {
         return (
             <div className="flex justify-center items-center min-h-screen bg-gray-50">
                 <PageLoader text="Loading course details..." />

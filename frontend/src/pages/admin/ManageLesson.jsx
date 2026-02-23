@@ -16,7 +16,8 @@ import {
     Layers,
 } from "lucide-react";
 import { fetchAdminLessonData, toggleAdminLessonBlock } from "../../store/features/admin/adminCourseSlice";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchSignedLessonUrl, selectActiveVideoUrl } from "../../store/features/public/signedUrlSlice";
 
 const ManageLesson = () => {
     const location = useLocation();
@@ -25,6 +26,8 @@ const ManageLesson = () => {
 
     const { courseId, lessonId } = useParams();
     const { courseTitle } = location.state || {};
+
+    const activeLessonUrl = useSelector(selectActiveVideoUrl);
 
     // 1. Initialize with NULL (Not empty object)
     const [lessonData, setLessonData] = useState(null);
@@ -45,7 +48,7 @@ const ManageLesson = () => {
                 // Navigate back safely
                 navigate(courseId ? `/admin/courses/${courseId}/manage` : "/admin/courses");
             } finally {
-                setLoading(false); // Now this works ✅
+                setLoading(false);
             }
         };
 
@@ -53,6 +56,16 @@ const ManageLesson = () => {
             fetchLessonData();
         }
     }, [lessonId, courseId, navigate, dispatch]);
+
+    useEffect(() => {
+        if (lessonData?._id) {
+            dispatch(fetchSignedLessonUrl(lessonData._id))
+                .unwrap()
+                .catch(() => {
+                    toast.error("Failed to secure video stream.");
+                });
+        }
+    }, [lessonData, dispatch]);
 
     // Helper functions
     const formatDuration = (totalSeconds) => {
@@ -215,14 +228,23 @@ const ManageLesson = () => {
                             <div className="relative group rounded-[2rem] overflow-hidden bg-black shadow-2xl">
                                 {lessonData.videoUrl ? (
                                     <div className="aspect-video">
-                                        <video
-                                            key={lessonData.videoUrl}
-                                            controls
-                                            className="w-full h-full object-contain"
-                                            poster={lessonData.thumbnailUrl}
-                                        >
-                                            <source src={lessonData.videoUrl} type="video/mp4" />
-                                        </video>
+                                        {!activeLessonUrl ? (
+                                            <div className="text-white flex flex-col items-center gap-2">
+                                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+                                                <p className="text-xs font-bold uppercase tracking-widest">
+                                                    Securing Stream...
+                                                </p>
+                                            </div>
+                                        ) : (
+                                            <video
+                                                key={activeLessonUrl}
+                                                controls
+                                                className="w-full h-full object-contain"
+                                                poster={lessonData.thumbnailUrl}
+                                            >
+                                                <source src={activeLessonUrl} type="video/mp4" />
+                                            </video>
+                                        )}
                                     </div>
                                 ) : (
                                     <div className="aspect-video flex flex-col items-center justify-center bg-gray-900 text-gray-500">

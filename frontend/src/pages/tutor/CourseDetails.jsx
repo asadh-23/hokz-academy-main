@@ -24,6 +24,7 @@ import defaultProfileImage from "../../assets/images/default-profile-image.webp"
 import { useDispatch, useSelector } from "react-redux";
 import { toggleTutorCourseStatus } from "../../store/features/tutor/tutorCoursesSlice";
 import { selectUserIsAuthenticated } from "../../store/features/auth/userAuthSlice";
+import { fetchSignedLessonUrl, selectActiveVideoUrl } from "../../store/features/public/signedUrlSlice";
 
 const CourseDetails = () => {
     const { courseId } = useParams();
@@ -32,6 +33,8 @@ const CourseDetails = () => {
     const [loading, setLoading] = useState(true);
     const [courseData, setCourseData] = useState(null);
     const [selectedLesson, setSelectedLesson] = useState(null);
+
+    const activeLessonUrl = useSelector(selectActiveVideoUrl);
 
     useEffect(() => {
         fetchCourseDetails();
@@ -42,7 +45,6 @@ const CourseDetails = () => {
             setLoading(true);
             const response = await tutorAxios.get(`/courses/${courseId}/details`);
             setCourseData(response.data.data);
-            // Set first lesson as selected by default if available
             if (response.data.data.lessons.length > 0) {
                 setSelectedLesson(response.data.data.lessons[0]);
             }
@@ -53,6 +55,16 @@ const CourseDetails = () => {
             setLoading(false);
         }
     };
+
+    useEffect(() => {
+        if (selectedLesson?._id) {
+            dispatch(fetchSignedLessonUrl(selectedLesson._id))
+                .unwrap()
+                .catch(() => {
+                    toast.error("Failed to secure video stream.");
+                });
+        }
+    }, [selectedLesson, dispatch]);
 
     const handleLessonClick = (lesson) => {
         setSelectedLesson(lesson);
@@ -315,14 +327,26 @@ const CourseDetails = () => {
                                             )}
                                         </div>
                                         <div className="aspect-video bg-black shadow-inner">
-                                            <video
-                                                key={selectedLesson.videoUrl}
-                                                controls
-                                                className="w-full h-full"
-                                                controlsList="nodownload"
-                                            >
-                                                <source src={selectedLesson.videoUrl} type="video/mp4" />
-                                            </video>
+                                            {!activeLessonUrl ? (
+                                                <div className="text-white flex flex-col items-center gap-2">
+                                                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+                                                    <p className="text-xs font-bold uppercase tracking-widest">
+                                                        Securing Stream...
+                                                    </p>
+                                                </div>
+                                            ) : (
+                                                <video
+                                                    key={activeLessonUrl}
+                                                    controls
+                                                    playsInline
+                                                    className="w-full h-full"
+                                                    controlsList="nodownload"
+                                                    onContextMenu={(e) => e.preventDefault()}
+                                                >
+                                                    <source src={activeLessonUrl} type="video/mp4" />
+                                                    Your browser does not support the video tag.
+                                                </video>
+                                            )}
                                         </div>
                                         <div className="p-6">
                                             <div className="flex items-center gap-4 mb-3 text-xs font-bold text-[#14C4E7] uppercase tracking-widest">
@@ -476,19 +500,19 @@ const CourseDetails = () => {
                                     <div className="flex items-center gap-4">
                                         <div className="relative">
                                             <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-white shadow-sm ring-2 ring-[#14C4E7]/20 relative">
-                                        {student.profileImage ? (
-                                            <img
-                                                src={student.profileImage}
-                                                alt={student.fullName || "User"}
-                                                className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
-                                            />
-                                        ) : (
-                                            /* Fallback: Name initial with Blue Gradient */
-                                            <div className="w-full h-full bg-gradient-to-br from-[#1E2EDE] to-[#14C4E7] flex items-center justify-center text-white text-xl font-black">
-                                                {student.fullName ? student.fullName.charAt(0).toUpperCase() : "U"}
+                                                {student.profileImage ? (
+                                                    <img
+                                                        src={student.profileImage}
+                                                        alt={student.fullName || "User"}
+                                                        className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+                                                    />
+                                                ) : (
+                                                    /* Fallback: Name initial with Blue Gradient */
+                                                    <div className="w-full h-full bg-gradient-to-br from-[#1E2EDE] to-[#14C4E7] flex items-center justify-center text-white text-xl font-black">
+                                                        {student.fullName ? student.fullName.charAt(0).toUpperCase() : "U"}
+                                                    </div>
+                                                )}
                                             </div>
-                                        )}
-                                    </div>
                                             <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-[#14C4E7] rounded-full border-2 border-white"></div>
                                         </div>
                                         <div className="flex-1 min-w-0">

@@ -4,6 +4,7 @@ import Lesson from "../../models/course/Lesson.js";
 import Enrollment from "../../models/course/Enrollment.js";
 import ExamAttempt from "../../models/course/ExamAttempt.js";
 
+
 export const getCourseContent = async (req, res) => {
     try {
         const { courseId } = req.params;
