@@ -156,6 +156,7 @@ const CourseLearning = () => {
                         playsInline
                         onEnded={handleVideoEnded}
                         controlsList="nodownload"
+                        onContextMenu={(e) => e.preventDefault()}
                         className="w-full h-full"
                         style={{ maxHeight: "100%" , backgroundColor: 'black' }}
                     >
