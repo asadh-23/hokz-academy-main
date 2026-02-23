@@ -101,11 +101,13 @@ const userAuthSlice = createSlice({
                 state.user = null;
                 state.token = null;
                 state.isAuthenticated = false;
+                localStorage.clear();
             })
             .addCase(logoutUser.rejected, (state, action) => {
                 state.user = null;
                 state.token = null;
                 state.isAuthenticated = false;
+                localStorage.clear();
             });
 
         // REGISTER

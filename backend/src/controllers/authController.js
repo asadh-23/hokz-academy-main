@@ -7,12 +7,12 @@ import Admin from "../models/user/Admin.js";
 export const handleRefreshToken = async (req, res) => {
     try {
         const cookies = req.cookies;
-        
+
         if (!cookies?.refreshToken) {
-            console.log('❌ No refresh token in cookies');
+            console.log("❌ No refresh token in cookies");
             return res.status(401).json({
                 success: false,
-                message: "Unauthorized: No refresh token provided" 
+                message: "Unauthorized: No refresh token provided",
             });
         }
 
@@ -22,10 +22,10 @@ export const handleRefreshToken = async (req, res) => {
         const decoded = verifyRefreshToken(refreshToken);
 
         if (!decoded.id || !decoded.role) {
-            console.log('❌ Invalid token payload');
-            return res.status(401).json({ 
+            console.log("❌ Invalid token payload");
+            return res.status(401).json({
                 success: false,
-                message: "Unauthorized: Invalid token payload" 
+                message: "Unauthorized: Invalid token payload",
             });
         }
 
@@ -38,33 +38,33 @@ export const handleRefreshToken = async (req, res) => {
         } else if (decoded.role === "admin") {
             user = await Admin.findById(decoded.id);
         } else {
-            console.log('❌ Invalid role in token:', decoded.role);
-            return res.status(401).json({ 
+            console.log("❌ Invalid role in token:", decoded.role);
+            return res.status(401).json({
                 success: false,
-                message: "Unauthorized: Invalid role" 
+                message: "Unauthorized: Invalid role",
             });
         }
 
         if (!user) {
-            console.log('❌ User not found for id:', decoded.id);
-            return res.status(401).json({ 
+            console.log("❌ User not found for id:", decoded.id);
+            return res.status(401).json({
                 success: false,
-                message: "Unauthorized: User not found" 
+                message: "Unauthorized: User not found",
             });
         }
 
         if (user.isBlocked) {
-            console.log('❌ User is blocked:', decoded.id);
-            return res.status(403).json({ 
+            console.log("❌ User is blocked:", decoded.id);
+            return res.status(403).json({
                 success: false,
-                message: "Forbidden: Account has been blocked" 
+                message: "Forbidden: Account has been blocked",
             });
         }
 
         // Generate new access token
         const newAccessToken = generateAccessToken(user._id, user.role);
 
-        console.log('✅ Access token refreshed for user:', user._id);
+        console.log("✅ Access token refreshed for user:", user._id);
 
         res.status(200).json({
             success: true,
@@ -81,24 +81,24 @@ export const handleRefreshToken = async (req, res) => {
         });
     } catch (error) {
         console.error("❌ Refresh Token Error:", error.message);
-        
-        if (error.name === 'TokenExpiredError') {
-            return res.status(401).json({ 
+
+        if (error.name === "TokenExpiredError") {
+            return res.status(401).json({
                 success: false,
-                message: "Unauthorized: Refresh token has expired" 
+                message: "Unauthorized: Refresh token has expired",
             });
         }
-        
-        if (error.name === 'JsonWebTokenError') {
-            return res.status(401).json({ 
+
+        if (error.name === "JsonWebTokenError") {
+            return res.status(401).json({
                 success: false,
-                message: "Unauthorized: Invalid refresh token" 
+                message: "Unauthorized: Invalid refresh token",
             });
         }
-        
-        return res.status(401).json({ 
+
+        return res.status(401).json({
             success: false,
-            message: "Unauthorized: Token verification failed" 
+            message: "Unauthorized: Token verification failed",
         });
     }
 };
@@ -107,11 +107,10 @@ export const logoutUser = (req, res) => {
     try {
         res.cookie("refreshToken", "", {
             httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "lax",
+            secure: true,
+            sameSite: "None",
             expires: new Date(0),
             path: "/",
-            ...(process.env.NODE_ENV === 'production' && { domain: '.hokzacademy.com' })
         });
         res.status(200).json({ success: true, message: "Logged out successfully" });
     } catch (error) {

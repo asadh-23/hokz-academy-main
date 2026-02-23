@@ -63,7 +63,7 @@ const ProfileLayout = () => {
                             onClick={() => setIsCollapsed(!isCollapsed)}
                             className={`
         absolute top-8 bg-[#14C4E7] text-white w-8 h-8 rounded-r-xl flex items-center justify-center shadow-md hover:bg-[#1E2EDE] transition-all z-[60]
-        ${isCollapsed ? "left-[100%] lg:-right-3 lg:rounded-full lg:w-6 lg:h-6" : "-right-3 w-6 h-6 rounded-full"}
+        ${isCollapsed ? "left-[110%] lg:-right-3 lg:rounded-full lg:w-6 lg:h-6" : "-right-3 w-6 h-6 rounded-full"}
     `}
                         >
                             {isCollapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
