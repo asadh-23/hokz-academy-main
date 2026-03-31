@@ -10,8 +10,7 @@ const PublicLayout = () => {
       <Header />
 
       {/* Main Content Area */}
-      {/* pt-20 matches the h-20 height of the fixed header */}
-      <main className="flex-grow pt-20">
+      <main className="flex-grow">
         <Outlet />
       </main>
 

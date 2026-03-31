@@ -99,8 +99,8 @@ const userAuthSlice = createSlice({
         builder
             .addCase(logoutUser.fulfilled, (state) => {
                 state.user = null;
-                state.token = null;
-                state.isAuthenticated = false;
+                state.accessToken = null;
+                state.isUserAuthenticated = false;
                 localStorage.clear();
             })
             .addCase(logoutUser.rejected, (state, action) => {

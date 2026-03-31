@@ -64,7 +64,7 @@ app.use((req, res, next) => {
 });
 
 app.use(cors({
-  origin: allowedOrigins, // simplified array
+  origin: allowedOrigins,
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
