@@ -1,11 +1,14 @@
 import { useState } from "react";
 import { toast } from "sonner";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { forgotPassword, selectForgotPasswordLoading } from "../../store/features/auth/passwordSlice";
 import { validateEmail } from "../../utils/validation";
 
-export default function ForgotPassword({ role }) {
+export default function ForgotPassword() {
+    const location = useLocation();
+    const role = location.pathname.split("/")[1];
+
     const [email, setEmail] = useState("");
     const navigate = useNavigate();
     const dispatch = useDispatch();
@@ -18,7 +21,7 @@ export default function ForgotPassword({ role }) {
             return toast.error(emailValidation.message || "Enter a valid email");
         }
 
-        const result = await dispatch(forgotPassword({ email: emailValidation.email, role }));
+        const result = await dispatch(forgotPassword({ email: emailValidation.value, role }));
 
         if (forgotPassword.fulfilled.match(result)) {
             toast.success(result.payload?.message || "Check your email for reset link");

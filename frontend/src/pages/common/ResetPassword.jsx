@@ -1,11 +1,14 @@
 import { useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 import { useDispatch, useSelector } from "react-redux";
 import { validatePassword } from "../../utils/validation";
 import { resetPassword, selectResetPasswordLoading } from "../../store/features/auth/passwordSlice";
 
-export default function ResetPassword({ role }) {
+export default function ResetPassword() {
+    const location = useLocation();
+    const role = location.pathname.split("/")[1];
+    
     const [formData, setFormData] = useState({
         password: "",
         confirmPassword: "",
@@ -30,7 +33,7 @@ export default function ResetPassword({ role }) {
         const result = await dispatch(
             resetPassword({
                 token,
-                password: passwordValidation.password,
+                password: passwordValidation.value,
                 role,
             })
         );

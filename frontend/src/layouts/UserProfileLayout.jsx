@@ -24,12 +24,15 @@ const ProfileLayout = () => {
     const [showConfirm, setShowConfirm] = useState(false);
 
     const handleLogout = async () => {
-        const res = await dispatch(logoutUser());
-        if (logoutUser.fulfilled.match(res)) {
+        try {
+
+            await dispatch(logoutUser()).unwrap();
             toast.success("Logged out successfully");
+            setShowConfirm(false);
             navigate("/user/login", { replace: true });
-        } else {
-            toast.error(res.payload || "Logout failed");
+
+        } catch (error) {
+            toast.error(error || "Logout failed");
         }
     };
 
@@ -46,7 +49,7 @@ const ProfileLayout = () => {
     const activeClass = "bg-[#1E2EDE] text-[#E6D929] shadow-lg shadow-blue-100";
     const inactiveClass = "text-slate-600 hover:bg-slate-50 hover:text-[#1E2EDE]";
 
-   return (
+    return (
         <div className="flex min-h-[calc(100vh-80px)] bg-[#FDFDFD] relative">
             {/* --- SIDEBAR CONTAINER --- */}
             {/* FIXED: The gutter width is now constant on desktop (lg:w-20) 
@@ -78,15 +81,15 @@ const ProfileLayout = () => {
                                 onClick={() => setIsCollapsed(!isCollapsed)}
                                 className="shrink-0 w-8 h-8 lg:w-10 lg:h-10 rounded-full border-2 border-[#14C4E7] overflow-hidden cursor-pointer"
                             >
-                                {user.profileImage ? (
+                                {user?.profileImage ? (
                                     <img
-                                        src={user.profileImage}
-                                        alt={user.fullName || "User"}
+                                        src={user?.profileImage}
+                                        alt={user?.fullName || "User"}
                                         className="w-full h-full object-cover"
                                     />
                                 ) : (
                                     <div className="w-full h-full bg-[#1E2EDE] flex items-center justify-center text-white font-bold text-xs lg:text-sm">
-                                        {user.fullName?.charAt(0)?.toUpperCase() || "U"}
+                                        {user?.fullName?.charAt(0)?.toUpperCase() || "U"}
                                     </div>
                                 )}
                             </div>

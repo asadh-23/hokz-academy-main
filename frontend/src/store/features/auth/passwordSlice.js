@@ -40,7 +40,7 @@ export const requestPasswordChange = createAsyncThunk(
     async ({ currentPassword, newPassword, role }, { rejectWithValue }) => {
         try {
             const axiosInstance = role === "user" ? userAxios : tutorAxios;
-            const res = await axiosInstance.post("/request-password-change", {
+            const res = await axiosInstance.post("/profile/request-password-change", {
                 currentPassword,
                 newPassword,
             });
@@ -57,7 +57,7 @@ export const verifyPasswordChangeOtp = createAsyncThunk(
     async ({ otpCode, newPassword, role }, { rejectWithValue }) => {
         try {
             const axiosInstance = role === "user" ? userAxios : tutorAxios;
-            const res = await axiosInstance.post("/verify-password-change", {
+            const res = await axiosInstance.post("/profile/verify-password-change", {
                 otpCode,
                 newPassword,
             });
@@ -74,7 +74,7 @@ export const resendPasswordChangeOtp = createAsyncThunk(
     async ({ role }, { rejectWithValue }) => {
         try {
             const axiosInstance = role === "user" ? userAxios : tutorAxios;
-            const res = await axiosInstance.post("/resend-password-change-otp");
+            const res = await axiosInstance.post("/profile/resend-password-change-otp");
             return res.data; // { success, message }
         } catch (err) {
             return rejectWithValue(err.response?.data?.message || "Failed to resend OTP");

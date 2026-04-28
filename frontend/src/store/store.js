@@ -85,7 +85,7 @@ export const store = configureStore({
 
   },
 
-  devTools: import.meta.env.MODE !== "production",
+  devTools: true,
 
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

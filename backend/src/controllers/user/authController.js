@@ -313,6 +313,8 @@ export const forgotPassword = async (req, res) => {
             return res.status(400).json({ message: "Please provide a valid email address" });
         }
 
+        console.log('1111111111111111')
+
         const user = await User.findOne({ email });
         if (!user) {
             return res.status(400).json({ message: "User with this email not found" });
