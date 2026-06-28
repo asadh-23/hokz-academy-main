@@ -71,7 +71,10 @@ const WishList = () => {
             try {
                 await dispatch(fetchUserWishlist()).unwrap();
             } catch (error) {
-                toast.error(error || "Failed to load wishlist");
+                // Only show error for actual failures, not empty wishlist
+                if (error && !error.includes("empty") && !error.includes("No items")) {
+                    toast.error(error || "Failed to load wishlist");
+                }
             }
         };
         loadWishlist();

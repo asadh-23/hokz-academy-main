@@ -35,7 +35,10 @@ const Cart = () => {
         try {
             await dispatch(fetchUserCart()).unwrap();
         } catch (error) {
-            toast.error(error || "Failed to load cart");
+            // Only show error for actual failures, not empty cart
+            if (error && !error.includes("empty") && !error.includes("No items")) {
+                toast.error(error || "Failed to load cart");
+            }
         }
     };
 

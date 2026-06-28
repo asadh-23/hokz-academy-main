@@ -52,7 +52,10 @@ const AddLesson = () => {
                 const response = await tutorAxios.get(`/lessons/courses/${courseId}/lessons`);
 
                 if (!response.data?.success) {
-                    toast.error("Failed to load lessons");
+                    // Only show error if it's a real failure, not just empty data
+                    if (response.data?.message && !response.data?.message.includes("No lessons")) {
+                        toast.error("Failed to load lessons");
+                    }
                     return;
                 }
 
@@ -66,7 +69,10 @@ const AddLesson = () => {
                 setLessons(transformed);
             } catch (error) {
                 console.error("Failed to load existing lessons:", error);
-                toast.error(error.response?.data?.message || "Failed to load existing lessons");
+                // Only show error toast for actual errors (not 404 or empty data)
+                if (error.response?.status !== 404) {
+                    toast.error(error.response?.data?.message || "Failed to load existing lessons");
+                }
             }
         };
 

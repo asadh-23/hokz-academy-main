@@ -42,7 +42,11 @@ const ManageCourses = () => {
             setFirstLoad(false);
         } catch (error) {
             console.error("Fetch course loading error:", error);
-            toast.error(error || "Failed to load courses");
+            // Only show error for actual failures, not empty results
+            if (error && !error.includes("No courses") && !error.includes("empty")) {
+                toast.error(error || "Failed to load courses");
+            }
+            setFirstLoad(false);
         }
     };
 

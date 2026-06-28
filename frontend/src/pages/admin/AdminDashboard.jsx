@@ -20,7 +20,10 @@ const navigte = useNavigate();
                 }
             } catch (error) {
                 console.error("Fetch Stats Error:", error);
-                toast.error("Failed to load dashboard data");
+                // Only show error for actual failures, not when data is empty/zero
+                if (error.response?.status !== 404 && error.response?.data?.message) {
+                    toast.error("Failed to load dashboard data");
+                }
             } finally {
                 setLoading(false);
             }

@@ -69,7 +69,10 @@ const Courses = () => {
             try {
                 await dispatch(fetchUserCourses(params)).unwrap();
             } catch (error) {
-                toast.error(error || "Failed to load courses");
+                // Only show error if it's not just empty results
+                if (error && !error.includes("No courses")) {
+                    toast.error(error || "Failed to load courses");
+                }
             }
         };
 
