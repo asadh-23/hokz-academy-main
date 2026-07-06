@@ -24,8 +24,7 @@ const categorySchema = new mongoose.Schema(
   }
 );
 
-// Useful indexes
-categorySchema.index({ name: 1 });
+// Useful indexes (name already has unique index from schema definition)
 categorySchema.index({ isListed: 1 });
 categorySchema.index({ createdAt: -1 });
 

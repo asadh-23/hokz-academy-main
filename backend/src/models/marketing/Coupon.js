@@ -61,9 +61,7 @@ const couponSchema = new mongoose.Schema(
     }
 );
 
-// Indexes
-couponSchema.index({ code: 1 });
-couponSchema.index({ tutor: 1 });
+// Indexes (code and tutor already have unique/indexed from schema definition)
 couponSchema.index({ expiryDate: 1 });
 
 // Methods
