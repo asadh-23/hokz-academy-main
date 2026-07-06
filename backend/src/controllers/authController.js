@@ -105,10 +105,12 @@ export const handleRefreshToken = async (req, res) => {
 
 export const logoutUser = (req, res) => {
     try {
+        const isProduction = process.env.NODE_ENV === 'production';
+        
         res.cookie("refreshToken", "", {
             httpOnly: true,
-            secure: true,
-            sameSite: "None",
+            secure: isProduction,
+            sameSite: isProduction ? 'none' : 'lax',
             expires: new Date(0),
             path: "/",
         });
