@@ -63,6 +63,20 @@ const CourseDetails = () => {
         }
     }, [courseId, dispatch, navigate, isAuthenticated]);
 
+    // Prevent body scroll when loading
+    useEffect(() => {
+        if (loading || !courseData || !course) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = 'unset';
+        }
+
+        // Cleanup function
+        return () => {
+            document.body.style.overflow = 'unset';
+        };
+    }, [loading, courseData, course]);
+
     // Extract Course and Enrollment Status
     const course = courseData?.course;
     const isEnrolled = courseData?.isEnrolled || false;
@@ -133,7 +147,7 @@ const CourseDetails = () => {
 
     if (loading || !courseData || !course) {
         return (
-            <div className="flex justify-center items-center min-h-screen bg-gray-50">
+            <div className="fixed inset-0 bg-white flex justify-center items-center z-50 overflow-hidden">
                 <PageLoader text="Loading course details..." />
             </div>
         );

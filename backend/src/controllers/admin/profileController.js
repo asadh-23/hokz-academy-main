@@ -57,13 +57,13 @@ export const updateAdminProfileImage = async (req, res) => {
         }
 
         // UPLOAD NEW IMAGE USING HELPER
-        const uploadResult = await uploadToCloudinary(req.file.buffer, "admin_profiles");
+        const uploadResult = await uploadToCloudinary(req.file.buffer, "admin_profiles", "image", req.file.originalname);
 
-        if (!uploadResult?.secure_url) throw new Error("Cloudinary upload failed");
+        if (!uploadResult?.url) throw new Error("Cloudinary upload failed");
 
         const updatedAdmin = await Admin.findByIdAndUpdate(
             adminId,
-            { profileImage: uploadResult.secure_url },
+            { profileImage: uploadResult.url },
             { new: true }
         );
 
@@ -72,7 +72,7 @@ export const updateAdminProfileImage = async (req, res) => {
         res.status(200).json({
             success: true,
             message: "Profile image updated successfully",
-            imageUrl: uploadResult.secure_url,
+            imageUrl: uploadResult.url,
         });
     } catch (error) {
         console.error("Error:", error);

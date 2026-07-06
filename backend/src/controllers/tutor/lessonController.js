@@ -1,7 +1,7 @@
 import Course from "../../models/course/Course.js";
 import mongoose from "mongoose";
 import Lesson from "../../models/course/Lesson.js";
-import { uploadToS3, deleteFromS3 } from "../../services/s3UploadService.js";
+import { uploadToCloudinary, deleteFromCloudinary } from "../../services/cloudinaryService.js";
 import Enrollment from "../../models/course/Enrollment.js";
 import { sendNotification } from "../../utils/notificationSender.js";
 
@@ -26,18 +26,32 @@ export const uploadLessonFile = async (req, res) => {
         }
 
         let folder = "";
-        if (type === "video") folder = "lesson-videos";
-        if (type === "thumbnail") folder = "lesson-thumbnails";
-        if (type === "pdfNotes") folder = "lesson-pdfs";
+        let resourceType = "auto";
+        
+        if (type === "video") {
+            folder = "hokz-academy/lesson-videos";
+            resourceType = "video";
+        } else if (type === "thumbnail") {
+            folder = "hokz-academy/lesson-thumbnails";
+            resourceType = "image";
+        } else if (type === "pdfNotes") {
+            folder = "hokz-academy/lesson-pdfs";
+            resourceType = "raw";
+        }
 
-        // Upload to S3
-        const { key, url } = await uploadToS3(req.file, folder);
+        // Upload to Cloudinary
+        const result = await uploadToCloudinary(
+            req.file.buffer, 
+            folder, 
+            resourceType,
+            req.file.originalname
+        );
 
         return res.status(200).json({
             success: true,
             message: `${type} uploaded successfully`,
-            fileUrl: url,
-            fileKey: key,
+            fileUrl: result.url,
+            fileKey: result.publicId,
         });
     } catch (error) {
         console.error("Lesson file upload error:", error);
@@ -207,26 +221,26 @@ export const updateLesson = async (req, res) => {
         if (description) lesson.description = description.trim();
 
         if (videoUrl && videoUrl !== lesson.videoUrl) {
-            if (lesson.videoKey) filesToDelete.push(lesson.videoKey);
+            if (lesson.videoKey) filesToDelete.push({ publicId: lesson.videoKey, resourceType: 'video' });
             lesson.videoUrl = videoUrl;
             lesson.videoKey = videoKey;
             lesson.duration = duration;
         }
 
         if (thumbnailUrl && thumbnailUrl !== lesson.thumbnailUrl) {
-            if (lesson.thumbnailKey) filesToDelete.push(lesson.thumbnailKey);
+            if (lesson.thumbnailKey) filesToDelete.push({ publicId: lesson.thumbnailKey, resourceType: 'image' });
             lesson.thumbnailUrl = thumbnailUrl;
             lesson.thumbnailKey = thumbnailKey;
         }
 
         if (pdfUrl && pdfUrl !== lesson.pdfUrl) {
-            if (lesson.pdfKey) filesToDelete.push(lesson.pdfKey);
+            if (lesson.pdfKey) filesToDelete.push({ publicId: lesson.pdfKey, resourceType: 'raw' });
             lesson.pdfUrl = pdfUrl;
             lesson.pdfKey = pdfKey;
         }
 
         if (!pdfUrl && lesson.pdfUrl) {
-            if (lesson.pdfKey) filesToDelete.push(lesson.pdfKey);
+            if (lesson.pdfKey) filesToDelete.push({ publicId: lesson.pdfKey, resourceType: 'raw' });
             lesson.pdfUrl = null;
             lesson.pdfKey = null;
         }
@@ -242,11 +256,11 @@ export const updateLesson = async (req, res) => {
         }
 
         if (filesToDelete.length > 0) {
-            Promise.allSettled(filesToDelete.map((key) => deleteFromS3(key))).then((results) => {
+            Promise.allSettled(filesToDelete.map((file) => deleteFromCloudinary(file.publicId, file.resourceType))).then((results) => {
                 const failures = results.filter((r) => r.status === "rejected");
                 if (failures.length > 0) {
                     console.error(
-                        `Failed to delete ${failures.length} files from S3:`,
+                        `Failed to delete ${failures.length} files from Cloudinary:`,
                         failures.map((f) => f.reason),
                     );
                 }
@@ -302,9 +316,9 @@ export const deleteLesson = async (req, res) => {
         const lessonOrder = lesson.order;
 
         const filesToDelete = [];
-        if (lesson.videoKey) filesToDelete.push(lesson.videoKey);
-        if (lesson.thumbnailKey) filesToDelete.push(lesson.thumbnailKey);
-        if (lesson.pdfKey) filesToDelete.push(lesson.pdfKey);
+        if (lesson.videoKey) filesToDelete.push({ publicId: lesson.videoKey, resourceType: 'video' });
+        if (lesson.thumbnailKey) filesToDelete.push({ publicId: lesson.thumbnailKey, resourceType: 'image' });
+        if (lesson.pdfKey) filesToDelete.push({ publicId: lesson.pdfKey, resourceType: 'raw' });
 
         await lesson.deleteOne();
 
@@ -317,12 +331,12 @@ export const deleteLesson = async (req, res) => {
 
         await Lesson.updateMany({ course: lesson.course, order: { $gt: lessonOrder } }, { $inc: { order: -1 } });
 
-        // 8️⃣ Delete S3 files asynchronously
+        // 8️⃣ Delete Cloudinary files asynchronously
         if (filesToDelete.length > 0) {
-            Promise.allSettled(filesToDelete.map((key) => deleteFromS3(key))).then((results) => {
+            Promise.allSettled(filesToDelete.map((file) => deleteFromCloudinary(file.publicId, file.resourceType))).then((results) => {
                 results.forEach((r) => {
                     if (r.status === "rejected") {
-                        console.error("Failed to delete from S3:", r.reason);
+                        console.error("Failed to delete from Cloudinary:", r.reason);
                     }
                 });
             });

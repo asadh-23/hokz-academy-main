@@ -3,7 +3,7 @@ import Enrollment from "../../models/course/Enrollment.js";
 import User from "../../models/user/User.js";
 import Message from "../../models/chat/Message.js";
 import { getReceiverSocketId, io } from "../../socket/socket.js";
-import { uploadToS3 } from "../../services/s3UploadService.js";
+import { uploadToCloudinary } from "../../services/cloudinaryService.js";
 
 // Get Complete Tutor Sidebar (Active Chats + All Students Ordered)
 export const getTutorSidebar = async (req, res) => {
@@ -144,18 +144,31 @@ export const sendMessageTutor = async (req, res) => {
         }
 
         // ---------------------------------------------------------
-        // 3. S3 Upload Logic
+        // Cloudinary Upload Logic
         // ---------------------------------------------------------
         let fileUrl = "";
         let fileType = "text";
         if (file) {
             try {
-                const uploadResult = await uploadToS3(file, "chat-media");
-                fileUrl = uploadResult.url;
+                let resourceType = "auto";
+                if (file.mimetype.startsWith("image")) {
+                    fileType = "image";
+                    resourceType = "image";
+                } else if (file.mimetype.startsWith("video")) {
+                    fileType = "video";
+                    resourceType = "video";
+                } else if (file.mimetype === "application/pdf") {
+                    fileType = "pdf";
+                    resourceType = "raw";
+                }
 
-                if (file.mimetype.startsWith("image")) fileType = "image";
-                else if (file.mimetype.startsWith("video")) fileType = "video";
-                else if (file.mimetype === "application/pdf") fileType = "pdf";
+                const uploadResult = await uploadToCloudinary(
+                    file.buffer,
+                    "hokz-academy/chat-media",
+                    resourceType,
+                    file.originalname
+                );
+                fileUrl = uploadResult.url;
             } catch (err) {
                 return res.status(500).json({ success: false, message: "File upload failed" });
             }

@@ -111,13 +111,13 @@ export const updateUserProfileImage = async (req, res) => {
         }
 
         // Upload new image using helper method
-        const uploadResult = await uploadToCloudinary(req.file.buffer, "user_profiles");
+        const uploadResult = await uploadToCloudinary(req.file.buffer, "user_profiles", "image", req.file.originalname);
 
-        if (!uploadResult?.secure_url) {
+        if (!uploadResult?.url) {
             throw new Error("Cloudinary upload failed");
         }
 
-        const updatedUser = await User.findByIdAndUpdate(userId, { profileImage: uploadResult.secure_url }, { new: true });
+        const updatedUser = await User.findByIdAndUpdate(userId, { profileImage: uploadResult.url }, { new: true });
 
         if (!updatedUser) {
             return res.status(404).json({ success: false, message: "User not found after image upload." });
@@ -126,7 +126,7 @@ export const updateUserProfileImage = async (req, res) => {
         res.status(200).json({
             success: true,
             message: "Profile image updated successfully",
-            imageUrl: uploadResult.secure_url,
+            imageUrl: uploadResult.url,
         });
     } catch (error) {
         console.error("Error updating profile image:", error);

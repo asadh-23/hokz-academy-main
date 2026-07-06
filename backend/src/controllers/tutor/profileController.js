@@ -151,19 +151,19 @@ export const updateTutorProfileImage = async (req, res) => {
         }
 
         // Upload new image
-        const result = await uploadToCloudinary(req.file.buffer, "tutor_profiles");
+        const result = await uploadToCloudinary(req.file.buffer, "tutor_profiles", "image", req.file.originalname);
 
-        if (!result?.secure_url) {
+        if (!result?.url) {
             return res.status(500).json({ success: false, message: "Cloudinary upload failed." });
         }
 
-        tutor.profileImage = result.secure_url;
+        tutor.profileImage = result.url;
         await tutor.save();
 
         res.status(200).json({
             success: true,
             message: "Profile image updated successfully.",
-            imageUrl: result.secure_url,
+            imageUrl: result.url,
         });
     } catch (error) {
         console.error("Profile Image Error:", error);

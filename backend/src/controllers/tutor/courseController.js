@@ -2,7 +2,7 @@ import Category from "../../models/category/Category.js";
 import Course from "../../models/course/Course.js";
 import Enrollment from "../../models/course/Enrollment.js";
 import Lesson from "../../models/course/Lesson.js";
-import { uploadToS3 } from "../../services/s3UploadService.js";
+import { uploadToCloudinary } from "../../services/cloudinaryService.js";
 import mongoose from "mongoose";
 
 export const getTutorCategories = async (req, res) => {
@@ -31,14 +31,19 @@ export const uploadCourseThumbnail = async (req, res) => {
             });
         }
 
-        // Upload to S3 (folder: course-thumbnails)
-        const { key, url } = await uploadToS3(req.file, "course-thumbnails");
+        // Upload to Cloudinary (folder: hokz-academy/course-thumbnails)
+        const result = await uploadToCloudinary(
+            req.file.buffer,
+            "hokz-academy/course-thumbnails",
+            "image",
+            req.file.originalname
+        );
 
         return res.status(200).json({
             success: true,
             message: "Thumbnail uploaded successfully",
-            fileUrl: url,
-            fileKey: key,
+            fileUrl: result.url,
+            fileKey: result.publicId,
         });
     } catch (error) {
         console.error("Course thumbnail upload error:", error);
